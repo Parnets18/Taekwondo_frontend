@@ -10,6 +10,9 @@ const StudentAchievements = () => {
   const [totalPoints, setTotalPoints] = useState(0);
   const [nextMilestones, setNextMilestones] = useState([]);
 
+  // API base URL
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+
   useEffect(() => {
     fetchStudentData();
   }, []);
@@ -20,7 +23,7 @@ const StudentAchievements = () => {
       const token = localStorage.getItem('token');
       
       // Fetch achievements
-      const achievementsResponse = await axios.get('/api/student/achievements', {
+      const achievementsResponse = await axios.get(`${API_BASE_URL}/student/achievements`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAchievements(achievementsResponse.data.achievements || []);
@@ -28,13 +31,13 @@ const StudentAchievements = () => {
       setNextMilestones(achievementsResponse.data.nextMilestones || []);
 
       // Fetch certificates
-      const certificatesResponse = await axios.get('/api/student/certificates', {
+      const certificatesResponse = await axios.get(`${API_BASE_URL}/student/certificates`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCertificates(certificatesResponse.data || []);
 
       // Fetch earned badges
-      const badgesResponse = await axios.get('/api/student/badges', {
+      const badgesResponse = await axios.get(`${API_BASE_URL}/student/badges`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBadges(badgesResponse.data || []);

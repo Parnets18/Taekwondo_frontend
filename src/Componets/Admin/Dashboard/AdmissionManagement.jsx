@@ -24,7 +24,7 @@ function AdmissionManagement() {
         // Get auth token from localStorage
         const token = localStorage.getItem('token');
         
-        const response = await fetch('http://localhost:5000/api/admin/admissions', {
+        const response = await fetch('https://taekwon-frontend.onrender.com/api/admin/admissions', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -83,7 +83,7 @@ function AdmissionManagement() {
       // Get auth token from localStorage
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/admin/admissions/${admissionId}/status`, {
+      const response = await fetch(`https://taekwon-frontend.onrender.com/api/admin/admissions/${admissionId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -154,7 +154,7 @@ function AdmissionManagement() {
         // Get auth token from localStorage
         const token = localStorage.getItem('token');
         
-        const response = await fetch(`http://localhost:5000/api/admin/admissions/${admissionId}`, {
+        const response = await fetch(`https://taekwon-frontend.onrender.com/api/admin/admissions/${admissionId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,

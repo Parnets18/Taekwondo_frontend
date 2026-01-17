@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const TemplateManagement = () => {
+  // API base URL
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -48,7 +51,7 @@ const TemplateManagement = () => {
   const fetchTemplates = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/certificate-templates', {
+      const response = await axios.get(`${API_BASE_URL}/certificate-templates`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setTemplates(response.data);
@@ -63,7 +66,7 @@ const TemplateManagement = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await axios.post('/api/certificate-templates', newTemplate, {
+      const response = await axios.post(`${API_BASE_URL}/certificate-templates`, newTemplate, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 

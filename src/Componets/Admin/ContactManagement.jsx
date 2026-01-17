@@ -33,7 +33,7 @@ const ContactManagement = () => {
   const handleDeleteContact = async (id) => {
     if (window.confirm('Are you sure you want to permanently delete this contact? This action cannot be undone and will remove the contact from the database forever.')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/contact/admin/${id}`, {
+        const response = await fetch(`https://taekwon-frontend.onrender.com/api/contact/admin/${id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ const ContactManagement = () => {
   const fetchContactsFromDatabase = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/contact/admin', {
+      const response = await fetch('https://taekwon-frontend.onrender.com/api/contact/admin', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'

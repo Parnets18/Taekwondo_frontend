@@ -27,7 +27,7 @@ function StudentManagement() {
   const [formAge, setFormAge] = useState(null);
 
   // API base URL
-  const API_BASE_URL = 'http://localhost:5000/api';
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
 
   // Helper function to calculate age
   const calculateAge = (dateOfBirth) => {

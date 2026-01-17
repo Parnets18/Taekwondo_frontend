@@ -9,6 +9,9 @@ const CertificateVerification = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // API base URL for production
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+
   useEffect(() => {
     if (urlCode) {
       handleVerification(urlCode);
@@ -26,7 +29,7 @@ const CertificateVerification = () => {
       setError('');
       setVerificationResult(null);
 
-      const response = await axios.post('/api/certificates/verify', {
+      const response = await axios.post(`${API_BASE_URL}/certificates/verify`, {
         verificationCode: code.trim().toUpperCase()
       });
 
@@ -65,7 +68,7 @@ const CertificateVerification = () => {
   const handleViewCertificate = async (certificateId) => {
     try {
       // Public route - no authentication needed
-      const response = await axios.get(`/api/certificates/${certificateId}`);
+      const response = await axios.get(`${API_BASE_URL}/certificates/${certificateId}`);
       if (response.data.status === 'success' && response.data.data.certificate.imageUrl) {
         // Open certificate image in a new window
         const imageUrl = response.data.data.certificate.imageUrl;
@@ -89,7 +92,7 @@ const CertificateVerification = () => {
   const handleDownloadCertificate = async (certificateId) => {
     try {
       // Public route - no authentication needed
-      const response = await axios.get(`/api/certificates/${certificateId}/download`, {
+      const response = await axios.get(`${API_BASE_URL}/certificates/${certificateId}/download`, {
         responseType: 'blob'
       });
       

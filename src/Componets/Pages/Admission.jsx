@@ -130,7 +130,7 @@ function Admission() {
       console.log('Submitting form data:', formData);
       
       // Send admission data to backend API
-      const response = await fetch('http://localhost:5000/api/admissions', {
+      const response = await fetch('https://taekwon-frontend.onrender.com/api/admissions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
