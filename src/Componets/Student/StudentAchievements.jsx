@@ -51,7 +51,7 @@ const StudentAchievements = () => {
 
   const downloadCertificate = async (certificateId) => {
     try {
-      const response = await axios.get(`/api/certificates/${certificateId}/download`, {
+      const response = await axios.get(`${API_BASE_URL}/certificates/${certificateId}/download`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         responseType: 'blob'
       });

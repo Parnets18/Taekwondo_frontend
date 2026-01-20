@@ -1433,7 +1433,7 @@ function BeltManagement() {
 
       {/* Add Belt Level Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
             <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
@@ -1580,7 +1580,7 @@ function BeltManagement() {
 
       {/* Edit Belt Level Modal */}
       {showEditModal && selectedBelt && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
             <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
@@ -1729,7 +1729,7 @@ function BeltManagement() {
 
       {/* Record Promotion Modal */}
       {showPromotionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
             <div className="bg-green-600 px-6 py-4 rounded-t-xl">
@@ -1895,7 +1895,7 @@ function BeltManagement() {
 
       {/* View Promotion Modal */}
       {showViewPromotionModal && selectedPromotion && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
             <div className="bg-slate-600 px-6 py-4 rounded-t-xl">
@@ -1966,7 +1966,7 @@ function BeltManagement() {
 
       {/* Edit Promotion Modal */}
       {showEditPromotionModal && selectedPromotion && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
             <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
@@ -2095,7 +2095,7 @@ function BeltManagement() {
 
       {/* Schedule Test Modal */}
       {showTestModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
             <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
@@ -2405,8 +2405,8 @@ function BeltManagement() {
 
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border-2 border-black">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl text-white font-bold">A</span>

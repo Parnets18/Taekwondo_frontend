@@ -49,13 +49,17 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-transparent flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-black text-2xl">CW</span>
+            <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <img 
+                src="/combat-warrior-logo.png" 
+                alt="Combat Warrior Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <h2 className="text-3xl font-black text-slate-800">Admin Login</h2>
             <p className="text-slate-600 mt-2">Combat Warrior Taekwon-do Institute</p>

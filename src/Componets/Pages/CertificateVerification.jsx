@@ -67,19 +67,26 @@ const CertificateVerification = () => {
 
   const handleViewCertificate = async (certificateId) => {
     try {
+      console.log('Viewing certificate ID:', certificateId);
+      
       // Public route - no authentication needed
       const response = await axios.get(`${API_BASE_URL}/certificates/${certificateId}`);
+      
+      console.log('Certificate data received:', response.data);
+      
       if (response.data.status === 'success' && response.data.data.certificate.imageUrl) {
-        // Open certificate image in a new window
-        const imageUrl = response.data.data.certificate.imageUrl;
-        window.open(imageUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+        // Open certificate image in a new window using the backend URL
+        const imageUrl = `${API_BASE_URL.replace('/api', '')}${response.data.data.certificate.imageUrl}`;
+        console.log('Opening image URL:', imageUrl);
         
-        // Reset the page after 2 seconds to allow user to see the action completed
-        setTimeout(() => {
-          setVerificationResult(null);
-          setVerificationCode('');
+        const newWindow = window.open(imageUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+        
+        if (!newWindow) {
+          // If popup was blocked, show alternative
+          setError('Popup blocked. Please allow popups for this site or try the download option.');
+        } else {
           setError('');
-        }, 2000);
+        }
       } else {
         setError('Certificate image not available for viewing');
       }
@@ -91,9 +98,21 @@ const CertificateVerification = () => {
 
   const handleDownloadCertificate = async (certificateId) => {
     try {
+      console.log('Starting certificate download for ID:', certificateId);
+      
       // Public route - no authentication needed
       const response = await axios.get(`${API_BASE_URL}/certificates/${certificateId}/download`, {
-        responseType: 'blob'
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/octet-stream, image/*, application/pdf'
+        }
+      });
+      
+      console.log('Download response received:', {
+        status: response.status,
+        contentType: response.headers['content-type'],
+        contentLength: response.headers['content-length'],
+        contentDisposition: response.headers['content-disposition']
       });
       
       // Create blob link to download
@@ -103,7 +122,7 @@ const CertificateVerification = () => {
       
       // Get filename from response headers or use default
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'certificate.pdf';
+      let filename = `certificate_${certificateId}.jpg`;
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
         if (filenameMatch) {
@@ -111,21 +130,32 @@ const CertificateVerification = () => {
         }
       }
       
+      console.log('Downloading file as:', filename);
+      
       link.setAttribute('download', filename);
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
-      link.remove();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      // Reset the page after 2 seconds to allow user to see the download started
-      setTimeout(() => {
-        setVerificationResult(null);
-        setVerificationCode('');
-        setError('');
-      }, 2000);
+      console.log('Download initiated successfully');
+      
+      // Show success message instead of resetting immediately
+      setError('');
+      alert('Certificate download started! Check your downloads folder.');
+      
     } catch (error) {
       console.error('Error downloading certificate:', error);
-      setError('Failed to download certificate');
+      console.error('Error response:', error.response);
+      
+      if (error.response?.status === 404) {
+        setError('Certificate file not found on server');
+      } else if (error.response?.status === 403) {
+        setError('Access denied to certificate file');
+      } else {
+        setError('Failed to download certificate. Please try again.');
+      }
     }
   };
 

@@ -4,6 +4,9 @@ import { FaEye, FaEdit, FaTrash, FaDownload } from 'react-icons/fa';
 
 // Certificate Management Component - Updated 2026-01-13
 function CertificationManagement() {
+  // API base URL
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [statistics, setStatistics] = useState({
@@ -191,6 +194,8 @@ function CertificationManagement() {
   };
 
   const previewCertificate = (certificate) => {
+    console.log('Preview certificate:', certificate);
+    console.log('Certificate imageUrl:', certificate.imageUrl);
     setSelectedCertificate(certificate);
     setShowPreviewModal(true);
   };
@@ -333,10 +338,18 @@ function CertificationManagement() {
       submitData.append('level', formData.level);
       submitData.append('grade', formData.grade);
       submitData.append('examiner', formData.examiner || formData.instructorName);
-      submitData.append('customVerificationCode', formData.customVerificationCode);
+      submitData.append('customVerificationCode', formData.customVerificationCode.toUpperCase());
       submitData.append('certificateImage', certificateImage);
 
-      const response = await axios.post('/api/certificates', submitData, {
+      console.log('Submitting certificate data:', {
+        studentName: formData.studentName,
+        instructorName: formData.instructorName,
+        achievementType: formData.achievementType,
+        achievementTitle: formData.achievementTitle,
+        customVerificationCode: formData.customVerificationCode.toUpperCase()
+      });
+
+      const response = await axios.post(`${API_BASE_URL}/certificates`, submitData, {
         headers: { 
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data'
@@ -356,6 +369,7 @@ function CertificationManagement() {
       }
     } catch (error) {
       console.error('Error uploading certificate:', error);
+      console.error('Error response:', error.response?.data);
       alert(error.response?.data?.message || 'Failed to upload certificate. Please try again.');
     } finally {
       setLoading(false);
@@ -434,8 +448,18 @@ function CertificationManagement() {
 
   const handleDownloadCertificate = async (certificateId) => {
     try {
-      // Try without authentication first (public route)
-      window.open(`/api/certificates/${certificateId}/download`, '_blank');
+      // Use the API base URL for consistency
+      const downloadUrl = `${API_BASE_URL}/certificates/${certificateId}/download`;
+      console.log('Downloading certificate from:', downloadUrl);
+      
+      // Create a temporary link to trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.target = '_blank';
+      link.download = `certificate_${certificateId}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading certificate:', error);
       alert('Failed to download certificate');
@@ -746,9 +770,9 @@ function CertificationManagement() {
                     {showStudentSuggestions && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                         {studentSuggestions.length > 0 ? (
-                          studentSuggestions.map((student) => (
+                          studentSuggestions.map((student, index) => (
                             <div
-                              key={student._id}
+                              key={student._id || `student-${index}`}
                               onClick={() => selectStudent(student)}
                               className="px-3 py-2 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                             >
@@ -997,9 +1021,9 @@ function CertificationManagement() {
                     {showStudentSuggestions && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                         {studentSuggestions.length > 0 ? (
-                          studentSuggestions.map((student) => (
+                          studentSuggestions.map((student, index) => (
                             <div
-                              key={student._id}
+                              key={student._id || `student-${index}`}
                               onClick={() => selectStudent(student)}
                               className="px-3 py-2 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                             >

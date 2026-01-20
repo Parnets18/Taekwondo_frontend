@@ -87,7 +87,7 @@ const TemplateManagement = () => {
   const handlePreviewTemplate = async (templateId) => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/certificate-templates/${templateId}/preview`, {
+      const response = await axios.get(`${API_BASE_URL}/certificate-templates/${templateId}/preview`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         responseType: 'blob'
       });
@@ -105,7 +105,7 @@ const TemplateManagement = () => {
 
   const handleToggleTemplate = async (templateId, isActive) => {
     try {
-      await axios.put(`/api/certificate-templates/${templateId}`, 
+      await axios.put(`${API_BASE_URL}/certificate-templates/${templateId}`, 
         { isActive: !isActive },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

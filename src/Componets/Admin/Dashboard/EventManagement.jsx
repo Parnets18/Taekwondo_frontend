@@ -712,8 +712,8 @@ function EventManagement() {
 
       {/* Add Event Modal */}
       {showAddEventModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border-2 border-black">
             <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Create New Event</h2>
@@ -881,8 +881,8 @@ function EventManagement() {
 
       {/* Edit Event Modal */}
       {showEditEventModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border-2 border-black">
             <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Edit Event</h2>
@@ -1048,8 +1048,8 @@ function EventManagement() {
 
       {/* Register Student Modal */}
       {showRegisterStudentModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border-2 border-black">
             <div className="bg-green-600 px-6 py-4 rounded-t-xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Register Student</h2>
@@ -1154,8 +1154,8 @@ function EventManagement() {
 
       {/* View Participants Modal */}
       {showViewParticipantsModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl">
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl border-2 border-black">
             <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Event Participants</h2>

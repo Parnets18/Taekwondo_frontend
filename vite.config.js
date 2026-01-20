@@ -11,6 +11,10 @@ export default defineConfig({
     }),
   ],
   server: {
+    port: 5176,
+    hmr: {
+      port: 5176,
+    },
     proxy: {
       '/api': {
         target: 'https://taekwon-frontend.onrender.com',

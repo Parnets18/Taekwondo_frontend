@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AchievementManagement = () => {
+  // API base URL
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
   const [achievements, setAchievements] = useState([]);
   const [badges, setBadges] = useState([]);
   const [students, setStudents] = useState([]);
@@ -37,7 +39,7 @@ const AchievementManagement = () => {
   const fetchAchievements = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/achievements', {
+      const response = await axios.get(`${API_BASE_URL}/achievements`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setAchievements(response.data);
@@ -50,7 +52,7 @@ const AchievementManagement = () => {
 
   const fetchBadges = async () => {
     try {
-      const response = await axios.get('/api/badges', {
+      const response = await axios.get(`${API_BASE_URL}/badges`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setBadges(response.data);
@@ -61,7 +63,7 @@ const AchievementManagement = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get('/api/students', {
+      const response = await axios.get(`${API_BASE_URL}/students`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setStudents(response.data);
@@ -74,7 +76,7 @@ const AchievementManagement = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await axios.post('/api/badges', newBadge, {
+      const response = await axios.post(`${API_BASE_URL}/badges`, newBadge, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 
@@ -96,7 +98,7 @@ const AchievementManagement = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await axios.post('/api/achievements', newAchievement, {
+      const response = await axios.post(`${API_BASE_URL}/achievements`, newAchievement, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 
