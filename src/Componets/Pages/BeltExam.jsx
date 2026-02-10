@@ -7,34 +7,33 @@ import {
   FaPhone, 
   FaEnvelope, 
   FaMapMarkerAlt, 
-  FaGraduationCap, 
-  FaHeartbeat, 
   FaCheckCircle, 
   FaPaperPlane,
   FaSpinner,
   FaHome,
-  FaStar
+  FaStar,
+  FaMedal
 } from 'react-icons/fa';
 
-function Admission() {
+function BeltExam() {
   const navigate = useNavigate();
   const [showThankYou, setShowThankYou] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    candidateName: '',
     dateOfBirth: '',
     age: '',
     gender: '',
-    fatherName: '',
-    motherName: '',
-    residentialAddress: '',
-    mobileNumber: '',
-    emergencyContact: '',
-    email: '',
-    aadhaarNumber: '',
-    bloodGroup: '',
-    height: '',
-    weight: '',
-    physicalDisorder: '',
+    parentGuardianName: '',
+    address: '',
+    phoneNumber: '',
+    district: '',
+    state: '',
+    gmail: '',
+    appearingForGrade: '',
+    presentBelt: '',
+    schoolName: '',
+    academicQualification: '',
+    instructorName: '',
     photo: null,
     agreeToTerms: false
   });
@@ -50,7 +49,7 @@ function Admission() {
         [name]: files[0]
       }));
     } else if (name === 'dateOfBirth') {
-      // Auto-calculate age when date of birth changes
+      // Auto-calculate age
       const birthDate = new Date(value);
       const today = new Date();
       const calculatedAge = today.getFullYear() - birthDate.getFullYear();
@@ -77,9 +76,10 @@ function Admission() {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.name || !formData.dateOfBirth || !formData.gender || 
-        !formData.fatherName || !formData.motherName || !formData.residentialAddress || 
-        !formData.mobileNumber || !formData.email || !formData.agreeToTerms) {
+    if (!formData.candidateName || !formData.dateOfBirth || !formData.gender || 
+        !formData.parentGuardianName || !formData.address || !formData.phoneNumber || 
+        !formData.gmail || !formData.appearingForGrade || !formData.presentBelt || 
+        !formData.agreeToTerms) {
       setSubmitStatus({
         type: 'error',
         message: 'Please fill in all required fields and agree to terms.'
@@ -98,7 +98,7 @@ function Admission() {
         }
       });
 
-      const response = await fetch('https://taekwon-frontend.onrender.com/api/admissions', {
+      const response = await fetch('https://taekwon-frontend.onrender.com/api/belt-exams', {
         method: 'POST',
         body: formDataToSend
       });
@@ -106,10 +106,6 @@ function Admission() {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.errors && Array.isArray(data.errors)) {
-          const errorMessages = data.errors.map(err => err.msg || err.message || JSON.stringify(err));
-          throw new Error(errorMessages.join(', '));
-        }
         throw new Error(data.message || 'Failed to submit application');
       }
 
@@ -117,21 +113,21 @@ function Admission() {
       
       // Reset form
       setFormData({
-        name: '',
+        candidateName: '',
         dateOfBirth: '',
         age: '',
         gender: '',
-        fatherName: '',
-        motherName: '',
-        residentialAddress: '',
-        mobileNumber: '',
-        emergencyContact: '',
-        email: '',
-        aadhaarNumber: '',
-        bloodGroup: '',
-        height: '',
-        weight: '',
-        physicalDisorder: '',
+        parentGuardianName: '',
+        address: '',
+        phoneNumber: '',
+        district: '',
+        state: '',
+        gmail: '',
+        appearingForGrade: '',
+        presentBelt: '',
+        schoolName: '',
+        academicQualification: '',
+        instructorName: '',
         photo: null,
         agreeToTerms: false
       });
@@ -140,7 +136,7 @@ function Admission() {
         navigate('/');
       }, 300000);
     } catch (error) {
-      console.error('Admission form submission error:', error);
+      console.error('Belt exam form submission error:', error);
       setSubmitStatus({
         type: 'error',
         message: error.message || 'Error submitting application. Please try again.'
@@ -166,29 +162,14 @@ function Admission() {
           </h1>
           
           <p className="text-xl text-gray-700 mb-6">
-            Your admission application has been successfully submitted!
+            Your belt exam application has been successfully submitted!
           </p>
 
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 mb-8">
             <p className="text-gray-800 text-lg leading-relaxed">
-              We're excited to have you join our <span className="font-bold text-red-600">Taekwon-Do family</span>! 
-              Our team will carefully review your application and contact you within <span className="font-semibold">24-48 hours</span>.
+              Good luck with your <span className="font-bold text-red-600">belt examination</span>! 
+              We'll contact you with the exam date and venue details within <span className="font-semibold">48 hours</span>.
             </p>
-          </div>
-
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center justify-center text-gray-600">
-              <FaEnvelope className="mr-2 text-amber-500" />
-              <span>Check your email for confirmation</span>
-            </div>
-            <div className="flex items-center justify-center text-gray-600">
-              <FaPhone className="mr-2 text-amber-500" />
-              <span>We'll call you soon to discuss next steps</span>
-            </div>
-          </div>
-
-          <div className="text-gray-500 text-sm mb-6">
-            Redirecting to home page in 5 minutes...
           </div>
 
           <button
@@ -198,12 +179,6 @@ function Admission() {
             <FaHome className="mr-2" />
             Go to Home Page
           </button>
-
-          <div className="mt-8 flex justify-center space-x-2">
-            <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse delay-75"></div>
-            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse delay-150"></div>
-          </div>
         </div>
       </div>
     );
@@ -224,16 +199,14 @@ function Admission() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10">
           <div className="inline-flex items-center bg-black border border-gray-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-semibold mb-6 sm:mb-8">
-            <span className="w-2 h-2 bg-green-400 rounded-full mr-2 sm:mr-3 animate-pulse"></span>
-            <FaStar className="mr-1 sm:mr-2" />
-            Admissions Now Open - Limited Seats Available
+            <FaMedal className="mr-2 text-yellow-400" />
+            Belt Examination Registration
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
-            Join <span className="text-white">Combat</span> <span className="text-white">Warrior</span>
+            Belt <span className="text-white">Examination</span> <span className="text-white">Form</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-white max-w-4xl mx-auto leading-relaxed">
-            Begin your martial arts journey with Karnataka's premier Taekwon-do academy. 
-            Complete the application below to secure your spot.
+            Register for your next belt level examination. Complete the form below to secure your spot.
           </p>
         </div>
       </section>
@@ -242,12 +215,12 @@ function Admission() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
             {/* Form Header */}
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-8 text-white text-center">
+            <div className="bg-white border-b-2 border-slate-200 p-8 text-center">
               <div className="flex items-center justify-center mb-2">
-                <FaGraduationCap className="text-4xl mr-3" />
-                <h2 className="text-3xl font-bold text-white">Student Admission Application</h2>
+                <FaMedal className="text-4xl mr-3 text-amber-500" />
+                <h2 className="text-3xl font-bold text-slate-900">Individual Colour Belt Exam Form</h2>
               </div>
-              <p className="text-slate-300">All fields marked with * are required</p>
+              <p className="text-slate-600">All fields marked with * are required</p>
             </div>
 
             <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-6">
@@ -258,38 +231,31 @@ function Admission() {
                     ? 'bg-green-50 border border-green-200 text-green-700' 
                     : 'bg-red-50 border border-red-200 text-red-700'
                 }`}>
-                  <div className="flex items-center">
-                    {submitStatus.type === 'success' ? (
-                      <FaCheckCircle className="mr-2" />
-                    ) : (
-                      <FaUser className="mr-2" />
-                    )}
-                    {submitStatus.message}
-                  </div>
+                  {submitStatus.message}
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Name */}
+                {/* Name of Candidate */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    1. Name (in capital letters) *
+                    Name of Candidate (In Capital Letters) *
                   </label>
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="candidateName"
+                    value={formData.candidateName}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 uppercase"
-                    placeholder="ENTER YOUR FULL NAME"
+                    placeholder="ENTER CANDIDATE NAME"
                   />
                 </div>
 
                 {/* Date of Birth */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    2. Date of Birth (dd/mm/yyyy) *
+                    Date of Birth *
                   </label>
                   <input
                     type="date"
@@ -304,7 +270,7 @@ function Admission() {
                 {/* Age */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Age (yy/mm)
+                    Age
                   </label>
                   <input
                     type="text"
@@ -319,7 +285,7 @@ function Admission() {
                 {/* Gender */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-3">
-                    3. Gender *
+                    Gender *
                   </label>
                   <div className="flex gap-6">
                     <label className="flex items-center cursor-pointer">
@@ -361,189 +327,181 @@ function Admission() {
                   </div>
                 </div>
 
-                {/* Father's Name */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    4. Father's Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="fatherName"
-                    value={formData.fatherName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="Enter father's name"
-                  />
-                </div>
-
-                {/* Mother's Name */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    5. Mother's Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="motherName"
-                    value={formData.motherName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="Enter mother's name"
-                  />
-                </div>
-
-                {/* Residential Address */}
+                {/* Parent/Guardian Name */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    6. Res. Address *
+                    Parent / Guardian name *
+                  </label>
+                  <input
+                    type="text"
+                    name="parentGuardianName"
+                    value={formData.parentGuardianName}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter parent/guardian name"
+                  />
+                </div>
+
+                {/* Address & Phone No */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Address: *
                   </label>
                   <textarea
-                    name="residentialAddress"
-                    value={formData.residentialAddress}
+                    name="address"
+                    value={formData.address}
                     onChange={handleInputChange}
                     required
                     rows="3"
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 resize-none"
-                    placeholder="Enter complete residential address"
+                    placeholder="Enter complete address"
                   ></textarea>
                 </div>
 
-                {/* Mobile Number */}
+{/* District */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    7. Contact No.(s) - Mob *
-                  </label>
-                  <input
-                    type="tel"
-                    name="mobileNumber"
-                    value={formData.mobileNumber}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="+91 XXXXX XXXXX"
-                  />
-                </div>
-
-                {/* Emergency Contact */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Emergency Contact
-                  </label>
-                  <input
-                    type="tel"
-                    name="emergencyContact"
-                    value={formData.emergencyContact}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="+91 XXXXX XXXXX"
-                  />
-                </div>
-
-                {/* Email ID */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    8. E-mail ID *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-
-                {/* Aadhaar Card No */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    9. Aadhaar Card No
+                    Dist:
                   </label>
                   <input
                     type="text"
-                    name="aadhaarNumber"
-                    value={formData.aadhaarNumber}
+                    name="district"
+                    value={formData.district}
                     onChange={handleInputChange}
-                    maxLength="12"
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="XXXX XXXX XXXX"
+                    placeholder="Enter district"
                   />
                 </div>
 
-                {/* Blood Group */}
+                {/* State */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    10. Blood Group
-                  </label>
-                  <select
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                  >
-                    <option value="">Select Blood Group</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-
-                {/* Height */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    11. Height (Cms)
+                    State:
                   </label>
                   <input
-                    type="number"
-                    name="height"
-                    value={formData.height}
+                    type="text"
+                    name="state"
+                    value={formData.state}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="Enter height in cm"
+                    placeholder="Enter state"
                   />
                 </div>
-
-                {/* Weight */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Weight (Kgs)
-                  </label>
-                  <input
-                    type="number"
-                    name="weight"
-                    value={formData.weight}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                    placeholder="Enter weight in kg"
-                  />
-                </div>
-
-                {/* Physical Disorder */}
+                
+                {/* Phone Number */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    12. Physical disorder (if any)
+                    Phone Number *
                   </label>
-                  <textarea
-                    name="physicalDisorder"
-                    value={formData.physicalDisorder}
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    rows="2"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 resize-none"
-                    placeholder="Please mention any physical disorder or health condition"
-                  ></textarea>
+                    required
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="+91 XXXXX XXXXX"
+                  />
+                </div>
+
+                {/* Gmail */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Gmail: *
+                  </label>
+                  <input
+                    type="email"
+                    name="gmail"
+                    value={formData.gmail}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="your.email@gmail.com"
+                  />
+                </div>
+
+                {/* Appearing for grade/Kup */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Appearing for grade/ Kup: *
+                  </label>
+                  <input
+                    type="text"
+                    name="appearingForGrade"
+                    value={formData.appearingForGrade}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter grade/kup appearing for"
+                  />
+                </div>
+
+                {/* Present Belt/Grade */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Present Belt /Grade: *
+                  </label>
+                  <input
+                    type="text"
+                    name="presentBelt"
+                    value={formData.presentBelt}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter current belt/grade"
+                  />
+                </div>
+
+                {/* Name of School/College/University */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Name of the School/College/University:
+                  </label>
+                  <input
+                    type="text"
+                    name="schoolName"
+                    value={formData.schoolName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter school/college/university name"
+                  />
+                </div>
+
+                {/* Academic Qualification */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Academic Qualification:
+                  </label>
+                  <input
+                    type="text"
+                    name="academicQualification"
+                    value={formData.academicQualification}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter academic qualification"
+                  />
+                </div>
+
+                {/* Instructor's Name */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Instructor's Name:
+                  </label>
+                  <input
+                    type="text"
+                    name="instructorName"
+                    value={formData.instructorName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter instructor's name"
+                  />
                 </div>
 
                 {/* Photo Upload */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-3">
-                   Upload Photo
+                    Upload Photo
                   </label>
                   <div className="flex items-center gap-4">
                     <label className="flex-1 cursor-pointer">
@@ -595,7 +553,7 @@ function Admission() {
                     className="w-5 h-5 text-amber-500 border-2 border-slate-300 rounded focus:ring-amber-500 mt-1"
                   />
                   <label className="text-sm text-slate-600 leading-relaxed">
-                    <strong>I agree to the terms and conditions *</strong> - I understand that martial arts training involves physical activity and inherent risks. I consent to emergency medical treatment if necessary and agree to the academy's policies.
+                    <strong>I agree to the terms and conditions *</strong> - I Undersigned do hereby solemnly affirm, declare and confirm for myself, executors and administrators, that I indemnify the organiser, officials, participants, etc., holding myself personally responsible for damages, injuries, accidents, claims, demand etc., waving all prerogative rights, whatever related to the above set forth events.
                   </label>
                 </div>
                 
@@ -622,7 +580,7 @@ function Admission() {
                     )}
                   </button>
                   <p className="text-sm text-slate-500 mt-4">
-                    We'll review your application and contact you within 24-48 hours
+                    We'll contact you with exam details within 48 hours
                   </p>
                 </div>
               </div>
@@ -634,4 +592,4 @@ function Admission() {
   );
 }
 
-export default Admission;
+export default BeltExam;

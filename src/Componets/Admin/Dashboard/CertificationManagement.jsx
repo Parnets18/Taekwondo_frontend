@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaEye, FaEdit, FaTrash, FaDownload } from 'react-icons/fa';
+import { API_BASE_URL } from '../../../utils/api';
+import { logApiCall, logApiError, logEnvironment } from '../../../utils/debug';
+import { testApiConnection, testCertificateEndpoint } from '../../../utils/apiTest';
 
 // Certificate Management Component - Updated 2026-01-13
 function CertificationManagement() {
-  // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
   
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,6 +46,17 @@ function CertificationManagement() {
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
   useEffect(() => {
+    logEnvironment();
+    
+    // Test API connection in production
+    if (import.meta.env.PROD) {
+      testApiConnection();
+      const token = localStorage.getItem('token');
+      if (token) {
+        testCertificateEndpoint(token);
+      }
+    }
+    
     fetchCertificates();
     fetchStatistics();
     fetchStudents();
@@ -55,7 +67,7 @@ function CertificationManagement() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await axios.get('/api/students', {
+      const response = await axios.get(`${API_BASE_URL}/students`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -79,7 +91,7 @@ function CertificationManagement() {
         return;
       }
 
-      const response = await axios.get('/api/certificates', {
+      const response = await axios.get(`${API_BASE_URL}/certificates`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -106,7 +118,7 @@ function CertificationManagement() {
         return;
       }
 
-      const response = await axios.get('/api/certificates/statistics', {
+      const response = await axios.get(`${API_BASE_URL}/certificates/statistics`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -149,12 +161,12 @@ function CertificationManagement() {
         ['Student Name', 'Achievement', 'Type', 'Level', 'Code', 'Date', 'Examiner'],
         ...filteredCertificates.map(cert => [
           cert.studentName,
-          cert.achievementDetails.title,
+          cert.achievementDetails?.title || '-',
           getTypeDisplay(cert.achievementType),
-          cert.achievementDetails.level || '-',
+          cert.achievementDetails?.level || '-',
           cert.verificationCode,
           new Date(cert.issuedDate).toLocaleDateString(),
-          cert.achievementDetails.examiner || '-'
+          cert.achievementDetails?.examiner || '-'
         ])
       ].map(row => row.join(',')).join('\n');
 
@@ -201,16 +213,18 @@ function CertificationManagement() {
   };
 
   const editCertificate = (certificate) => {
+    console.log('Editing certificate:', certificate);
+    console.log('Certificate ID:', certificate?._id);
     setSelectedCertificate(certificate);
     setFormData({
       studentName: certificate.studentName,
       instructorName: certificate.metadata?.instructorName || '',
       achievementType: certificate.achievementType,
-      achievementTitle: certificate.achievementDetails.title,
-      achievementDescription: certificate.achievementDetails.description || '',
-      level: certificate.achievementDetails.level || '',
-      grade: certificate.achievementDetails.grade || '',
-      examiner: certificate.achievementDetails.examiner || '',
+      achievementTitle: certificate.achievementDetails?.title || '',
+      achievementDescription: certificate.achievementDetails?.description || '',
+      level: certificate.achievementDetails?.level || '',
+      grade: certificate.achievementDetails?.grade || '',
+      examiner: certificate.achievementDetails?.examiner || '',
       customVerificationCode: certificate.verificationCode
     });
     setShowEditModal(true);
@@ -341,7 +355,8 @@ function CertificationManagement() {
       submitData.append('customVerificationCode', formData.customVerificationCode.toUpperCase());
       submitData.append('certificateImage', certificateImage);
 
-      console.log('Submitting certificate data:', {
+      const apiUrl = `${API_BASE_URL}/certificates`;
+      logApiCall('POST', apiUrl, {
         studentName: formData.studentName,
         instructorName: formData.instructorName,
         achievementType: formData.achievementType,
@@ -349,7 +364,7 @@ function CertificationManagement() {
         customVerificationCode: formData.customVerificationCode.toUpperCase()
       });
 
-      const response = await axios.post(`${API_BASE_URL}/certificates`, submitData, {
+      const response = await axios.post(apiUrl, submitData, {
         headers: { 
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data'
@@ -368,6 +383,7 @@ function CertificationManagement() {
         resetForm();
       }
     } catch (error) {
+      logApiError(error, 'Certificate Creation');
       console.error('Error uploading certificate:', error);
       console.error('Error response:', error.response?.data);
       alert(error.response?.data?.message || 'Failed to upload certificate. Please try again.');
@@ -380,8 +396,17 @@ function CertificationManagement() {
   const handleUpdateCertificate = async (e) => {
     e.preventDefault();
     
+    console.log('Update called - selectedCertificate:', selectedCertificate);
+    console.log('Update called - formData:', formData);
+    
     if (!formData.studentName || !formData.achievementType || !formData.achievementTitle) {
       alert('Please fill in all required fields');
+      return;
+    }
+
+    if (!selectedCertificate || !selectedCertificate._id) {
+      console.error('selectedCertificate is missing or has no _id:', selectedCertificate);
+      alert('No certificate selected for update');
       return;
     }
 
@@ -402,7 +427,7 @@ function CertificationManagement() {
         submitData.append('certificateImage', certificateImage);
       }
 
-      const response = await axios.put(`/api/certificates/${selectedCertificate._id}`, submitData, {
+      const response = await axios.put(`${API_BASE_URL}/certificates/${selectedCertificate._id}`, submitData, {
         headers: { 
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data'
@@ -433,7 +458,7 @@ function CertificationManagement() {
   const handleDeleteCertificate = async (certificateId) => {
     if (window.confirm('Are you sure you want to delete this certificate?')) {
       try {
-        await axios.delete(`/api/certificates/${certificateId}`, {
+        await axios.delete(`${API_BASE_URL}/certificates/${certificateId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         alert('Certificate deleted successfully');
@@ -585,14 +610,14 @@ function CertificationManagement() {
             </thead>
             <tbody className="divide-y divide-slate-200">
               {loading ? (
-                <tr>
+                <tr key="loading">
                   <td colSpan="7" className="px-6 py-8 text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
                     <p className="mt-4 text-slate-600">Loading certificates...</p>
                   </td>
                 </tr>
               ) : filteredCertificates.length === 0 ? (
-                <tr>
+                <tr key="empty">
                   <td colSpan="7" className="px-6 py-8 text-center">
                     <div className="text-6xl text-slate-400 mb-4">📄</div>
                     <h3 className="text-xl font-bold text-slate-600 mb-2">No Certificates Found</h3>
@@ -604,11 +629,11 @@ function CertificationManagement() {
                   <tr key={certificate._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-semibold text-slate-800">{certificate.studentName}</div>
-                      <div className="text-sm text-slate-500">{certificate.achievementDetails.examiner}</div>
+                      <div className="text-sm text-slate-500">{certificate.achievementDetails?.examiner || '-'}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-slate-800">{certificate.achievementDetails.title}</div>
-                      {certificate.achievementDetails.description && (
+                      <div className="font-medium text-slate-800">{certificate.achievementDetails?.title || '-'}</div>
+                      {certificate.achievementDetails?.description && (
                         <div className="text-sm text-slate-500 truncate max-w-xs">{certificate.achievementDetails.description}</div>
                       )}
                     </td>
@@ -618,8 +643,8 @@ function CertificationManagement() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-slate-800">{certificate.achievementDetails.level || '-'}</div>
-                      {certificate.achievementDetails.grade && (
+                      <div className="text-sm text-slate-800">{certificate.achievementDetails?.level || '-'}</div>
+                      {certificate.achievementDetails?.grade && (
                         <div className="text-xs text-slate-500">{certificate.achievementDetails.grade}</div>
                       )}
                     </td>
@@ -632,6 +657,7 @@ function CertificationManagement() {
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <button 
+                          key="view"
                           onClick={() => previewCertificate(certificate)}
                           className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
                           title="View"
@@ -639,6 +665,7 @@ function CertificationManagement() {
                           <FaEye className="w-4 h-4" />
                         </button>
                         <button 
+                          key="edit"
                           onClick={() => editCertificate(certificate)}
                           className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
                           title="Edit"
@@ -647,6 +674,7 @@ function CertificationManagement() {
                         </button>
                         {certificate.imageUrl && (
                           <button 
+                            key="download"
                             onClick={() => handleDownloadCertificate(certificate._id)}
                             className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
                             title="Download"
@@ -655,6 +683,7 @@ function CertificationManagement() {
                           </button>
                         )}
                         <button 
+                          key="delete"
                           onClick={() => handleDeleteCertificate(certificate._id)}
                           className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
                           title="Delete"
@@ -1225,27 +1254,27 @@ function CertificationManagement() {
                 </div>
                 <div>
                   <span className="text-slate-600 text-sm">Achievement:</span>
-                  <p className="font-semibold text-slate-800">{selectedCertificate.achievementDetails.title}</p>
+                  <p className="font-semibold text-slate-800">{selectedCertificate.achievementDetails?.title || '-'}</p>
                 </div>
-                {selectedCertificate.achievementDetails.description && (
+                {selectedCertificate.achievementDetails?.description && (
                   <div className="md:col-span-2">
                     <span className="text-slate-600 text-sm">Description:</span>
                     <p className="font-semibold text-slate-800">{selectedCertificate.achievementDetails.description}</p>
                   </div>
                 )}
-                {selectedCertificate.achievementDetails.level && (
+                {selectedCertificate.achievementDetails?.level && (
                   <div>
                     <span className="text-slate-600 text-sm">Level/Belt:</span>
                     <p className="font-semibold text-slate-800">{selectedCertificate.achievementDetails.level}</p>
                   </div>
                 )}
-                {selectedCertificate.achievementDetails.grade && (
+                {selectedCertificate.achievementDetails?.grade && (
                   <div>
                     <span className="text-slate-600 text-sm">Grade:</span>
                     <p className="font-semibold text-slate-800">{selectedCertificate.achievementDetails.grade}</p>
                   </div>
                 )}
-                {selectedCertificate.achievementDetails.examiner && (
+                {selectedCertificate.achievementDetails?.examiner && (
                   <div>
                     <span className="text-slate-600 text-sm">Examiner:</span>
                     <p className="font-semibold text-slate-800">{selectedCertificate.achievementDetails.examiner}</p>

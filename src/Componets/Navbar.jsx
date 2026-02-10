@@ -11,6 +11,7 @@ function Navbar() {
     { name: 'About', href: '/about' },
     { name: 'Programs', href: '/courses' },
     { name: 'Admission', href: '/admission' },
+    { name: 'Belt Exam', href: '/belt-exam' },
     { name: 'Contact', href: '/contact' },
     { name: 'Verify Certificate', href: '/verify-certificate' },
   ];

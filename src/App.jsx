@@ -5,7 +5,9 @@ import Home from './Componets/Pages/Home';
 import About from './Componets/Pages/About';
 import Courses from './Componets/Pages/Courses';
 import Admission from './Componets/Pages/Admission';
+import BeltExam from './Componets/Pages/BeltExam';
 import Contact from './Componets/Pages/Contact';
+import ClubRules from './Componets/Pages/ClubRules';
 import { useScrollToTop } from './utils/useScrollToTop';
 
 // Admin Components
@@ -13,6 +15,7 @@ import AdminLogin from './Componets/Admin/AdminLogin';
 import AdminLayout from './Componets/Admin/AdminLayout';
 import DashboardHome from './Componets/Admin/Dashboard/DashboardHome';
 import AdmissionManagement from './Componets/Admin/Dashboard/AdmissionManagement';
+import BeltExamManagement from './Componets/Admin/Dashboard/BeltExamManagement';
 import AttendanceTracking from './Componets/Admin/Dashboard/AttendanceTracking';
 import BeltManagement from './Componets/Admin/Dashboard/BeltManagement';
 import EventManagement from './Componets/Admin/Dashboard/EventManagement';
@@ -70,9 +73,21 @@ function App() {
           </PublicLayout>
         } />
         
+        <Route path="/belt-exam" element={
+          <PublicLayout>
+            <BeltExam />
+          </PublicLayout>
+        } />
+        
         <Route path="/contact" element={
           <PublicLayout>
             <Contact />
+          </PublicLayout>
+        } />
+
+        <Route path="/club-rules" element={
+          <PublicLayout>
+            <ClubRules />
           </PublicLayout>
         } />
 
@@ -101,6 +116,7 @@ function App() {
           <Route path="events" element={<EventManagement />} />
           <Route path="certificates" element={<CertificationManagement />} />
           <Route path="admissions" element={<AdmissionManagement />} />
+          <Route path="belt-exams" element={<BeltExamManagement />} />
           <Route path="fees" element={<FeeManagement />} />
           <Route path="contacts" element={<ContactManagement />} />
           <Route path="courses" element={<CourseManagement />} />

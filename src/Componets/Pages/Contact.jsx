@@ -211,56 +211,59 @@ function Contact() {
       </section>
 
       <div className="py-16 bg-slate-50">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {/* Contact Information */}
-            <div>
-              <div className="bg-white rounded-2xl p-8 shadow-xl">
-                <h2 className="text-2xl font-bold text-black mb-6">Contact Information</h2>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+            {/* Contact Information - Takes 2 columns */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-3xl p-8 shadow-2xl h-full">
+                <h2 className="text-3xl font-bold text-slate-900 mb-3">Let's Connect</h2>
+                <p className="text-gray-600 mb-8 text-sm">We're here to answer your questions and help you begin your martial arts journey</p>
                 
-                <div className="space-y-5">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <FaMapMarkerAlt className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-black mb-1">Academy Location</h3>
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        Combat Warrior Taekwon-do Association<br />
-                        Karnataka, India
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <FaPhone className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-black mb-1">Phone Number</h3>
-                      <p className="text-sm text-gray-700 font-semibold">+91 9019157225</p>
+                <div className="space-y-6">
+                  <div className="group">
+                    <div className="flex items-start space-x-4 p-4 rounded-2xl bg-amber-50 border border-amber-100 hover:bg-amber-100 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                      <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:rotate-6 transition-transform duration-300">
+                        <FaMapMarkerAlt className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-slate-900 mb-2 flex items-center">
+                          Academy Location
+                          <span className="ml-2 text-xs bg-amber-500 text-white px-2 py-1 rounded-full">Visit Us</span>
+                        </h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          #368/A, 3rd Main, 4th Phase, 707 CHS, Near Shristi College, Yelahanka New Town, Bengaluru -560064
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <FaEnvelope className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-black mb-1">Email Address</h3>
-                      <p className="text-sm text-gray-700">hello@parnetsgroup.com</p>
+                  <div className="group">
+                    <div className="flex items-start space-x-4 p-4 rounded-2xl bg-green-50 border border-green-100 hover:bg-green-100 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                      <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:rotate-6 transition-transform duration-300">
+                        <FaPhone className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-slate-900 mb-2 flex items-center">
+                          Call Us Now
+                          <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">Available</span>
+                        </h3>
+                        <a href="tel:+917259113288" className="text-sm text-gray-700 hover:text-green-600 transition-colors block font-semibold">+91 7259113288</a>
+                        <a href="tel:+919663333247" className="text-sm text-gray-700 hover:text-green-600 transition-colors block font-semibold">+91 9663333247</a>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <FaClock className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-black mb-1">Training Schedule</h3>
-                      <div className="text-sm text-gray-700">
-                        <p className="mb-1"><strong>Mon-Fri:</strong> 6:00 AM - 8:00 PM</p>
-                        <p><strong>Sat-Sun:</strong> 8:00 AM - 6:00 PM</p>
+                  
+                  <div className="group">
+                    <div className="flex items-start space-x-4 p-4 rounded-2xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                      <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:rotate-6 transition-transform duration-300">
+                        <FaEnvelope className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center">
+                          Email Us
+                          <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">24/7</span>
+                        </h3>
+                        <a href="mailto:yesh18390@gmail.com" className="text-sm text-gray-700 hover:text-blue-600 transition-colors break-all">yesh18390@gmail.com</a>
                       </div>
                     </div>
                   </div>
@@ -268,8 +271,9 @@ function Contact() {
               </div>
             </div>
 
-            {/* Contact Form */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            {/* Contact Form - Takes 3 columns */}
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white">
                 <h2 className="text-2xl font-bold mb-2 text-white">Send us a Message</h2>
                 <p className="text-base text-slate-300">We'll get back to you soon</p>
@@ -407,10 +411,15 @@ function Contact() {
                 </button>
               </form>
             </div>
+            </div>
           </div>
+        </div>
+      </div>
 
-          {/* Google Map Section */}
-          <div className="mt-24 flex justify-center">
+      {/* Google Map Section */}
+      <div className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex justify-center">
             <div className="w-full max-w-4xl">
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold text-black mb-6">
@@ -421,9 +430,8 @@ function Contact() {
               
               <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
                 <div className="h-80 bg-gray-200 flex items-center justify-center">
-                  {/* Google Map Embed - Replace with actual Google Maps embed code */}
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d248849.886539092!2d77.49085452148641!3d12.953945614117967!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670c9b44e6d%3A0xf8dfc3e8517e4fe0!2sBengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1703123456789!5m2!1sen!2sin"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.6234567890123!2d77.5789!3d13.0789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDA0JzQ0LjAiTiA3N8KwMzQnNDQuMCJF!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
                     width="100%"
                     height="320"
                     style={{ border: 0 }}
@@ -431,15 +439,19 @@ function Contact() {
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     className="w-full h-80"
-                    title="Combat Warrior Taekwon-Do Location"
+                    title="Combat Warrior Taekwon-Do Location - #368/A, 3rd Main, 4th Phase, 707 CHS, Near Shristi College, Yelahanka New Town, Bengaluru -560064"
                   ></iframe>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* FAQ Section */}
-          <div className="mt-24 bg-white rounded-3xl p-12 shadow-2xl">
+      {/* FAQ Section */}
+      <div className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="bg-white rounded-3xl p-12 shadow-2xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-black mb-6">
                 Frequently Asked <span className="text-red-600">Questions</span>

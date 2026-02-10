@@ -15,7 +15,10 @@ import {
   FaPhone,
   FaEnvelope,
   FaRocket,
-  FaDumbbell
+  FaDumbbell,
+  FaUserTie,
+  FaPray,
+  FaHandPaper
 } from 'react-icons/fa';
 
 function Home() {
@@ -64,32 +67,46 @@ function Home() {
 
   const features = [
     {
-      icon: <FaFistRaised className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
-      title: 'Authentic ITF Taekwon-Do',
-      description: 'Traditional patterns and techniques under certified Korean masters',
+      icon: <FaUserTie className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      title: 'Discipline',
+      description: 'Develop self-control, focus, and commitment through structured training that builds mental strength and personal responsibility',
       color: 'from-yellow-400 to-yellow-600',
       delay: '0ms'
     },
     {
-      icon: <FaTrophy className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
-      title: 'Championship Training',
-      description: 'Proven track record with 50+ state and national champions',
+      icon: <FaFistRaised className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      title: 'Self-Defence',
+      description: 'Master practical self-defense techniques and gain confidence to protect yourself in real-world situations',
       color: 'from-red-500 to-red-700',
-      delay: '200ms'
+      delay: '100ms'
     },
     {
       icon: <FaBullseye className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
-      title: 'Character Development',
-      description: 'Build discipline, respect, and mental strength',
+      title: 'Focus',
+      description: 'Enhance concentration and mental clarity through mindful practice, improving performance in all areas of life',
+      color: 'from-yellow-400 to-yellow-600',
+      delay: '200ms'
+    },
+    {
+      icon: <FaPray className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      title: 'Self-Respect',
+      description: 'Build confidence and self-worth through achievement and personal growth in a supportive martial arts environment',
+      color: 'from-red-500 to-red-700',
+      delay: '300ms'
+    },
+    {
+      icon: <FaUsers className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      title: 'Leadership',
+      description: 'Cultivate leadership qualities and learn to inspire others through example, teamwork, and mentorship',
       color: 'from-yellow-400 to-yellow-600',
       delay: '400ms'
     },
     {
-      icon: <FaBolt className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
-      title: 'Self-Defense Skills',
-      description: 'Practical techniques for real-world situations',
+      icon: <FaHandPaper className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      title: 'Anti-Bullying',
+      description: 'Develop the confidence and skills to stand against bullying while promoting respect and kindness',
       color: 'from-red-500 to-red-700',
-      delay: '600ms'
+      delay: '500ms'
     }
   ];
 
@@ -284,14 +301,10 @@ function Home() {
                 About <span className="text-red-600">Combat Warrior</span> <span className="text-yellow-600">Dojang</span>
               </h2>
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Established in 2010, Combat Warrior Taekwon-Do Association of Karnataka is dedicated to 
-                preserving and teaching authentic International Taekwon-Do Federation (ITF) training. 
-                We follow the original teachings of General Choi Hong Hi, the founder of Taekwon-Do.
+                Taekwon-Do is a South Korean form of martial arts. It is a combat sport characterised by punching and kicking techniques and was developed during 1940's and 1950's by Korean Martial artists. The main International Taekwon-Do Federation (ITF), founded by Choi Hong- hi in 1966 and Kukkiwon and World Taekwon-Do Federation (WTF).
               </p>
               <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-                Our certified masters have trained over 500 students and produced 50+ state and national 
-                champions. We emphasize traditional values, discipline, and character development alongside 
-                physical fitness and martial arts excellence.
+                Taekwon-Do made it's Paralympic debut at Tokyo 2020 and is a sport governed by World Taekwon-Do (WT). The goal of this martial art is to give a sense of self-esteem, knowledge of self-defence heightened mental and physical well-being.
               </p>
               <Link
                 to="/about"
@@ -350,12 +363,12 @@ function Home() {
               Why Choose <span className="text-red-600">Combat Warrior</span> <span className="text-yellow-600">Dojang?</span>
             </h2>
             <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-              Authentic Korean martial arts with traditional values and modern excellence
+              Building character and life skills through traditional martial arts training
             </p>
             <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 via-red-500 to-black mx-auto mt-4 rounded-full"></div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <div 
                 key={index} 
@@ -622,17 +635,7 @@ function Home() {
             </Link>
           </div>
 
-          {/* Contact info with React Icons */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 text-gray-600">
-            <div className="flex items-center group hover:scale-105 transition-transform duration-300">
-              <FaPhone className="text-yellow-600 mr-2 group-hover:animate-bounce" />
-              <span>Call: +91 98765 43210</span>
-            </div>
-            <div className="flex items-center group hover:scale-105 transition-transform duration-300">
-              <FaEnvelope className="text-yellow-600 mr-2 group-hover:animate-pulse" />
-              <span>Email: info@combatwarrior.com</span>
-            </div>
-          </div>
+          
         </div>
       </section>
     </div>
