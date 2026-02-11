@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AchievementManagement = () => {
   // API base URL
-  const API_BASE_URL = 'http://localhost:5000/api';
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
   const [achievements, setAchievements] = useState([]);
   const [badges, setBadges] = useState([]);
   const [students, setStudents] = useState([]);

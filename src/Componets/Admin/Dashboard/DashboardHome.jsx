@@ -7,7 +7,7 @@ function DashboardHome() {
   const [stats, setStats] = useState({ totalStudents: 0, totalEvents: 0, dailyAdmissions: 0, totalRevenue: 0, beltTests: 0, dailyAttendance: 0, certificates: 0 });
   const [recentActivities, setRecentActivities] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const API_BASE_URL = 'http://localhost:5000/api';
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
 
   useEffect(() => { fetchDashboardData(); }, []);
 
