@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import image from '../../assets/image.png';
+import image from '../../assets/belt.jpg';
 import { 
   FaUser, 
   FaCalendarAlt, 

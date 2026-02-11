@@ -16,6 +16,7 @@ import AdminLayout from './Componets/Admin/AdminLayout';
 import DashboardHome from './Componets/Admin/Dashboard/DashboardHome';
 import AdmissionManagement from './Componets/Admin/Dashboard/AdmissionManagement';
 import BeltExamManagement from './Componets/Admin/Dashboard/BeltExamManagement';
+import BannerManagement from './Componets/Admin/Dashboard/BannerManagement';
 import AttendanceTracking from './Componets/Admin/Dashboard/AttendanceTracking';
 import BeltManagement from './Componets/Admin/Dashboard/BeltManagement';
 import EventManagement from './Componets/Admin/Dashboard/EventManagement';
@@ -117,6 +118,7 @@ function App() {
           <Route path="certificates" element={<CertificationManagement />} />
           <Route path="admissions" element={<AdmissionManagement />} />
           <Route path="belt-exams" element={<BeltExamManagement />} />
+          <Route path="banners" element={<BannerManagement />} />
           <Route path="fees" element={<FeeManagement />} />
           <Route path="contacts" element={<ContactManagement />} />
           <Route path="courses" element={<CourseManagement />} />

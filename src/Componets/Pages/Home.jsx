@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import image1 from '../../assets/image1.jpg';
-import image3 from '../../assets/image3.jpg';
 import { 
   FaFistRaised, 
   FaTrophy, 
@@ -24,6 +23,52 @@ import {
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState({});
+  const [heroSlides, setHeroSlides] = useState([]);
+  const [loadingBanners, setLoadingBanners] = useState(true);
+
+  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+
+  // Fetch banners from API
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        setLoadingBanners(true);
+        const response = await fetch(`${API_BASE_URL}/banners?isActive=true`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch banners');
+        }
+
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.data.banners.length > 0) {
+          // Transform API banners to match component format
+          const transformedBanners = data.data.banners.map(banner => ({
+            title: banner.title,
+            subtitle: banner.subtitle,
+            description: banner.description,
+            image: `${API_BASE_URL.replace('/api', '')}/${banner.image}`,
+            buttonText: banner.buttonText,
+            buttonLink: banner.buttonLink,
+            secondaryButtonText: banner.secondaryButtonText,
+            secondaryButtonLink: banner.secondaryButtonLink
+          }));
+          setHeroSlides(transformedBanners);
+        } else {
+          // No banners available
+          setHeroSlides([]);
+        }
+      } catch (error) {
+        console.error('Error fetching banners:', error);
+        // No banners on error
+        setHeroSlides([]);
+      } finally {
+        setLoadingBanners(false);
+      }
+    };
+
+    fetchBanners();
+  }, []);
 
   // Intersection Observer for animations
   useEffect(() => {
@@ -44,65 +89,44 @@ function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const heroSlides = [
-    {
-      title: "Master the Ancient Art of Taekwon-Do",
-      subtitle: "Discipline • Honor • Excellence • Tradition",
-      description: "Join Karnataka's premier ITF Taekwon-Do Dojang with over 15 years of authentic martial arts mastery. Train under certified masters in the true spirit of Korean martial arts.",
-      image: "/combat-warrior-logo.png"
-    },
-    {
-      title: "Forge Champions Through Discipline",
-      subtitle: "Traditional Training • Modern Champions • Timeless Values",
-      description: "Our certified black belt masters have forged over 50 state and national champions. Your journey from white belt to mastery begins here.",
-      image: "/combat-warrior-logo.png"
-    },
-    {
-      title: "ITF Taekwon-Do Excellence",
-      subtitle: "Authentic Techniques • Korean Heritage • Global Standards",
-      description: "Experience true International Taekwon-Do Federation training with traditional Korean values and cutting-edge martial arts methodology.",
-      image: "/combat-warrior-logo.png"
-    }
-  ];
-
   const features = [
     {
-      icon: <FaUserTie className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      icon: <FaUserTie className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Discipline',
       description: 'Develop self-control, focus, and commitment through structured training that builds mental strength and personal responsibility',
       color: 'from-yellow-400 to-yellow-600',
       delay: '0ms'
     },
     {
-      icon: <FaFistRaised className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      icon: <FaFistRaised className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Self-Defence',
       description: 'Master practical self-defense techniques and gain confidence to protect yourself in real-world situations',
       color: 'from-red-500 to-red-700',
       delay: '100ms'
     },
     {
-      icon: <FaBullseye className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      icon: <FaBullseye className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Focus',
       description: 'Enhance concentration and mental clarity through mindful practice, improving performance in all areas of life',
       color: 'from-yellow-400 to-yellow-600',
       delay: '200ms'
     },
     {
-      icon: <FaPray className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      icon: <FaPray className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Self-Respect',
       description: 'Build confidence and self-worth through achievement and personal growth in a supportive martial arts environment',
       color: 'from-red-500 to-red-700',
       delay: '300ms'
     },
     {
-      icon: <FaUsers className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      icon: <FaUsers className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Leadership',
       description: 'Cultivate leadership qualities and learn to inspire others through example, teamwork, and mentorship',
       color: 'from-yellow-400 to-yellow-600',
       delay: '400ms'
     },
     {
-      icon: <FaHandPaper className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300" />,
+      icon: <FaHandPaper className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Anti-Bullying',
       description: 'Develop the confidence and skills to stand against bullying while promoting respect and kindness',
       color: 'from-red-500 to-red-700',
@@ -164,133 +188,143 @@ function Home() {
     }
   ];
 
-  // Auto-slide functionality
+  // Auto-slide functionality - only if there are slides
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    if (heroSlides.length > 0) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      }, 5000);
+      return () => clearInterval(timer);
+    }
   }, [heroSlides.length]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-hidden">
-      {/* Enhanced Hero Section with Slider */}
-      <section 
-        className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${image3})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'scroll'
-        }}
-      >
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full">
-          <div className="flex justify-start items-center min-h-screen pt-16 sm:pt-20">
-            <div className="text-white text-left max-w-lg hero-content">
-              
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
-                {heroSlides[currentSlide].title.split(' ').map((word, index) => (
-                  <span
-                    key={index}
-                    className="inline-block animate-fade-in-up mr-2"
-                    style={{ animationDelay: `${index * 200}ms` }}
-                  >
-                    {word}
-                  </span>
-                ))}
-              </h1>
-              
-              <p className="text-base sm:text-lg mb-3 sm:mb-4 font-bold text-yellow-300 tracking-wide">
-                {heroSlides[currentSlide].subtitle}
-              </p>
-              
-              <p className="text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed text-gray-100">
-                {heroSlides[currentSlide].description}
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8 justify-start">
-                <Link
-                  to="/admission"
-                  className="group bg-yellow-400 text-black px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:bg-yellow-300 hover:shadow-2xl transition-all duration-300 text-center border-2 border-yellow-400 touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-yellow-500"
-                  style={{
-                    minHeight: '48px',
-                    touchAction: 'manipulation',
-                    WebkitTapHighlightColor: 'transparent'
-                  }}
-                >
-                  <span className="flex items-center justify-center">
-                    <FaRocket className="mr-2" />
-                    Begin Your Journey
-                    <svg className="ml-2 w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                </Link>
-                <Link
-                  to="/courses"
-                  className="border-2 border-red-500 text-red-500 bg-black bg-opacity-50 px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:bg-red-500 hover:text-white transition-all duration-300 text-center backdrop-blur-sm touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-red-600 active:text-white"
-                  style={{
-                    minHeight: '48px',
-                    touchAction: 'manipulation',
-                    WebkitTapHighlightColor: 'transparent'
-                  }}
-                >
-                  <span className="flex items-center justify-center">
-                    <FaDumbbell className="mr-2" />
-                    Training Programs
-                  </span>
-                </Link>
+      {/* Hero Section - Only show if banners are available */}
+      {loadingBanners ? (
+        <section className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-gradient-to-br from-yellow-50 via-white to-red-50">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 w-full h-full">
+            <div className="flex justify-start items-center min-h-screen pt-16">
+              <div className="text-gray-800 text-center w-full">
+                <div className="animate-pulse">
+                  <div className="h-12 bg-gray-300 bg-opacity-40 rounded w-3/4 mx-auto mb-4"></div>
+                  <div className="h-6 bg-gray-300 bg-opacity-40 rounded w-1/2 mx-auto mb-4"></div>
+                  <div className="h-4 bg-gray-300 bg-opacity-40 rounded w-2/3 mx-auto"></div>
+                </div>
               </div>
-
-              {/* Achievement Stats */}
-              {/* <div className="grid grid-cols-3 gap-6 text-center max-w-2xl mx-auto">
-                <div className="bg-black bg-opacity-60 backdrop-blur-sm rounded-lg p-4 border border-yellow-400">
-                  <div className="text-2xl font-bold text-yellow-400">500+</div>
-                  <div className="text-sm text-white">Students Trained</div>
-                </div>
-                <div className="bg-black bg-opacity-60 backdrop-blur-sm rounded-lg p-4 border border-red-500">
-                  <div className="text-2xl font-bold text-red-500">15+</div>
-                  <div className="text-sm text-white">Years Excellence</div>
-                </div>
-                <div className="bg-black bg-opacity-60 backdrop-blur-sm rounded-lg p-4 border border-yellow-400">
-                  <div className="text-2xl font-bold text-yellow-400">50+</div>
-                  <div className="text-sm text-white">Champions</div>
-                </div>
-              </div> */}
             </div>
           </div>
-        </div>
-
-        {/* Slide indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
-          {heroSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`rounded-full transition-all duration-300 touch-manipulation ${
-                index === currentSlide ? 'bg-white opacity-100' : 'bg-white opacity-40'
-              }`}
-              style={{
-                width: '12px',
-                height: '12px',
-                minHeight: '20px',
-                minWidth: '20px',
-                touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent',
-                borderRadius: '50%'
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 right-8 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+        </section>
+      ) : heroSlides.length > 0 ? (
+        <section 
+          className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${heroSlides[currentSlide]?.image})`,
+            backgroundPosition: 'center center',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'scroll'
+          }}
+        >
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full">
+            <div className="flex justify-start items-center min-h-screen pt-16 sm:pt-20">
+              <div className="text-white text-left max-w-lg hero-content">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
+                  {heroSlides[currentSlide].title.split(' ').map((word, index) => (
+                    <span
+                      key={index}
+                      className="inline-block animate-fade-in-up mr-2"
+                      style={{ animationDelay: `${index * 200}ms` }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </h1>
+                
+                <p className="text-base sm:text-lg mb-3 sm:mb-4 font-bold text-yellow-300 tracking-wide">
+                  {heroSlides[currentSlide].subtitle}
+                </p>
+                
+                <p className="text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed text-gray-100">
+                  {heroSlides[currentSlide].description}
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8 justify-start">
+                  <Link
+                    to="/admission"
+                    className="group bg-yellow-400 text-black px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:bg-yellow-300 hover:shadow-2xl transition-all duration-300 text-center border-2 border-yellow-400 touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-yellow-500"
+                    style={{
+                      minHeight: '48px',
+                      touchAction: 'manipulation',
+                      WebkitTapHighlightColor: 'transparent'
+                    }}
+                  >
+                    <span className="flex items-center justify-center">
+                      <FaRocket className="mr-2" />
+                      Begin Your Journey
+                      <svg className="ml-2 w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                  </Link>
+                  <Link
+                    to="/courses"
+                    className="border-2 border-red-500 text-red-500 bg-black bg-opacity-50 px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:bg-red-500 hover:text-white transition-all duration-300 text-center backdrop-blur-sm touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-red-600 active:text-white"
+                    style={{
+                      minHeight: '48px',
+                      touchAction: 'manipulation',
+                      WebkitTapHighlightColor: 'transparent'
+                    }}
+                  >
+                    <span className="flex items-center justify-center">
+                      <FaDumbbell className="mr-2" />
+                      {heroSlides[currentSlide]?.secondaryButtonText || "Training Programs"}
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+
+          {/* Slide indicators */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`rounded-full transition-all duration-300 touch-manipulation ${
+                  index === currentSlide ? 'bg-white opacity-100' : 'bg-white opacity-40'
+                }`}
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  minHeight: '20px',
+                  minWidth: '20px',
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent',
+                  borderRadius: '50%'
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-8 right-8 animate-bounce">
+            <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
+              <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        // Show only "No Banner Available" with gray background
+        <section className="hero-background mobile-hero-fix relative min-h-[60vh] flex items-center justify-center bg-gray-300">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-700">
+              No Banner Available
+            </h1>
+          </div>
+        </section>
+      )}
 
       {/* About Preview Section */}
       <section className="py-20 bg-white">
@@ -330,11 +364,6 @@ function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-transparent to-red-500/10"></div>
                 </div>
-                
-                {/* Enhanced stats overlay with animation */}
-                
-
-              
               </div>
 
               {/* Floating elements around the image */}
@@ -634,8 +663,6 @@ function Home() {
               </span>
             </Link>
           </div>
-
-          
         </div>
       </section>
     </div>

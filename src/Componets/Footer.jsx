@@ -78,10 +78,10 @@ function Footer() {
                 <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                <p className="text-gray-300 text-sm">+91 7259113288</p>
-              </div>
-               <div className="flex items-center space-x-18">
-                <p className="text-gray-300 text-sm">+91 7259113288</p>
+                <div className="flex flex-col">
+                  <p className="text-gray-300 text-sm">+91 7259113288</p>
+                  <p className="text-gray-300 text-sm">+91 9663333247</p>
+                </div>
               </div>
               
               <div className="flex items-center space-x-3">

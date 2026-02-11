@@ -12,7 +12,8 @@ import {
   FaBook, 
   FaEnvelope,
   FaSignOutAlt,
-  FaUserShield
+  FaUserShield,
+  FaImage
 } from 'react-icons/fa';
 
 function AdminLayout() {
@@ -68,7 +69,8 @@ function AdminLayout() {
         { path: '/admin/events', name: 'Event Creation & Tracking', icon: FaCalendarAlt},
         { path: '/admin/certificates', name: 'Certificate Upload', icon: FaCertificate},
         { path: '/admin/admissions', name: 'Admissions', icon: FaUserPlus},
-        { path: '/admin/belt-exams', name: 'Belt Exams', icon: FaMedal}
+        { path: '/admin/belt-exams', name: 'Belt Exams', icon: FaMedal},
+        { path: '/admin/banners', name: 'Banner Management', icon: FaImage}
       ]
     },
     {

@@ -93,38 +93,43 @@ function Courses() {
   }, []);
 
   const belts = [
-    { name: 'White Belt', requirements: 'Basic stances, blocks, and kicks', duration: '2-3 months' },
-    { name: 'Yellow Belt', requirements: 'Chon-Ji pattern, basic combinations', duration: '3-4 months' },
-    { name: 'Green Belt', requirements: 'Dan-Gun pattern, intermediate techniques', duration: '4-5 months' },
-    { name: 'Blue Belt', requirements: 'Do-San pattern, advanced kicks', duration: '5-6 months' },
-    { name: 'Red Belt', requirements: 'Won-Hyo pattern, sparring techniques', duration: '6-8 months' },
-    { name: 'Black Belt 1st Dan', requirements: 'All color belt patterns, breaking', duration: '12+ months' }
+    { name: 'White Belt', requirements: 'Basic stances, blocks, and kicks', duration: '2-3 months', color: 'bg-gray-200 border-2 border-gray-400' },
+    { name: 'White Belt / Yellow Stripe', requirements: 'Chon-Ji pattern introduction', duration: '2-3 months', color: 'bg-gradient-to-r from-gray-200 to-yellow-300' },
+    { name: 'Yellow Belt', requirements: 'Chon-Ji pattern, basic combinations', duration: '3-4 months', color: 'bg-yellow-400' },
+    { name: 'Yellow Belt / Green Stripe', requirements: 'Dan-Gun pattern introduction', duration: '3-4 months', color: 'bg-gradient-to-r from-yellow-400 to-green-400' },
+    { name: 'Green Belt', requirements: 'Dan-Gun pattern, intermediate techniques', duration: '4-5 months', color: 'bg-green-500' },
+    { name: 'Green Belt / Blue Stripe', requirements: 'Do-San pattern introduction', duration: '4-5 months', color: 'bg-gradient-to-r from-green-500 to-blue-500' },
+    { name: 'Blue Belt', requirements: 'Do-San pattern, advanced kicks', duration: '5-6 months', color: 'bg-blue-600' },
+    { name: 'Blue Belt / Red Stripe', requirements: 'Won-Hyo pattern introduction', duration: '5-6 months', color: 'bg-gradient-to-r from-blue-600 to-red-500' },
+    { name: 'Red Belt', requirements: 'Won-Hyo pattern, sparring techniques', duration: '6-8 months', color: 'bg-red-600' },
+    { name: 'Red Belt / Black Stripe', requirements: 'Yul-Gok pattern, black belt preparation', duration: '8-10 months', color: 'bg-gradient-to-r from-red-600 to-black' },
+    { name: 'Black Belt 1st Dan', requirements: 'All color belt patterns, breaking', duration: '12+ months', color: 'bg-black' }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white" style={{ perspective: '1000px' }}>
       {/* Hero Section */}
-      <section 
-        className="hero-section mobile-hero-fix relative py-16 sm:py-20 min-h-[60vh] flex items-center justify-center transform-gpu"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${img1})`,
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'scroll',
-          transform: 'rotateX(2deg)',
-          transformStyle: 'preserve-3d'
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 animate-fade-in-up">
-          <div className="transform hover:scale-105 transition-all duration-500">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
-              Training <span className="text-white">Programs</span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed">
-              Discover our comprehensive Taekwon-Do programs designed for every age and skill level. 
-              From beginners to black belts, we have the perfect program for your martial arts journey.
-            </p>
+      <section className="hero-section mobile-hero-fix relative w-full overflow-hidden">
+        <div className="relative w-full h-[45vh] sm:h-[50vh] lg:h-[55vh]">
+          <img 
+            src={img1} 
+            alt="Training Programs" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/40"></div>
+          
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 animate-fade-in-up">
+              <div className="transform hover:scale-105 transition-all duration-500">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
+                  Training <span className="text-white">Programs</span>
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed">
+                  Discover our comprehensive Taekwon-Do programs designed for every age and skill level. 
+                  From beginners to black belts, we have the perfect program for your martial arts journey.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -282,7 +287,7 @@ function Courses() {
             </h2>
             <p className="text-sm text-gray-700">Progress through the traditional ranking system</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {belts.map((belt, index) => (
               <div 
@@ -295,14 +300,7 @@ function Courses() {
                 }}
               >
                 <div className="flex items-center mb-3">
-                  <div className={`w-6 h-6 rounded-full mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 ${
-                    belt.name.includes('White') ? 'bg-gray-200 border-2 border-gray-400' :
-                    belt.name.includes('Yellow') ? 'bg-yellow-400' :
-                    belt.name.includes('Green') ? 'bg-green-500' :
-                    belt.name.includes('Blue') ? 'bg-blue-600' :
-                    belt.name.includes('Red') ? 'bg-red-600' :
-                    'bg-black'
-                  }`}></div>
+                  <div className={`w-6 h-6 rounded-full mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 ${belt.color}`}></div>
                   <h3 className="text-lg font-bold text-black group-hover:text-red-600 transition-colors duration-300">{belt.name}</h3>
                 </div>
                 <p className="text-sm text-gray-700 mb-2 group-hover:text-black transition-colors duration-300">{belt.requirements}</p>
@@ -312,194 +310,6 @@ function Courses() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Training Schedule */}
-      <section className="py-12 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 transform hover:scale-105 transition-all duration-500">
-            <h2 className="text-2xl font-bold text-black mb-3 flex items-center justify-center">
-              <FaCalendarAlt className="text-red-600 mr-2 animate-bounce" />
-              Weekly <span className="text-yellow-600 ml-2">Schedule</span>
-            </h2>
-            <p className="text-sm text-gray-700">Find the perfect time for your training</p>
-          </div>
-          
-          <div className="bg-gray-100 rounded-xl p-6 overflow-x-auto transform hover:scale-105 hover:rotate-1 transition-all duration-500 shadow-lg"
-               style={{
-                 transform: 'rotateX(5deg)',
-                 transformStyle: 'preserve-3d'
-               }}>
-            <table className="w-full min-w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-300">
-                  <th className="text-left py-2 px-3 font-semibold text-black flex items-center text-sm">
-                    <FaClock className="text-amber-500 mr-1" />
-                    Time
-                  </th>
-                  <th className="text-left py-2 px-3 font-semibold text-black text-sm">Monday</th>
-                  <th className="text-left py-2 px-3 font-semibold text-black text-sm">Tuesday</th>
-                  <th className="text-left py-2 px-3 font-semibold text-black text-sm">Wednesday</th>
-                  <th className="text-left py-2 px-3 font-semibold text-black text-sm">Thursday</th>
-                  <th className="text-left py-2 px-3 font-semibold text-black text-sm">Friday</th>
-                  <th className="text-left py-2 px-3 font-semibold text-black text-sm">Saturday</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs">
-                <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200">
-                  <td className="py-2 px-3 font-semibold text-black">9:00 AM</td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-pink-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaShieldAlt className="text-pink-600 mr-1 text-xs" />
-                      <span className="text-xs">Women's Self-Defense</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-pink-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaShieldAlt className="text-pink-600 mr-1 text-xs" />
-                      <span className="text-xs">Women's Self-Defense</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-purple-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaTrophy className="text-purple-600 mr-1 text-xs" />
-                      <span className="text-xs">Competition Team</span>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200">
-                  <td className="py-2 px-3 font-semibold text-black">4:00 PM</td>
-                  <td className="py-2 px-3 bg-yellow-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaUsers className="text-yellow-600 mr-1 text-xs" />
-                      <span className="text-xs">Little Warriors</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-yellow-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaUsers className="text-yellow-600 mr-1 text-xs" />
-                      <span className="text-xs">Little Warriors</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-yellow-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaUsers className="text-yellow-600 mr-1 text-xs" />
-                      <span className="text-xs">Little Warriors</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">-</td>
-                </tr>
-                <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200">
-                  <td className="py-2 px-3 font-semibold text-black">5:00 PM</td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-blue-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaGraduationCap className="text-blue-600 mr-1 text-xs" />
-                      <span className="text-xs">Junior Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-blue-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaGraduationCap className="text-blue-600 mr-1 text-xs" />
-                      <span className="text-xs">Junior Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3 bg-blue-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaGraduationCap className="text-blue-600 mr-1 text-xs" />
-                      <span className="text-xs">Junior Program</span>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200">
-                  <td className="py-2 px-3 font-semibold text-black">6:00 PM</td>
-                  <td className="py-2 px-3 bg-green-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFire className="text-green-600 mr-1 text-xs" />
-                      <span className="text-xs">Teen Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-green-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFire className="text-green-600 mr-1 text-xs" />
-                      <span className="text-xs">Teen Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-green-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFire className="text-green-600 mr-1 text-xs" />
-                      <span className="text-xs">Teen Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-green-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFire className="text-green-600 mr-1 text-xs" />
-                      <span className="text-xs">Teen Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-green-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFire className="text-green-600 mr-1 text-xs" />
-                      <span className="text-xs">Teen Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-green-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFire className="text-green-600 mr-1 text-xs" />
-                      <span className="text-xs">Teen Program</span>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50 transition-colors duration-200">
-                  <td className="py-2 px-3 font-semibold text-black">7:30 PM</td>
-                  <td className="py-2 px-3 bg-red-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFistRaised className="text-red-600 mr-1 text-xs" />
-                      <span className="text-xs">Adult Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-red-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFistRaised className="text-red-600 mr-1 text-xs" />
-                      <span className="text-xs">Adult Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-red-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFistRaised className="text-red-600 mr-1 text-xs" />
-                      <span className="text-xs">Adult Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-red-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFistRaised className="text-red-600 mr-1 text-xs" />
-                      <span className="text-xs">Adult Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-red-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFistRaised className="text-red-600 mr-1 text-xs" />
-                      <span className="text-xs">Adult Program</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 bg-red-100 rounded transform hover:scale-105 transition-transform duration-200">
-                    <div className="flex items-center">
-                      <FaFistRaised className="text-red-600 mr-1 text-xs" />
-                      <span className="text-xs">Adult Program</span>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -551,34 +361,3 @@ function Courses() {
 }
 
 export default Courses;
-
-// Add CSS animations
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes float-0 {
-    0%, 100% { transform: translateY(0px) rotateX(5deg) rotateY(2deg); }
-    50% { transform: translateY(-10px) rotateX(7deg) rotateY(4deg); }
-  }
-  @keyframes float-1 {
-    0%, 100% { transform: translateY(0px) rotateX(7deg) rotateY(4deg); }
-    50% { transform: translateY(-15px) rotateX(9deg) rotateY(6deg); }
-  }
-  @keyframes float-2 {
-    0%, 100% { transform: translateY(0px) rotateX(9deg) rotateY(6deg); }
-    50% { transform: translateY(-8px) rotateX(11deg) rotateY(8deg); }
-  }
-  @keyframes animate-fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-fade-in-up {
-    animation: animate-fade-in-up 1s ease-out;
-  }
-`;
-document.head.appendChild(style);

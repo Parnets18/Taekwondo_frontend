@@ -12,7 +12,8 @@ import {
   FaBalanceScale,
   FaWalking,
   FaUserAlt,
-  FaDumbbell
+  FaDumbbell,
+  FaUsers
 } from 'react-icons/fa';
 import photo1 from '../../assets/photo1.jpg';
 import p1 from '../../assets/p1.jpg';
@@ -24,29 +25,29 @@ function About() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-gray-100" style={{ perspective: '1000px' }}>
       {/* Hero Section */}
-      <section 
-        className="hero-section mobile-hero-fix relative py-16 sm:py-20 min-h-[60vh] flex items-center justify-center transform-gpu"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${photo1})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'scroll',
-          transform: 'rotateX(2deg)',
-          transformStyle: 'preserve-3d'
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center animate-fade-in-up">
-            <div className="transform hover:scale-105 transition-all duration-500">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">
-                About Combat <span className="text-white">Warrior</span> <span className="text-white">Taekwon-Do</span>
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl text-white max-w-3xl mx-auto font-medium leading-relaxed">
-                Authentic ITF Taekwon-Do training in Karnataka, preserving the traditional 
-                martial art founded by General Choi Hong Hi while building strong character 
-                and physical fitness in our students.
-              </p>
+      <section className="hero-section mobile-hero-fix relative w-full overflow-hidden">
+        <div className="relative w-full h-[45vh] sm:h-[50vh] lg:h-[55vh]">
+          <img 
+            src={photo1} 
+            alt="Combat Warrior Taekwon-Do" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/40"></div>
+          
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+              <div className="animate-fade-in-up">
+                <div className="transform hover:scale-105 transition-all duration-500">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">
+                    About Combat <span className="text-white">Warrior</span> <span className="text-white">Taekwon-Do</span>
+                  </h1>
+                  <p className="text-base sm:text-lg md:text-xl text-white max-w-3xl mx-auto font-medium leading-relaxed">
+                    Authentic ITF Taekwon-Do training in Karnataka, preserving the traditional 
+                    martial art founded by General Choi Hong Hi while building strong character 
+                    and physical fitness in our students.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -98,6 +99,130 @@ function About() {
               <div className="hidden sm:block absolute -top-2 -left-2 w-4 sm:w-6 h-4 sm:h-6 bg-yellow-400 rounded-full opacity-60 animate-bounce" style={{animationDelay: '0s'}}></div>
               <div className="hidden sm:block absolute -top-4 right-10 w-3 sm:w-4 h-3 sm:h-4 bg-red-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '1s'}}></div>
               <div className="hidden sm:block absolute bottom-10 -right-2 w-4 sm:w-5 h-4 sm:h-5 bg-yellow-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '2s'}}></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CWTAK History Section */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 flex items-center justify-center flex-wrap">
+              <FaFlag className="text-yellow-600 mr-2 sm:mr-3 animate-pulse" />
+              <span>CWTAK <span className="text-red-600 ml-1 sm:ml-2">History</span></span>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-red-500 mx-auto rounded-full"></div>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-gray-50 to-yellow-50 rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10 border-l-4 border-yellow-500">
+              <div className="space-y-4 sm:space-y-5 text-sm sm:text-base text-gray-700 leading-relaxed">
+                <p className="text-base sm:text-lg font-semibold text-black">
+                  Combat Warrior Taekwon-Do Association of Karnataka (CWTAK) was formed in 2017. It is affiliated to All India Taekwon-Do Association and International Taekwon-DO Federation, UK.
+                </p>
+                
+                <p>
+                  Here, Taekwon-Do is more than just training for strength, confidence and self-esteem can only be improved by coaching each student.
+                </p>
+                
+                <p>
+                  When looking for a martial arts school, it can be difficult. We live in an age of commercialised, franchised martial arts and a market saturated with instructors.
+                </p>
+                
+                <p>
+                  Several athletes (martial artists) learned much about the roots of Taekwon-Do and gained a greater appreciation for the art by our <span className="font-semibold text-black">Master V. Maruthi Prasad, 8th Dan, President, All India Taekwon-Do Association.</span>
+                </p>
+                
+                <p className="text-base sm:text-lg font-semibold text-red-600">
+                  CWTAK is the perfect tool to unlocking your child's potential. It can be seen that the study of Taekwon-Do is recommended for men, women and children of all age groups.
+                </p>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="mt-6 pt-6 border-t border-yellow-300">
+                <div className="flex items-center justify-center space-x-4 text-yellow-600">
+                  <FaStar className="text-xl animate-pulse" />
+                  <span className="text-sm font-semibold text-gray-600">Established 2017</span>
+                  <FaStar className="text-xl animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Class Process In CWTAK Section */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-yellow-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4">
+              <span className="text-yellow-600">Class Process</span> <span className="text-red-600">In CWTAK</span>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-red-500 mx-auto rounded-full"></div>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Process Item 1 */}
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-yellow-500">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    1
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    Classes are conducted <span className="font-semibold text-black">twice in a week.</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Process Item 2 */}
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-red-500">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    2
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    Group sessions for students to <span className="font-semibold text-black">promote social skills.</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Process Item 3 */}
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-yellow-500">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    3
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    Advanced tests are conducted for the <span className="font-semibold text-black">promotion of students to the next level belt (Belt Exams)</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Process Item 4 */}
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-red-500">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    4
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    Provided <span className="font-semibold text-black">one-on-one sessions to empower students.</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Process Item 5 - Full Width */}
+              <div className="md:col-span-2 bg-gradient-to-r from-yellow-50 to-red-50 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-yellow-600">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-yellow-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    5
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    Involving students in various events like <span className="font-semibold text-black">internal level, club level, district level, state level, Nationals, Internationals, and Asian.</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -273,6 +398,55 @@ function About() {
         </div>
       </section>
 
+      {/* CWTAK Leadership Section */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-12 lg:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 flex items-center justify-center flex-wrap">
+              <FaUsers className="text-red-600 mr-2 sm:mr-3 animate-pulse" />
+              <span>CWTAK <span className="text-yellow-600 ml-1 sm:ml-2">Leadership</span></span>
+            </h2>
+            <p className="text-sm sm:text-base text-gray-700">Combat Warrior Taekwon-Do Association of Karnataka</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* President */}
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 border-t-4 border-yellow-500 transform hover:-translate-y-2">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+                <FaGraduationCap className="text-3xl sm:text-4xl text-white" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">Yeshwanth B R</h3>
+              <div className="mb-3">
+                <p className="text-red-600 font-bold text-base sm:text-lg">3rd DAN Black Belt</p>
+                <p className="text-gray-700 font-semibold text-sm sm:text-base">President, CWTAK</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 mt-4">
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Leading Combat Warrior Taekwon-Do Association with dedication to authentic ITF training and student development.
+                </p>
+              </div>
+            </div>
+
+            {/* Vice President */}
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 border-t-4 border-red-500 transform hover:-translate-y-2">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+                <FaGraduationCap className="text-3xl sm:text-4xl text-white" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">Manjunath</h3>
+              <div className="mb-3">
+                <p className="text-red-600 font-bold text-base sm:text-lg">2nd DAN Black Belt</p>
+                <p className="text-gray-700 font-semibold text-sm sm:text-base">Vice-President, CWTAK</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 mt-4">
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Supporting the mission of CWTAK with commitment to excellence in martial arts training and student success.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Achievements Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -377,68 +551,7 @@ function About() {
         </div>
       </section>
 
-      {/* ITF Affiliation */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 transform hover:scale-105 transition-all duration-500">
-          <div className="flex items-center justify-center mb-4 sm:mb-6 flex-wrap">
-            <FaCheckCircle className="text-3xl sm:text-4xl text-green-600 mr-2 sm:mr-3 animate-pulse" />
-            <h2 className="text-2xl sm:text-3xl font-bold text-black">ITF Certified Training</h2>
-          </div>
-          <p className="text-sm sm:text-base text-gray-700 mb-6 sm:mb-8 font-medium leading-relaxed">
-            We are proud members of the International Taekwon-Do Federation (ITF), 
-            ensuring authentic and standardized training according to General Choi Hong Hi's 
-            original teachings and philosophy. Our curriculum includes all 24 ITF patterns, 
-            fundamental movements, sparring techniques, and breaking methods.
-          </p>
-          <div className="rounded-lg sm:rounded-xl p-4 sm:p-6 lg:p-8 border-2 border-gray-300 transform hover:scale-105 hover:rotate-1 transition-all duration-500 mb-6 sm:mb-8"
-               style={{
-                 transform: 'rotateX(5deg)',
-                 transformStyle: 'preserve-3d'
-               }}>
-            <FaQuoteLeft className="text-gray-600 text-xl sm:text-2xl mb-3 sm:mb-4 mx-auto animate-bounce" />
-            <p className="text-gray-800 text-base sm:text-lg font-semibold mb-3 sm:mb-4 leading-relaxed">
-              "The ultimate aim of Taekwon-Do lies not in winning or losing, 
-              but in the perfection of the character of its participants."
-            </p>
-            <p className="text-gray-600 font-medium text-sm sm:text-base">- General Choi Hong Hi, Founder of ITF Taekwon-Do</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <div className="bg-gray-50 rounded-lg p-4 sm:p-6 border-2 border-yellow-500 shadow-lg transform hover:scale-105 hover:rotate-1 transition-all duration-500 group"
-                 style={{
-                   transform: 'rotateX(5deg)',
-                   transformStyle: 'preserve-3d'
-                 }}>
-              <div className="flex items-center justify-center mb-2 sm:mb-3 flex-wrap">
-                <FaBolt className="text-xl sm:text-2xl text-yellow-500 mr-2 group-hover:animate-bounce" />
-                <h4 className="font-bold text-lg sm:text-xl text-black text-center">24 ITF Patterns</h4>
-              </div>
-              <p className="text-sm sm:text-base text-gray-700 font-medium leading-relaxed">Complete Tul curriculum from Chon-Ji to Tong-Il</p>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4 sm:p-6 border-2 border-red-500 shadow-lg transform hover:scale-105 hover:-rotate-1 transition-all duration-500 group"
-                 style={{
-                   transform: 'rotateX(-5deg)',
-                   transformStyle: 'preserve-3d'
-                 }}>
-              <div className="flex items-center justify-center mb-2 sm:mb-3 flex-wrap">
-                <FaFistRaised className="text-xl sm:text-2xl text-red-500 mr-2 group-hover:animate-pulse" />
-                <h4 className="font-bold text-lg sm:text-xl text-black text-center">Authentic Techniques</h4>
-              </div>
-              <p className="text-sm sm:text-base text-gray-700 font-medium leading-relaxed">Traditional ITF fundamental movements and applications</p>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4 sm:p-6 border-2 border-yellow-500 shadow-lg transform hover:scale-105 hover:rotate-1 transition-all duration-500 group"
-                 style={{
-                   transform: 'rotateX(5deg)',
-                   transformStyle: 'preserve-3d'
-                 }}>
-              <div className="flex items-center justify-center mb-2 sm:mb-3 flex-wrap">
-                <FaFlag className="text-xl sm:text-2xl text-yellow-500 mr-2 group-hover:animate-spin" />
-                <h4 className="font-bold text-lg sm:text-xl text-black text-center">International Standards</h4>
-              </div>
-              <p className="text-sm sm:text-base text-gray-700 font-medium leading-relaxed">Grading and competition rules as per ITF guidelines</p>
-            </div>
-          </div>
-        </div>
-      </section>
+     
     </div>
   );
 }
