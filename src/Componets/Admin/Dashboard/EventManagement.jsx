@@ -13,6 +13,8 @@ function EventManagement() {
   const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [showRegisterStudentModal, setShowRegisterStudentModal] = useState(false);
   const [showViewParticipantsModal, setShowViewParticipantsModal] = useState(false);
+  const [showEditParticipantModal, setShowEditParticipantModal] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [authToken, setAuthToken] = useState(null);
   
@@ -50,7 +52,7 @@ function EventManagement() {
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Check for existing token on component mount
   useEffect(() => {
@@ -125,16 +127,25 @@ function EventManagement() {
   const fetchParticipants = async (eventId) => {
     if (!authToken || !eventId) return;
     try {
-      console.log('🔍 Fetching participants for event:', eventId);
-      const response = await fetch(`${API_BASE_URL}/events/${eventId}/participants`, {
+      console.log('🔍 Fetching event with participants:', eventId);
+      const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
         headers: getAuthHeaders()
       });
-      if (!response.ok) throw new Error('Failed to fetch participants');
+      if (!response.ok) throw new Error('Failed to fetch event');
       const data = await response.json();
-      console.log('📥 Participants response:', data);
-      if (data.status === 'success') {
-        console.log('✅ Setting participants:', data.data.participants);
-        setParticipants(data.data.participants || []);
+      console.log('📥 Event response:', data);
+      if (data.status === 'success' && data.data.event) {
+        const event = data.data.event;
+        // Transform registeredParticipants to match expected format
+        const participants = (event.registeredParticipants || []).map(p => ({
+          _id: p._id,
+          student: p.student?._id || p.student,
+          studentName: p.student?.fullName || 'Unknown Student',
+          participationStatus: p.paymentStatus || 'Registered',
+          registrationDate: p.registrationDate
+        }));
+        console.log('✅ Setting participants:', participants);
+        setParticipants(participants);
       }
     } catch (error) {
       console.error('❌ Error fetching participants:', error);
@@ -236,10 +247,28 @@ function EventManagement() {
     }
 
     try {
+      // Transform frontend field names to match backend expectations
+      const requestBody = {
+        name: eventForm.name,
+        description: eventForm.description,
+        date: eventForm.date,
+        startTime: '09:00', // Default start time if not provided
+        endTime: '17:00',   // Default end time if not provided
+        location: eventForm.location,
+        eventType: eventForm.eventType || 'Other', // Use 'Other' if custom type
+        level: eventForm.eventLevel, // Backend expects 'level' not 'eventLevel'
+        maxParticipants: parseInt(eventForm.capacity),
+        registrationFee: 0,
+        organizer: 'Combat Warrior Taekwondo Academy',
+        status: eventForm.status === 'Scheduled' ? 'Upcoming' : (eventForm.status || 'Upcoming')
+      };
+
+      console.log('📤 Sending event data:', requestBody);
+
       const response = await fetch(`${API_BASE_URL}/events`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify(eventForm)
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
@@ -261,16 +290,16 @@ function EventManagement() {
   const handleEditEvent = (event) => {
     setSelectedEvent(event);
     const eventType = typeof event.eventType === 'object' ? event.eventType.name : event.eventType;
-    const eventLevel = typeof event.eventLevel === 'object' ? event.eventLevel.name : event.eventLevel;
+    const eventLevel = typeof event.level === 'object' ? event.level.name : event.level; // Backend uses 'level' not 'eventLevel'
     
     setEventForm({
       name: event.name,
       eventType: eventType,
-      eventLevel: eventLevel,
+      eventLevel: eventLevel, // Map from backend 'level' to frontend 'eventLevel'
       description: event.description || '',
       date: event.date ? new Date(event.date).toISOString().split('T')[0] : '',
       location: event.location,
-      capacity: event.capacity,
+      capacity: event.maxParticipants || '', // Backend uses 'maxParticipants' not 'capacity'
       status: event.status
     });
     setShowEditEventModal(true);
@@ -281,10 +310,24 @@ function EventManagement() {
     if (!selectedEvent) return;
 
     try {
+      // Transform frontend field names to match backend expectations
+      const requestBody = {
+        name: eventForm.name,
+        description: eventForm.description,
+        date: eventForm.date,
+        startTime: '09:00',
+        endTime: '17:00',
+        location: eventForm.location,
+        eventType: eventForm.eventType || 'Other',
+        level: eventForm.eventLevel, // Backend expects 'level' not 'eventLevel'
+        maxParticipants: parseInt(eventForm.capacity),
+        status: eventForm.status === 'Scheduled' ? 'Upcoming' : (eventForm.status || 'Upcoming')
+      };
+
       const response = await fetch(`${API_BASE_URL}/events/${selectedEvent._id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify(eventForm)
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
@@ -360,7 +403,7 @@ function EventManagement() {
       
       console.log('📤 Sending request:', requestBody);
       
-      const response = await fetch(`${API_BASE_URL}/events/${selectedEvent._id}/participants`, {
+      const response = await fetch(`${API_BASE_URL}/events/${selectedEvent._id}/register`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(requestBody)
@@ -416,15 +459,16 @@ function EventManagement() {
     setShowRegisterStudentModal(true);
   };
 
-  const handleRemoveParticipant = async (participantId) => {
+  const handleRemoveParticipant = async (participant) => {
     if (!confirm('Are you sure you want to remove this participant?')) {
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/events/${selectedEvent._id}/participants/${participantId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
+      const response = await fetch(`${API_BASE_URL}/events/${selectedEvent._id}/unregister`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ studentId: participant.student })
       });
 
       const data = await response.json();
@@ -453,6 +497,48 @@ function EventManagement() {
       }
     } catch (error) {
       console.error('Error removing participant:', error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const handleEditParticipant = (participant) => {
+    setSelectedParticipant(participant);
+    setParticipantForm({
+      student: participant.student,
+      studentName: participant.studentName,
+      participationStatus: participant.participationStatus
+    });
+    setShowEditParticipantModal(true);
+  };
+
+  const handleUpdateParticipant = async (e) => {
+    e.preventDefault();
+    
+    if (!selectedParticipant) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/events/participants/${selectedParticipant._id}/status`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ participationStatus: participantForm.participationStatus })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to update participant');
+
+      if (data.status === 'success') {
+        alert('Participant updated successfully!');
+        setShowEditParticipantModal(false);
+        setSelectedParticipant(null);
+        resetParticipantForm();
+        
+        // Refresh participants list
+        await fetchParticipants(selectedEvent._id);
+        await fetchEvents();
+        await fetchStatistics();
+      }
+    } catch (error) {
+      console.error('Error updating participant:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -642,8 +728,10 @@ function EventManagement() {
                     </td>
                     <td className="py-4 px-6 text-slate-600">{event.location}</td>
                     <td className="py-4 px-6">
-                      <span className="font-semibold text-slate-900">{event.currentParticipants}</span>
-                      <span className="text-slate-500">/{event.capacity}</span>
+                      <span className="font-semibold text-slate-900">
+                        {event.registeredParticipants?.length || 0}
+                      </span>
+                      <span className="text-slate-500">/{event.maxParticipants || '∞'}</span>
                     </td>
                     <td className="py-4 px-6">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(event.status)}`}>
@@ -1073,7 +1161,7 @@ function EventManagement() {
                   <strong>Event:</strong> {selectedEvent.name}
                 </p>
                 <p className="text-sm text-blue-800">
-                  <strong>Capacity:</strong> {selectedEvent.currentParticipants}/{selectedEvent.capacity}
+                  <strong>Capacity:</strong> {selectedEvent.registeredParticipants?.length || 0}/{selectedEvent.maxParticipants || '∞'}
                 </p>
               </div>
 
@@ -1152,6 +1240,84 @@ function EventManagement() {
         </div>
       )}
 
+      {/* Edit Participant Modal */}
+      {showEditParticipantModal && selectedParticipant && (
+        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border-2 border-black">
+            <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-white">Edit Participant</h2>
+                <button 
+                  onClick={() => {
+                    setShowEditParticipantModal(false);
+                    setSelectedParticipant(null);
+                    resetParticipantForm();
+                  }}
+                  className="text-white hover:text-gray-200 text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <form onSubmit={handleUpdateParticipant} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Student Name
+                  </label>
+                  <input
+                    type="text"
+                    value={participantForm.studentName}
+                    disabled
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-gray-100 text-gray-600 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Student cannot be changed</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Participation Status *
+                  </label>
+                  <select
+                    value={participantForm.participationStatus}
+                    onChange={(e) => setParticipantForm(prev => ({ ...prev, participationStatus: e.target.value }))}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="Registered">Registered</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Attended">Attended</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 font-semibold transition"
+                  >
+                    Update Participant
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditParticipantModal(false);
+                      setSelectedParticipant(null);
+                      resetParticipantForm();
+                    }}
+                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* View Participants Modal */}
       {showViewParticipantsModal && selectedEvent && (
         <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
@@ -1184,7 +1350,7 @@ function EventManagement() {
                   <strong>Location:</strong> {selectedEvent.location}
                 </p>
                 <p className="text-sm text-blue-800">
-                  <strong>Participants:</strong> {selectedEvent.currentParticipants}/{selectedEvent.capacity}
+                  <strong>Participants:</strong> {selectedEvent.registeredParticipants?.length || 0}/{selectedEvent.maxParticipants || '∞'}
                 </p>
               </div>
 
@@ -1223,13 +1389,22 @@ function EventManagement() {
                             {new Date(participant.registrationDate).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4">
-                            <button 
-                              onClick={() => handleRemoveParticipant(participant._id)}
-                              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                              title="Remove Participant"
-                            >
-                              <FaTrash className="w-4 h-4" />
-                            </button>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => handleEditParticipant(participant)}
+                                className="p-2 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
+                                title="Edit Participant"
+                              >
+                                <FaEdit className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleRemoveParticipant(participant)}
+                                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                                title="Remove Participant"
+                              >
+                                <FaTrash className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))

@@ -89,7 +89,7 @@ function BeltManagement() {
   const [showEditTestModal, setShowEditTestModal] = useState(false);
 
   // API base URL - using direct backend URL to bypass proxy issues
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Log API URL on component mount
   useEffect(() => {

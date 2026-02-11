@@ -27,7 +27,7 @@ function StudentManagement() {
   const [formAge, setFormAge] = useState(null);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Helper function to calculate age
   const calculateAge = (dateOfBirth) => {
@@ -379,8 +379,8 @@ function StudentManagement() {
     const dateOfBirth = formData.get('dateOfBirth');
     const age = calculateAge(dateOfBirth);
     
-    if (age < 5) {
-      alert(`❌ Age Validation Error: Student must be at least 5 years old. Current age: ${age} years. Please check the date of birth.`);
+    if (age < 3) {
+      alert(`❌ Age Validation Error: Student must be at least 3 years old. Current age: ${age} years. Please check the date of birth.`);
       return;
     }
 
@@ -752,8 +752,8 @@ function StudentManagement() {
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Date of Birth * 
                     {formAge !== null && (
-                      <span className={`ml-2 text-sm ${formAge >= 5 ? 'text-green-600' : 'text-red-600'}`}>
-                        (Age: {formAge} years {formAge < 5 ? '- Too young!' : '- Valid'})
+                      <span className={`ml-2 text-sm ${formAge >= 3 ? 'text-green-600' : 'text-red-600'}`}>
+                        (Age: {formAge} years {formAge < 3 ? '- Too young!' : '- Valid'})
                       </span>
                     )}
                   </label>
@@ -761,7 +761,7 @@ function StudentManagement() {
                     type="date"
                     name="dateOfBirth"
                     className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                      formAge !== null && formAge < 5 
+                      formAge !== null && formAge < 3 
                         ? 'border-red-300 bg-red-50' 
                         : 'border-slate-200'
                     }`}
@@ -771,9 +771,9 @@ function StudentManagement() {
                     }}
                     required
                   />
-                  {formAge !== null && formAge < 5 && (
+                  {formAge !== null && formAge < 3 && (
                     <p className="text-red-600 text-sm mt-1">
-                      ⚠️ Student must be at least 5 years old for enrollment
+                      ⚠️ Student must be at least 3 years old for enrollment
                     </p>
                   )}
                 </div>

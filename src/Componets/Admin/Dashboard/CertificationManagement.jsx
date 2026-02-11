@@ -625,8 +625,8 @@ function CertificationManagement() {
                   </td>
                 </tr>
               ) : (
-                filteredCertificates.map((certificate) => (
-                  <tr key={certificate._id} className="hover:bg-slate-50 transition-colors">
+                filteredCertificates.map((certificate, index) => (
+                  <tr key={certificate._id || certificate.id || `cert-${index}`} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-semibold text-slate-800">{certificate.studentName}</div>
                       <div className="text-sm text-slate-500">{certificate.achievementDetails?.examiner || '-'}</div>
@@ -657,7 +657,6 @@ function CertificationManagement() {
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <button 
-                          key="view"
                           onClick={() => previewCertificate(certificate)}
                           className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
                           title="View"
@@ -665,7 +664,6 @@ function CertificationManagement() {
                           <FaEye className="w-4 h-4" />
                         </button>
                         <button 
-                          key="edit"
                           onClick={() => editCertificate(certificate)}
                           className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
                           title="Edit"
@@ -674,8 +672,7 @@ function CertificationManagement() {
                         </button>
                         {certificate.imageUrl && (
                           <button 
-                            key="download"
-                            onClick={() => handleDownloadCertificate(certificate._id)}
+                            onClick={() => handleDownloadCertificate(certificate._id || certificate.id)}
                             className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
                             title="Download"
                           >
@@ -683,8 +680,7 @@ function CertificationManagement() {
                           </button>
                         )}
                         <button 
-                          key="delete"
-                          onClick={() => handleDeleteCertificate(certificate._id)}
+                          onClick={() => handleDeleteCertificate(certificate._id || certificate.id)}
                           className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
                           title="Delete"
                         >

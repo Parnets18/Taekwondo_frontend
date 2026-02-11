@@ -7,7 +7,7 @@ function DashboardHome() {
   const [stats, setStats] = useState({ totalStudents: 0, totalEvents: 0, dailyAdmissions: 0, totalRevenue: 0, beltTests: 0, dailyAttendance: 0, certificates: 0 });
   const [recentActivities, setRecentActivities] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   useEffect(() => { fetchDashboardData(); }, []);
 
@@ -28,8 +28,12 @@ function DashboardHome() {
       let totalStudents = 0;
       if (studentsRes.status === 'fulfilled' && studentsRes.value.ok) {
         const response = await studentsRes.value.json();
-        const studentsData = response.data?.students || response.data || response || [];
-        totalStudents = Array.isArray(studentsData) ? studentsData.length : 0;
+        // Use stats.total for accurate count, fallback to pagination.totalItems, then array length
+        totalStudents = response.data?.stats?.total || response.data?.pagination?.totalItems || 0;
+        if (totalStudents === 0) {
+          const studentsData = response.data?.students || response.data || response || [];
+          totalStudents = Array.isArray(studentsData) ? studentsData.length : 0;
+        }
       }
 
       let totalEvents = 0, upcomingEventsData = [];

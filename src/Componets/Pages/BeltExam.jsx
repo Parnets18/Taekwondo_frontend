@@ -87,6 +87,24 @@ function BeltExam() {
       return;
     }
 
+    // Age validation - must be at least 3 years old
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    if (age < 3) {
+      setSubmitStatus({
+        type: 'error',
+        message: `Candidate must be at least 3 years old. Current age: ${age} years. Please check the date of birth.`
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitStatus(null);
 
@@ -98,7 +116,7 @@ function BeltExam() {
         }
       });
 
-      const response = await fetch('https://taekwon-frontend.onrender.com/api/belt-exams', {
+      const response = await fetch('http://localhost:5000/api/belt-exams', {
         method: 'POST',
         body: formDataToSend
       });
@@ -256,6 +274,11 @@ function BeltExam() {
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
                     Date of Birth *
+                    {formData.age && (
+                      <span className={`ml-2 text-sm ${parseInt(formData.age) >= 3 ? 'text-green-600' : 'text-red-600'}`}>
+                        (Age: {formData.age} years {parseInt(formData.age) < 3 ? '- Too young!' : '- Valid'})
+                      </span>
+                    )}
                   </label>
                   <input
                     type="date"
@@ -263,8 +286,17 @@ function BeltExam() {
                     value={formData.dateOfBirth}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 ${
+                      formData.age && parseInt(formData.age) < 3
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-slate-200'
+                    }`}
                   />
+                  {formData.age && parseInt(formData.age) < 3 && (
+                    <p className="text-red-600 text-sm mt-1">
+                      ⚠️ Candidate must be at least 3 years old for belt exam
+                    </p>
+                  )}
                 </div>
 
                 {/* Age */}
@@ -277,7 +309,11 @@ function BeltExam() {
                     name="age"
                     value={formData.age}
                     readOnly
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg bg-gray-50 transition-all duration-300"
+                    className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-300 ${
+                      formData.age && parseInt(formData.age) < 3
+                        ? 'bg-red-50 border-red-300'
+                        : 'bg-gray-50 border-slate-200'
+                    }`}
                     placeholder="Auto-calculated"
                   />
                 </div>

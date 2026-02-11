@@ -17,7 +17,6 @@ import {
 } from 'react-icons/fa';
 import photo1 from '../../assets/photo1.jpg';
 import p1 from '../../assets/p1.jpg';
-import genChoiPhoto from '../../../public/choi-hong-hi.jpg';
 
 function About() {
   
@@ -236,7 +235,7 @@ function About() {
               <div className="rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl border-2 sm:border-4 border-gradient-to-r from-red-500 to-yellow-500 transform transition-all duration-500 hover:scale-105 hover:rotate-1">
                 <div className="relative overflow-hidden">
                   <img 
-                    src={genChoiPhoto} 
+                    src="/choi-hong-hi.jpg" 
                     alt="General Choi Hong-Hi - Founder of Taekwon-Do" 
                     className="w-full h-80 sm:h-96 lg:h-[500px] object-cover transition-all duration-700 group-hover:scale-110 filter group-hover:brightness-110 group-hover:contrast-110"
                   />
