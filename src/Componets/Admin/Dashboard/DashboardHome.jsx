@@ -1,13 +1,13 @@
 ﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUsers, FaCalendarAlt, FaFileAlt, FaMoneyBillWave, FaGraduationCap, FaChartLine, FaTrophy, FaUserCheck } from 'react-icons/fa';
+import { API_BASE_URL, getAuthHeaders as getHeaders } from '../../../config/api';
 
 function DashboardHome() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalStudents: 0, totalEvents: 0, dailyAdmissions: 0, totalRevenue: 0, beltTests: 0, dailyAttendance: 0, certificates: 0 });
   const [recentActivities, setRecentActivities] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
 
   useEffect(() => { fetchDashboardData(); }, []);
 
