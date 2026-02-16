@@ -83,7 +83,8 @@ function AdminLogin() {
                 required
                 value={credentials.email}
                 onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{ focusRing: '#006CB5' }}
                 placeholder="admin@combatwarrior.com"
               />
             </div>
@@ -97,7 +98,8 @@ function AdminLogin() {
                 required
                 value={credentials.password}
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{ focusRing: '#006CB5' }}
                 placeholder="Enter your password"
               />
             </div>
@@ -105,7 +107,8 @@ function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: '#006CB5', color: 'white' }}
+              className="w-full py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
@@ -113,7 +116,7 @@ function AdminLogin() {
 
           {/* Default Credentials Info */}
           <div className="mt-8 p-4 bg-slate-50 rounded-lg">
-            <h4 className="text-sm font-semibold text-slate-700 mb-2">Default Admin Credentials:</h4>
+            <h4 className="text-sm font-semibold mb-2" style={{ color: '#006CB5' }}>Default Admin Credentials:</h4>
             <p className="text-sm text-slate-600">Email: admin@combatwarrior.com</p>
             <p className="text-sm text-slate-600">Password: admin123</p>
           </div>
@@ -122,7 +125,8 @@ function AdminLogin() {
           <div className="mt-6 text-center">
             <button
               onClick={() => navigate('/')}
-              className="text-slate-600 hover:text-amber-600 text-sm font-medium transition-colors"
+              style={{ color: '#006CB5' }}
+              className="hover:opacity-70 text-sm font-medium transition-opacity"
             >
               ← Back to Home
             </button>
