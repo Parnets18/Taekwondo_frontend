@@ -46,7 +46,7 @@ function StudentManagement() {
 
   // Check for existing token on component mount
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (token) {
       setAuthToken(token);
     } else {
@@ -70,7 +70,7 @@ function StudentManagement() {
         if (data.status === 'success') {
           const token = data.data.token;
           setAuthToken(token);
-          localStorage.setItem('authToken', token);
+          localStorage.setItem('token', token);
           setShowLoginModal(false);
           return true;
         }
@@ -114,7 +114,7 @@ function StudentManagement() {
       if (!response.ok) {
         if (response.status === 401) {
           // Token expired or invalid, clear it and show login
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('token');
           setAuthToken(null);
           setShowLoginModal(true);
           throw new Error('Authentication required');
@@ -158,7 +158,7 @@ function StudentManagement() {
         const errorData = await response.json();
         console.log('❌ Error response:', errorData);
         if (response.status === 401) {
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('token');
           setAuthToken(null);
           setShowLoginModal(true);
           throw new Error('Authentication required');
@@ -205,7 +205,7 @@ function StudentManagement() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('token');
           setAuthToken(null);
           setShowLoginModal(true);
           throw new Error('Authentication required');
@@ -252,7 +252,7 @@ function StudentManagement() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('token');
           setAuthToken(null);
           setShowLoginModal(true);
           throw new Error('Authentication required');
