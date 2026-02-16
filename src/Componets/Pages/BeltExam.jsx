@@ -116,7 +116,7 @@ function BeltExam() {
         }
       });
 
-      const response = await fetch('https://taekwon-frontend.onrender.com/api/belt-exams', {
+      const response = await fetch('http://localhost:5000/api/belt-exams', {
         method: 'POST',
         body: formDataToSend
       });
@@ -216,10 +216,7 @@ function BeltExam() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10">
-          <div className="inline-flex items-center bg-black border border-gray-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-semibold mb-6 sm:mb-8">
-            <FaMedal className="mr-2 text-yellow-400" />
-            Belt Examination Registration
-          </div>
+         
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
             Belt <span className="text-white">Examination</span> <span className="text-white">Form</span>
           </h1>
@@ -233,12 +230,12 @@ function BeltExam() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
             {/* Form Header */}
-            <div className="bg-white border-b-2 border-slate-200 p-8 text-center">
+            <div className="p-8 text-center" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex items-center justify-center mb-2">
-                <FaMedal className="text-4xl mr-3 text-amber-500" />
-                <h2 className="text-3xl font-bold text-slate-900">Individual Colour Belt Exam Form</h2>
+                <FaMedal className="text-4xl mr-3 text-white" />
+                <h2 style={{ color: 'white', fontSize: '1.875rem', fontWeight: 'bold' }}>Individual Colour Belt Exam Form</h2>
               </div>
-              <p className="text-slate-600">All fields marked with * are required</p>
+              <p className="text-white text-opacity-90">All fields marked with * are required</p>
             </div>
 
             <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-6">
@@ -597,25 +594,29 @@ function BeltExam() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-12 py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg ${
+                    className={`px-12 py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg text-white ${
                       isSubmitting 
                         ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 hover:shadow-xl hover:scale-105'
+                        : 'hover:shadow-xl hover:scale-105 hover:opacity-90'
                     }`}
+                    style={{
+                      backgroundColor: isSubmitting ? '' : '#006CB5',
+                      color: 'white'
+                    }}
                   >
                     {isSubmitting ? (
-                      <span className="flex items-center justify-center">
-                        <FaSpinner className="mr-2 animate-spin" />
+                      <span className="flex items-center justify-center text-white">
+                        <FaSpinner className="mr-2 animate-spin text-white" />
                         Submitting Application...
                       </span>
                     ) : (
-                      <span className="flex items-center justify-center">
-                        <FaPaperPlane className="mr-2" />
+                      <span className="flex items-center justify-center text-white">
+                        <FaPaperPlane className="mr-2 text-white" />
                         Submit Application
                       </span>
                     )}
                   </button>
-                  <p className="text-sm text-slate-500 mt-4">
+                  <p className="text-sm text-gray-500 mt-4">
                     We'll contact you with exam details within 48 hours
                   </p>
                 </div>

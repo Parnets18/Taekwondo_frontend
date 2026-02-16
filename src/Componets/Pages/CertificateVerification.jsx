@@ -10,7 +10,7 @@ const CertificateVerification = () => {
   const [error, setError] = useState('');
 
   // API base URL for production
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   useEffect(() => {
     if (urlCode) {
@@ -34,10 +34,21 @@ const CertificateVerification = () => {
       });
 
       // Extract the data from the response
+      // Backend returns { status: 'success', data: { isValid: true, certificate: {...} } }
       setVerificationResult(response.data.data);
     } catch (error) {
       console.error('Verification failed:', error);
-      setError(error.response?.data?.message || 'Verification failed. Please check the code and try again.');
+      
+      // Provide user-friendly error messages
+      if (error.response?.status === 404) {
+        setError('Please enter a valid verification code. The code you entered was not found in our system.');
+      } else if (error.response?.status === 400) {
+        setError('Invalid verification code format. Please check and try again.');
+      } else if (error.code === 'ERR_NETWORK' || !error.response) {
+        setError('Unable to connect to verification service. Please check your internet connection and try again.');
+      } else {
+        setError(error.response?.data?.message || 'Verification failed. Please check the code and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -164,7 +175,7 @@ const CertificateVerification = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Certificate Verification</h1>
+          <h1 className="text-3xl font-bold mb-4" style={{ color: '#006CB5' }}>Certificate Verification</h1>
           <p className="text-lg text-gray-600">
             Verify the authenticity of certificates issued by Combat Warrior Taekwon-Do Institute
           </p>
@@ -184,7 +195,7 @@ const CertificateVerification = () => {
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.toUpperCase())}
                   placeholder="Enter the verification code from the certificate"
-                  className="flex-1 border border-gray-300 rounded-md px-4 py-3 text-center font-mono text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 border border-gray-300 rounded-md px-4 py-3 text-center font-mono text-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
                   maxLength={32}
                 />
                 <button
@@ -206,16 +217,16 @@ const CertificateVerification = () => {
           </form>
 
           {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+            <div className="mt-4 p-4 bg-white border-2 border-red-500 rounded-md">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Verification Failed</h3>
-                  <p className="mt-1 text-sm text-red-700">{error}</p>
+                  <h3 className="text-sm font-medium text-red-600">Verification Failed</h3>
+                  <p className="mt-1 text-sm text-gray-700">{error}</p>
                 </div>
               </div>
             </div>
@@ -373,9 +384,9 @@ const CertificateVerification = () => {
         )}
 
         {/* Information Section */}
-        <div className="mt-12 bg-blue-50 rounded-lg p-6">
-          <h2 className="text-lg font-medium text-blue-900 mb-4">About Certificate Verification</h2>
-          <div className="space-y-3 text-sm text-blue-800">
+        <div className="mt-12 bg-white border border-gray-200 rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">About Certificate Verification</h2>
+          <div className="space-y-3 text-sm text-gray-700">
             <p>
               <strong>Secure Verification:</strong> Each certificate issued by Combat Warrior Taekwon-Do Institute 
               contains a unique verification code that can be used to confirm its authenticity.
@@ -390,7 +401,7 @@ const CertificateVerification = () => {
             </p>
             <p>
               <strong>Questions?</strong> If you have questions about a certificate or the verification process, 
-              please contact us at <a href="mailto:info@combatwarrior.com" className="underline">info@combatwarrior.com</a>
+              please contact us at <a href="mailto:info@combatwarrior.com" className="underline text-blue-600">info@combatwarrior.com</a>
             </p>
           </div>
         </div>

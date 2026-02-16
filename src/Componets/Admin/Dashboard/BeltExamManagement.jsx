@@ -22,7 +22,7 @@ function BeltExamManagement() {
       try {
         const token = localStorage.getItem('token');
         
-        const response = await fetch('https://taekwon-frontend.onrender.com/api/admin/belt-exams', {
+        const response = await fetch('http://localhost:5000/api/admin/belt-exams', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ function BeltExamManagement() {
       try {
         const token = localStorage.getItem('token');
         
-        const response = await fetch(`https://taekwon-frontend.onrender.com/api/admin/belt-exams/${examId}`, {
+        const response = await fetch(`http://localhost:5000/api/admin/belt-exams/${examId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -260,7 +260,7 @@ function BeltExamManagement() {
                           <td className="px-6 py-4">
                             {exam.photo ? (
                               <img 
-                                src={`https://taekwon-frontend.onrender.com/${exam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
+                                src={`http://localhost:5000/${exam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
                                 alt={exam.candidateName}
                                 className="w-12 h-12 rounded-full object-cover border-2 border-slate-300"
                                 onError={(e) => {
@@ -298,8 +298,9 @@ function BeltExamManagement() {
                             <div className="flex gap-3">
                               <button
                                 onClick={() => viewExamDetails(exam._id)}
-                                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                                 title="View Details"
+                                style={{ color: '#006CB5' }}
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -308,8 +309,9 @@ function BeltExamManagement() {
                               </button>
                               <button
                                 onClick={() => handleDeleteExam(exam._id)}
-                                className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                                 title="Delete"
+                                style={{ color: '#dc2626' }}
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -329,7 +331,7 @@ function BeltExamManagement() {
 
         {/* Belt Exam Details Modal */}
         {showModal && selectedExam && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
             <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
               <div className="bg-white border-b-2 border-slate-200 p-6 rounded-t-2xl">
@@ -427,7 +429,7 @@ function BeltExamManagement() {
                       <div className="md:col-span-2 bg-slate-50 p-4 rounded-lg">
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Photo</label>
                         <img 
-                          src={`https://taekwon-frontend.onrender.com/${selectedExam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
+                          src={`http://localhost:5000/${selectedExam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
                           alt="Candidate" 
                           className="w-32 h-32 object-cover rounded-lg border-2 border-slate-300"
                           onError={(e) => {

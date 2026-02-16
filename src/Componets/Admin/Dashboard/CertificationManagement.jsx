@@ -499,14 +499,13 @@ function CertificationManagement() {
           <h1 className="text-4xl font-black text-slate-800 mb-2">Certification Management</h1>
           <p className="text-slate-600">Issue and manage digital certificates for students</p>
         </div>
-        <div className="flex space-x-3">
-          <button 
-            onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300"
-          >
-            Add Certificate
-          </button>
-        </div>
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all duration-300"
+          style={{ backgroundColor: '#006CB5' }}
+        >
+          Add Certificate
+        </button>
       </div>
 
       {/* Statistics */}
@@ -575,7 +574,8 @@ function CertificationManagement() {
           <div className="flex items-end space-x-2">
             <button 
               onClick={handleExportCSV}
-              className="flex-1 bg-red-600 text-white px-4 py-3 rounded-xl hover:bg-red-700 transition-colors font-semibold"
+              className="flex-1 text-white px-4 py-3 rounded-xl hover:opacity-90 transition-colors font-semibold"
+              style={{ backgroundColor: '#006CB5' }}
             >
               Export CSV
             </button>
@@ -658,31 +658,35 @@ function CertificationManagement() {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => previewCertificate(certificate)}
-                          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="View"
+                          style={{ color: '#006CB5' }}
                         >
                           <FaEye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => editCertificate(certificate)}
-                          className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Edit"
+                          style={{ color: '#006CB5' }}
                         >
                           <FaEdit className="w-4 h-4" />
                         </button>
                         {certificate.imageUrl && (
                           <button 
                             onClick={() => handleDownloadCertificate(certificate._id || certificate.id)}
-                            className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+                            className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                             title="Download"
+                            style={{ color: '#006CB5' }}
                           >
                             <FaDownload className="w-4 h-4" />
                           </button>
                         )}
                         <button 
                           onClick={() => handleDeleteCertificate(certificate._id || certificate.id)}
-                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Delete"
+                          style={{ color: '#dc2626' }}
                         >
                           <FaTrash className="w-4 h-4" />
                         </button>
@@ -698,7 +702,7 @@ function CertificationManagement() {
 
       {/* Create Certificate Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Add Certificate</h2>
@@ -927,14 +931,16 @@ function CertificationManagement() {
                     setShowCreateModal(false);
                     resetForm();
                   }}
-                  className="flex-1 bg-slate-300 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-400 transition-colors"
+                  className="flex-1 py-3 rounded-xl font-semibold transition-colors border-2"
+                  style={{ backgroundColor: '#006CB5', color: 'white', borderColor: '#006CB5' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={loading || !certificateImage}
-                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 text-white py-3 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border-2"
+                  style={{ backgroundColor: loading || !certificateImage ? '#9ca3af' : '#006CB5', borderColor: loading || !certificateImage ? '#9ca3af' : '#006CB5' }}
                 >
                   {loading ? 'Adding...' : 'Add Certificate'}
                 </button>
@@ -946,7 +952,7 @@ function CertificationManagement() {
 
       {/* Edit Certificate Modal */}
       {showEditModal && selectedCertificate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Edit Certificate</h2>
@@ -1179,14 +1185,16 @@ function CertificationManagement() {
                     setSelectedCertificate(null);
                     resetForm();
                   }}
-                  className="flex-1 bg-slate-300 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-400 transition-colors"
+                  className="flex-1 py-3 rounded-xl font-semibold transition-colors border-2"
+                  style={{ backgroundColor: '#006CB5', color: 'white', borderColor: '#006CB5' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 text-white py-3 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border-2"
+                  style={{ backgroundColor: loading ? '#9ca3af' : '#006CB5', borderColor: loading ? '#9ca3af' : '#006CB5' }}
                 >
                   {loading ? 'Updating...' : 'Update Certificate'}
                 </button>
@@ -1198,7 +1206,7 @@ function CertificationManagement() {
 
       {/* Certificate Preview Modal */}
       {showPreviewModal && selectedCertificate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Certificate View</h2>
@@ -1296,13 +1304,15 @@ function CertificationManagement() {
                 <>
                   <button 
                     onClick={() => window.open(selectedCertificate.imageUrl, '_blank')}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition-colors"
+                    className="text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-colors"
+                    style={{ backgroundColor: '#006CB5' }}
                   >
                     View Full Size
                   </button>
                   <button 
                     onClick={() => handleDownloadCertificate(selectedCertificate._id)}
-                    className="bg-green-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors"
+                    className="text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-colors"
+                    style={{ backgroundColor: '#006CB5' }}
                   >
                     Download Certificate
                   </button>

@@ -25,7 +25,7 @@ function Courses() {
   const [error, setError] = useState(null);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Fetch courses from backend
   const fetchCourses = async () => {
@@ -93,44 +93,40 @@ function Courses() {
   }, []);
 
   const belts = [
-    { name: 'White Belt', requirements: 'Basic stances, blocks, and kicks', duration: '2-3 months', color: 'bg-gray-200 border-2 border-gray-400' },
-    { name: 'White Belt / Yellow Stripe', requirements: 'Chon-Ji pattern introduction', duration: '2-3 months', color: 'bg-gradient-to-r from-gray-200 to-yellow-300' },
-    { name: 'Yellow Belt', requirements: 'Chon-Ji pattern, basic combinations', duration: '3-4 months', color: 'bg-yellow-400' },
-    { name: 'Yellow Belt / Green Stripe', requirements: 'Dan-Gun pattern introduction', duration: '3-4 months', color: 'bg-gradient-to-r from-yellow-400 to-green-400' },
-    { name: 'Green Belt', requirements: 'Dan-Gun pattern, intermediate techniques', duration: '4-5 months', color: 'bg-green-500' },
-    { name: 'Green Belt / Blue Stripe', requirements: 'Do-San pattern introduction', duration: '4-5 months', color: 'bg-gradient-to-r from-green-500 to-blue-500' },
-    { name: 'Blue Belt', requirements: 'Do-San pattern, advanced kicks', duration: '5-6 months', color: 'bg-blue-600' },
-    { name: 'Blue Belt / Red Stripe', requirements: 'Won-Hyo pattern introduction', duration: '5-6 months', color: 'bg-gradient-to-r from-blue-600 to-red-500' },
-    { name: 'Red Belt', requirements: 'Won-Hyo pattern, sparring techniques', duration: '6-8 months', color: 'bg-red-600' },
-    { name: 'Red Belt / Black Stripe', requirements: 'Yul-Gok pattern, black belt preparation', duration: '8-10 months', color: 'bg-gradient-to-r from-red-600 to-black' },
-    { name: 'Black Belt 1st Dan', requirements: 'All color belt patterns, breaking', duration: '12+ months', color: 'bg-black' }
+    { name: 'White Belt', requirements: 'Basic stances, blocks, and kicks', duration: '2-3 months', bgColor: '#FFFFFF', borderColor: '#9CA3AF' },
+    { name: 'White Belt / Yellow Stripe', requirements: 'Chon-Ji pattern introduction', duration: '2-3 months', bgColor: 'linear-gradient(to right, #FFFFFF, #FDE047, #FACC15)', borderColor: '#D1D5DB' },
+    { name: 'Yellow Belt', requirements: 'Chon-Ji pattern, basic combinations', duration: '3-4 months', bgColor: '#FACC15', borderColor: '#EAB308' },
+    { name: 'Yellow Belt / Green Stripe', requirements: 'Dan-Gun pattern introduction', duration: '3-4 months', bgColor: 'linear-gradient(to right, #FACC15, #FDE047, #22C55E)', borderColor: '#16A34A' },
+    { name: 'Green Belt', requirements: 'Dan-Gun pattern, intermediate techniques', duration: '4-5 months', bgColor: '#22C55E', borderColor: '#16A34A' },
+    { name: 'Green Belt / Blue Stripe', requirements: 'Do-San pattern introduction', duration: '4-5 months', bgColor: 'linear-gradient(to right, #22C55E, #60A5FA, #2563EB)', borderColor: '#1D4ED8' },
+    { name: 'Blue Belt', requirements: 'Do-San pattern, advanced kicks', duration: '5-6 months', bgColor: '#2563EB', borderColor: '#1D4ED8' },
+    { name: 'Blue Belt / Red Stripe', requirements: 'Won-Hyo pattern introduction', duration: '5-6 months', bgColor: 'linear-gradient(to right, #2563EB, #F87171, #DC2626)', borderColor: '#B91C1C' },
+    { name: 'Red Belt', requirements: 'Won-Hyo pattern, sparring techniques', duration: '6-8 months', bgColor: '#DC2626', borderColor: '#B91C1C' },
+    { name: 'Red Belt / Black Stripe', requirements: 'Yul-Gok pattern, black belt preparation', duration: '8-10 months', bgColor: 'linear-gradient(to right, #DC2626, #4B5563, #000000)', borderColor: '#000000' },
+    { name: 'Black Belt 1st Dan', requirements: 'All color belt patterns, breaking', duration: '12+ months', bgColor: '#000000', borderColor: '#4B5563' }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white" style={{ perspective: '1000px' }}>
       {/* Hero Section */}
-      <section className="hero-section mobile-hero-fix relative w-full overflow-hidden">
-        <div className="relative w-full h-[45vh] sm:h-[50vh] lg:h-[55vh]">
-          <img 
-            src={img1} 
-            alt="Training Programs" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/40"></div>
-          
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 animate-fade-in-up">
-              <div className="transform hover:scale-105 transition-all duration-500">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
-                  Training <span className="text-white">Programs</span>
-                </h1>
-                <p className="text-base sm:text-lg md:text-xl text-white max-w-3xl mx-auto leading-relaxed">
-                  Discover our comprehensive Taekwon-Do programs designed for every age and skill level. 
-                  From beginners to black belts, we have the perfect program for your martial arts journey.
-                </p>
-              </div>
-            </div>
-          </div>
+      <section 
+        className="hero-section mobile-hero-fix relative py-20 sm:py-24 min-h-[60vh] flex items-center justify-center"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${img1})`,
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'scroll'
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
+            Training <span className="text-white">Programs</span>
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl text-white max-w-4xl mx-auto leading-relaxed">
+            Discover our comprehensive Taekwon-Do programs designed for every age and skill level. 
+            From beginners to black belts, we have the perfect program for your martial arts journey.
+          </p>
         </div>
       </section>
 
@@ -170,7 +166,7 @@ function Courses() {
             {/* Section Title */}
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Our <span className="text-red-600">Programs</span>
+                <span style={{ color: '#006CB5' }}>Our</span> <span style={{ color: '#006CB5' }}>Programs</span>
               </h2>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                 Choose from our comprehensive range of Taekwon-Do programs designed for all ages and skill levels. 
@@ -188,68 +184,53 @@ function Courses() {
                 {programs.map((program, index) => (
                   <div 
                     key={program.id || index} 
-                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 transform hover:scale-105 hover:rotate-1 group"
-                    style={{
-                      transform: `rotateX(${5 + index * 2}deg) rotateY(${2 + index}deg)`,
-                      transformStyle: 'preserve-3d',
-                      animation: `float-${index % 3} 3s ease-in-out infinite`
-                    }}
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100"
                   >
-                    <div className={`h-2 bg-gradient-to-r ${program.color} group-hover:h-4 transition-all duration-300`}></div>
-                    <div className="p-8 transform group-hover:translate-z-4">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center">
-                          <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mr-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
-                            {index === 0 && <FaUsers className="w-6 h-6 text-white" />}
-                            {index === 1 && <FaGraduationCap className="w-6 h-6 text-white" />}
-                            {index === 2 && <FaFire className="w-6 h-6 text-white" />}
-                            {index === 3 && <FaFistRaised className="w-6 h-6 text-white" />}
-                            {index === 4 && <FaTrophy className="w-6 h-6 text-white" />}
-                            {index === 5 && <FaShieldAlt className="w-6 h-6 text-white" />}
-                          </div>
-                          <h3 className="text-3xl font-bold text-black">{program.title}</h3>
-                        </div>
-                        <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold transform group-hover:scale-110 transition-transform duration-300">
+                    {/* Card Header */}
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6">
+                      <h3 className="text-2xl font-bold mb-3" style={{ color: '#006CB5' }}>{program.title}</h3>
+                      <div className="mb-3">
+                        <span className="bg-white px-4 py-2 rounded-full text-sm font-bold shadow-md inline-block" style={{ color: '#006CB5' }}>
                           {program.ageGroup}
                         </span>
                       </div>
-                      
-                      <p className="text-base text-gray-700 mb-6">{program.description}</p>
-                      
-                      <div className="space-y-3 mb-6">
-                        <div className="flex justify-between items-center group/item hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
+                      <p className="text-gray-600 text-sm">{program.description}</p>
+                    </div>
+                    
+                    {/* Card Body */}
+                    <div className="p-6">
+                      <div className="space-y-4 mb-6">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center">
-                            <FaClock className="text-amber-500 mr-2 group-hover/item:animate-spin" />
-                            <span className="text-base text-gray-700">Duration:</span>
+                            <span className="text-gray-700 font-medium">Duration:</span>
                           </div>
-                          <span className="font-semibold text-black">{program.duration}</span>
+                          <span className="font-bold text-gray-900">{program.duration}</span>
                         </div>
-                        <div className="flex justify-between items-center group/item hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
+                        
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center">
-                            <FaCalendarAlt className="text-amber-500 mr-2 group-hover/item:animate-pulse" />
-                            <span className="text-base text-gray-700">Schedule:</span>
+                            <span className="text-gray-700 font-medium">Schedule:</span>
                           </div>
-                          <span className="font-semibold text-black text-sm">{program.schedule}</span>
+                          <span className="font-bold text-gray-900 text-sm">{program.schedule}</span>
                         </div>
-                        <div className="flex justify-between items-center group/item hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
+                        
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50">
                           <div className="flex items-center">
-                            <FaRupeeSign className="text-amber-500 mr-2 group-hover/item:animate-bounce" />
-                            <span className="text-base text-gray-700">Price:</span>
+                            <span className="text-gray-700 font-medium">Price:</span>
                           </div>
-                          <span className="font-bold text-red-600">{program.price}</span>
+                          <span className="font-bold text-gray-900">{program.price}</span>
                         </div>
                       </div>
                       
                       <div className="mb-6">
-                        <h4 className="font-semibold text-black mb-3 flex items-center">
-                          <FaStar className="text-yellow-500 mr-2" />
+                        <h4 className="font-bold text-gray-900 mb-3">
                           What You'll Learn:
                         </h4>
                         <ul className="space-y-2">
                           {program.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-center text-sm text-gray-700 group/feature hover:text-black transition-colors duration-200">
-                              <FaCheckCircle className="w-4 h-4 text-green-500 mr-2 group-hover/feature:animate-pulse" />
-                              {feature}
+                            <li key={idx} className="flex items-start text-sm text-gray-700">
+                              <span className="mr-2">•</span>
+                              <span>{feature}</span>
                             </li>
                           ))}
                         </ul>
@@ -257,14 +238,10 @@ function Courses() {
                       
                       <Link
                         to="/admission"
-                        className="block w-full text-center bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-500 transform hover:scale-105 hover:rotate-1 shadow-lg group-hover:shadow-xl"
-                        style={{
-                          transform: 'rotateX(5deg)',
-                          transformStyle: 'preserve-3d'
-                        }}
+                        className="block w-full text-center text-white py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        style={{ backgroundColor: '#006CB5' }}
                       >
-                        <span className="flex items-center justify-center">
-                          <FaBolt className="mr-2 group-hover:animate-bounce" />
+                        <span className="flex items-center justify-center text-white">
                           Enroll Now
                         </span>
                       </Link>
@@ -281,32 +258,32 @@ function Courses() {
       <section className="py-12 bg-gradient-to-r from-yellow-50 to-red-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 transform hover:scale-105 transition-all duration-500">
-            <h2 className="text-2xl font-bold text-black mb-3 flex items-center justify-center">
-              <FaMedal className="text-yellow-500 mr-2 animate-pulse" />
-              ITF Belt <span className="text-red-600 ml-2">System</span>
+            <h2 className="text-4xl font-bold mb-3 flex items-center justify-center">
+              <span style={{ color: '#006CB5' }}>ITF Belt System</span>
             </h2>
-            <p className="text-sm text-gray-700">Progress through the traditional ranking system</p>
+            <p className="text-lg text-gray-700">Progress through the traditional ranking system</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {belts.map((belt, index) => (
               <div 
                 key={index} 
-                className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-all duration-500 transform hover:scale-105 hover:rotate-1 group"
-                style={{
-                  transform: `rotateX(${3 + index}deg) rotateY(${1 + index}deg)`,
-                  transformStyle: 'preserve-3d',
-                  animation: `float-${index % 3} 4s ease-in-out infinite`
-                }}
+                className="bg-white rounded-xl shadow-lg p-4 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100"
               >
                 <div className="flex items-center mb-3">
-                  <div className={`w-6 h-6 rounded-full mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 ${belt.color}`}></div>
-                  <h3 className="text-lg font-bold text-black group-hover:text-red-600 transition-colors duration-300">{belt.name}</h3>
+                  <div 
+                    className="w-12 h-12 rounded-full mr-3 shadow-lg flex-shrink-0"
+                    style={{
+                      background: belt.bgColor,
+                      border: `3px solid ${belt.borderColor}`
+                    }}
+                  ></div>
+                  <h3 className="text-lg font-bold text-gray-900">{belt.name}</h3>
                 </div>
-                <p className="text-sm text-gray-700 mb-2 group-hover:text-black transition-colors duration-300">{belt.requirements}</p>
-                <div className="flex items-center">
-                  <FaClock className="text-amber-500 mr-1 group-hover:animate-spin text-sm" />
-                  <p className="text-red-600 font-semibold text-xs">Duration: {belt.duration}</p>
+                <p className="text-gray-600 mb-3 leading-relaxed text-sm">{belt.requirements}</p>
+                <div className="flex items-center p-2 bg-blue-50 rounded-lg">
+                  <span className="text-gray-700 font-medium text-xs">Duration:</span>
+                  <span className="ml-auto font-bold text-gray-900 text-xs">{belt.duration}</span>
                 </div>
               </div>
             ))}
@@ -316,41 +293,30 @@ function Courses() {
 
       {/* CTA Section */}
       <section className="py-12 bg-gray-100">
-        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 lg:px-8 transform hover:scale-105 transition-all duration-500">
-          <div className="bg-white rounded-2xl p-8 shadow-lg"
-               style={{
-                 transform: 'rotateX(5deg)',
-                 transformStyle: 'preserve-3d'
-               }}>
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl p-8 shadow-lg">
             <div className="flex items-center justify-center mb-4">
-              <FaHeart className="text-red-600 text-2xl mr-2 animate-pulse" />
               <h2 className="text-2xl font-bold text-black">Ready to Start Your Training?</h2>
             </div>
             <p className="text-sm text-gray-700 mb-6">
               Choose the program that's right for you and begin your martial arts journey today.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/admission"
-                className="bg-red-600 text-white px-6 py-3 rounded-lg text-base font-semibold hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:rotate-1 shadow-lg flex items-center justify-center"
-                style={{
-                  transform: 'rotateX(5deg)',
-                  transformStyle: 'preserve-3d'
-                }}
+                className="text-white px-8 py-3 rounded-xl text-base font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+                style={{ backgroundColor: '#006CB5' }}
               >
-                <FaBolt className="mr-2 animate-bounce" />
-                Enroll Now
+                <FaBolt className="mr-2 text-white" />
+                <span className="text-white">Enroll Now</span>
               </Link>
               <Link
                 to="/contact"
-                className="border-2 border-gray-400 text-black px-6 py-3 rounded-lg text-base font-semibold hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:-rotate-1 shadow-lg flex items-center justify-center"
-                style={{
-                  transform: 'rotateX(-5deg)',
-                  transformStyle: 'preserve-3d'
-                }}
+                className="border-2 px-8 py-3 rounded-xl text-base font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+                style={{ borderColor: '#006CB5', color: '#006CB5' }}
               >
-                <FaCalendarAlt className="mr-2 animate-pulse" />
-                Schedule a Visit
+                <FaCalendarAlt className="mr-2" style={{ color: '#006CB5' }} />
+                <span style={{ color: '#006CB5' }}>Schedule a Visit</span>
               </Link>
             </div>
           </div>

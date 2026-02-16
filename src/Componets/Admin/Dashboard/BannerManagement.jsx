@@ -18,7 +18,7 @@ function BannerManagement() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   useEffect(() => {
     fetchBanners();
@@ -235,7 +235,8 @@ function BannerManagement() {
         <h2 className="text-2xl font-bold text-gray-800">Banner Management</h2>
         <button
           onClick={openAddModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-700 transition-colors"
+          className="text-white px-4 py-2 rounded-lg flex items-center hover:opacity-90 transition-colors"
+          style={{ backgroundColor: '#006CB5' }}
         >
           <FaPlus className="mr-2" />
           Add Banner
@@ -264,14 +265,16 @@ function BannerManagement() {
                       <button
                         onClick={() => handleMoveUp(banner, index)}
                         disabled={index === 0}
-                        className={`${index === 0 ? 'text-gray-300' : 'text-blue-600 hover:text-blue-800'}`}
+                        className={`${index === 0 ? 'text-gray-300' : 'hover:opacity-80'}`}
+                        style={index !== 0 ? { color: '#006CB5' } : {}}
                       >
                         <FaArrowUp className="text-xs" />
                       </button>
                       <button
                         onClick={() => handleMoveDown(banner, index)}
                         disabled={index === banners.length - 1}
-                        className={`${index === banners.length - 1 ? 'text-gray-300' : 'text-blue-600 hover:text-blue-800'}`}
+                        className={`${index === banners.length - 1 ? 'text-gray-300' : 'hover:opacity-80'}`}
+                        style={index !== banners.length - 1 ? { color: '#006CB5' } : {}}
                       >
                         <FaArrowDown className="text-xs" />
                       </button>
@@ -300,19 +303,22 @@ function BannerManagement() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => handleView(banner)}
-                    className="text-blue-600 hover:text-blue-900 mr-3"
+                    className="hover:opacity-80 mr-3"
+                    style={{ color: '#006CB5' }}
                   >
                     <FaEye />
                   </button>
                   <button
                     onClick={() => handleEdit(banner)}
-                    className="text-yellow-600 hover:text-yellow-900 mr-3"
+                    className="hover:opacity-80 mr-3"
+                    style={{ color: '#006CB5' }}
                   >
                     <FaEdit />
                   </button>
                   <button
                     onClick={() => handleDelete(banner._id)}
-                    className="text-red-600 hover:text-red-900"
+                    className="hover:opacity-80"
+                    style={{ color: '#dc2626' }}
                   >
                     <FaTrash />
                   </button>
@@ -331,7 +337,7 @@ function BannerManagement() {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h3 className="text-xl font-bold mb-4">
@@ -440,7 +446,8 @@ function BannerManagement() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+                    className="px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:bg-gray-400"
+                    style={{ backgroundColor: isSubmitting ? '#9ca3af' : '#006CB5' }}
                   >
                     {isSubmitting ? 'Saving...' : (selectedBanner ? 'Update' : 'Create')}
                   </button>
@@ -453,7 +460,7 @@ function BannerManagement() {
 
       {/* View Modal */}
       {showViewModal && selectedBanner && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h3 className="text-xl font-bold mb-4">Banner Details</h3>
@@ -513,7 +520,8 @@ function BannerManagement() {
               <div className="flex justify-end mt-6">
                 <button
                   onClick={() => setShowViewModal(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                  className="px-4 py-2 text-white rounded-lg hover:opacity-90"
+                  style={{ backgroundColor: '#006CB5' }}
                 >
                   Close
                 </button>

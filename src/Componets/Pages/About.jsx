@@ -13,7 +13,8 @@ import {
   FaWalking,
   FaUserAlt,
   FaDumbbell,
-  FaUsers
+  FaUsers,
+  FaUser
 } from 'react-icons/fa';
 import photo1 from '../../assets/photo1.jpg';
 import p1 from '../../assets/p1.jpg';
@@ -24,31 +25,25 @@ function About() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-gray-100" style={{ perspective: '1000px' }}>
       {/* Hero Section */}
-      <section className="hero-section mobile-hero-fix relative w-full overflow-hidden">
-        <div className="relative w-full h-[45vh] sm:h-[50vh] lg:h-[55vh]">
-          <img 
-            src={photo1} 
-            alt="Combat Warrior Taekwon-Do" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/40"></div>
-          
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-              <div className="animate-fade-in-up">
-                <div className="transform hover:scale-105 transition-all duration-500">
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">
-                    About Combat <span className="text-white">Warrior</span> <span className="text-white">Taekwon-Do</span>
-                  </h1>
-                  <p className="text-base sm:text-lg md:text-xl text-white max-w-3xl mx-auto font-medium leading-relaxed">
-                    Authentic ITF Taekwon-Do training in Karnataka, preserving the traditional 
-                    martial art founded by General Choi Hong Hi while building strong character 
-                    and physical fitness in our students.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <section 
+        className="hero-section mobile-hero-fix relative py-20 sm:py-24 min-h-[60vh] flex items-center justify-center"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${photo1})`,
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'scroll'
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">
+            About Combat <span className="text-white">Warrior</span> <span className="text-white">Taekwon-Do</span>
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl text-white max-w-4xl mx-auto leading-relaxed">
+            Authentic ITF Taekwon-Do training in Karnataka, preserving the traditional 
+            martial art founded by General Choi Hong Hi while building strong character 
+            and physical fitness in our students.
+          </p>
         </div>
       </section>
 
@@ -57,9 +52,9 @@ function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="transform hover:scale-105 transition-all duration-500 order-2 lg:order-1">
-              <h2 className="text-2xl sm:text-3xl font-bold text-black mb-4 sm:mb-6 flex items-center flex-wrap">
-                <FaFlag className="text-red-600 mr-2 sm:mr-3 animate-pulse" />
-                <span>Our Dojang <span className="text-yellow-600 ml-1 sm:ml-2">Story</span></span>
+              <h2 className="text-4xl font-bold mb-4 sm:mb-6 flex items-center flex-wrap" style={{ color: '#006CB5' }}>
+                <FaFlag className="mr-2 sm:mr-3" style={{ color: '#006CB5' }} />
+                <span>Our Dojang Story</span>
               </h2>
               <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700">
                 <p className="leading-relaxed">
@@ -79,25 +74,14 @@ function About() {
                  </p>
               </div>
             </div>
-            <div className="relative transform hover:scale-105 hover:rotate-1 transition-all duration-500 order-1 lg:order-2">
-              <div className="rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl border-2 sm:border-4 border-gradient-to-r from-yellow-500 to-red-500 transform transition-all duration-500 hover:scale-105 hover:rotate-1">
-                <div className="relative overflow-hidden">
-                  <img 
-                    src={p1} 
-                    alt="Combat Warrior Dojang Training Story" 
-                    className="w-full h-64 sm:h-80 lg:h-96 object-cover transition-all duration-700 group-hover:scale-110 filter group-hover:brightness-110 group-hover:contrast-110"
-                  />
-                  
-                  {/* Multiple gradient overlays for depth */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-transparent to-red-500/10"></div>
-                </div>
+            <div className="relative order-1 lg:order-2">
+              <div className="rounded-2xl overflow-hidden shadow-xl border-4 border-yellow-500">
+                <img 
+                  src={p1} 
+                  alt="Combat Warrior Dojang Training Story" 
+                  className="w-full h-64 sm:h-80 lg:h-96 object-cover"
+                />
               </div>
-
-              {/* Floating elements around the image - hidden on mobile */}
-              <div className="hidden sm:block absolute -top-2 -left-2 w-4 sm:w-6 h-4 sm:h-6 bg-yellow-400 rounded-full opacity-60 animate-bounce" style={{animationDelay: '0s'}}></div>
-              <div className="hidden sm:block absolute -top-4 right-10 w-3 sm:w-4 h-3 sm:h-4 bg-red-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '1s'}}></div>
-              <div className="hidden sm:block absolute bottom-10 -right-2 w-4 sm:w-5 h-4 sm:h-5 bg-yellow-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '2s'}}></div>
             </div>
           </div>
         </div>
@@ -107,11 +91,11 @@ function About() {
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 flex items-center justify-center flex-wrap">
-              <FaFlag className="text-yellow-600 mr-2 sm:mr-3 animate-pulse" />
-              <span>CWTAK <span className="text-red-600 ml-1 sm:ml-2">History</span></span>
+            <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#006CB5' }}>
+              <FaFlag className="mr-2 sm:mr-3" style={{ color: '#006CB5' }} />
+              <span>CWTAK History</span>
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-red-500 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#006CB5' }}></div>
           </div>
 
           <div className="max-w-4xl mx-auto">
@@ -155,19 +139,19 @@ function About() {
       <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-yellow-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4">
-              <span className="text-yellow-600">Class Process</span> <span className="text-red-600">In CWTAK</span>
+            <h2 className="text-4xl font-bold mb-3 sm:mb-4" style={{ color: '#006CB5' }}>
+              <span>Class Process In CWTAK</span>
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-red-500 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#006CB5' }}></div>
           </div>
 
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Process Item 1 */}
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-yellow-500">
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    1
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                    <span style={{ color: '#006CB5', fontWeight: 'bold', fontSize: '1.125rem' }}>1</span>
                   </div>
                   <p className="text-gray-700 leading-relaxed">
                     Classes are conducted <span className="font-semibold text-black">twice in a week.</span>
@@ -176,10 +160,10 @@ function About() {
               </div>
 
               {/* Process Item 2 */}
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-red-500">
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    2
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                    <span style={{ color: '#006CB5', fontWeight: 'bold', fontSize: '1.125rem' }}>2</span>
                   </div>
                   <p className="text-gray-700 leading-relaxed">
                     Group sessions for students to <span className="font-semibold text-black">promote social skills.</span>
@@ -188,10 +172,10 @@ function About() {
               </div>
 
               {/* Process Item 3 */}
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-yellow-500">
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    3
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                    <span style={{ color: '#006CB5', fontWeight: 'bold', fontSize: '1.125rem' }}>3</span>
                   </div>
                   <p className="text-gray-700 leading-relaxed">
                     Advanced tests are conducted for the <span className="font-semibold text-black">promotion of students to the next level belt (Belt Exams)</span>
@@ -200,10 +184,10 @@ function About() {
               </div>
 
               {/* Process Item 4 */}
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-red-500">
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    4
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                    <span style={{ color: '#006CB5', fontWeight: 'bold', fontSize: '1.125rem' }}>4</span>
                   </div>
                   <p className="text-gray-700 leading-relaxed">
                     Provided <span className="font-semibold text-black">one-on-one sessions to empower students.</span>
@@ -212,10 +196,10 @@ function About() {
               </div>
 
               {/* Process Item 5 - Full Width */}
-              <div className="md:col-span-2 bg-gradient-to-r from-yellow-50 to-red-50 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-yellow-600">
+              <div className="md:col-span-2 bg-gradient-to-r from-yellow-50 to-red-50 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-yellow-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    5
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                    <span style={{ color: '#006CB5', fontWeight: 'bold', fontSize: '1.125rem' }}>5</span>
                   </div>
                   <p className="text-gray-700 leading-relaxed">
                     Involving students in various events like <span className="font-semibold text-black">internal level, club level, district level, state level, Nationals, Internationals, and Asian.</span>
@@ -231,31 +215,20 @@ function About() {
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="relative transform hover:scale-105 hover:rotate-1 transition-all duration-500 order-1 lg:order-1">
-              <div className="rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl border-2 sm:border-4 border-gradient-to-r from-red-500 to-yellow-500 transform transition-all duration-500 hover:scale-105 hover:rotate-1">
-                <div className="relative overflow-hidden">
-                  <img 
-                    src="/choi-hong-hi.jpg" 
-                    alt="General Choi Hong-Hi - Founder of Taekwon-Do" 
-                    className="w-full h-80 sm:h-96 lg:h-[500px] object-cover transition-all duration-700 group-hover:scale-110 filter group-hover:brightness-110 group-hover:contrast-110"
-                  />
-                  
-                  {/* Multiple gradient overlays for depth */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-transparent to-yellow-500/10"></div>
-                </div>
+            <div className="relative order-1 lg:order-1">
+              <div className="rounded-2xl overflow-hidden shadow-xl border-4 border-red-500">
+                <img 
+                  src="/choi-hong-hi.jpg" 
+                  alt="General Choi Hong-Hi - Founder of Taekwon-Do" 
+                  className="w-full h-80 sm:h-96 lg:h-[500px] object-cover"
+                />
               </div>
-
-              {/* Floating elements around the image - hidden on mobile */}
-              <div className="hidden sm:block absolute -top-2 -left-2 w-4 sm:w-6 h-4 sm:h-6 bg-red-400 rounded-full opacity-60 animate-bounce" style={{animationDelay: '0s'}}></div>
-              <div className="hidden sm:block absolute -top-4 right-10 w-3 sm:w-4 h-3 sm:h-4 bg-yellow-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '1s'}}></div>
-              <div className="hidden sm:block absolute bottom-10 -right-2 w-4 sm:w-5 h-4 sm:h-5 bg-red-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '2s'}}></div>
             </div>
             
             <div className="transform hover:scale-105 transition-all duration-500 order-2 lg:order-2">
-              <h2 className="text-2xl sm:text-3xl font-bold text-black mb-4 sm:mb-6 flex items-center flex-wrap">
-                <FaGraduationCap className="text-yellow-600 mr-2 sm:mr-3 animate-pulse" />
-                <span>General Choi Hong-Hi <span className="text-red-600 ml-1 sm:ml-2">Founder of Taekwon-Do</span></span>
+              <h2 className="text-4xl font-bold mb-4 sm:mb-6 flex items-center flex-wrap" style={{ color: '#006CB5' }}>
+                <FaGraduationCap className="mr-2 sm:mr-3" style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+                <span>General Choi Hong-Hi Founder of Taekwon-Do</span>
               </h2>
               <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700">
                 <p className="leading-relaxed">
@@ -283,11 +256,11 @@ function About() {
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16 transform hover:scale-105 transition-all duration-500">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 flex items-center justify-center flex-wrap">
-              <FaStar className="text-yellow-500 mr-2 sm:mr-3 animate-pulse" />
-              <span>The Five Tenets of <span className="text-red-600 ml-1 sm:ml-2">Taekwon-Do</span></span>
+            <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#006CB5' }}>
+              <FaStar className="mr-2 sm:mr-3" style={{ color: '#006CB5' }} />
+              <span>The Five Tenets of Taekwon-Do</span>
             </h2>
-            <p className="text-sm sm:text-base text-gray-700">The fundamental principles that guide every ITF practitioner</p>
+            <p className="text-lg sm:text-xl text-gray-700">The fundamental principles that guide every ITF practitioner</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -322,8 +295,8 @@ function About() {
                 key={index} 
                 className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 p-6 text-center"
               >
-                <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <tenet.icon className="text-3xl text-white" />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#FFFFFF', borderWidth: '3px', borderStyle: 'solid', borderColor: '#006CB5' }}>
+                  <tenet.icon style={{ color: '#006CB5', fontSize: '2rem' }} />
                 </div>
                 <h3 className="text-lg font-bold text-gray-800 mb-3">{tenet.title}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{tenet.description}</p>
@@ -338,18 +311,18 @@ function About() {
       <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-red-100 to-yellow-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 flex items-center justify-center flex-wrap">
-              <FaGraduationCap className="text-red-600 mr-2 sm:mr-3 animate-bounce" />
-              <span>Our Esteemed <span className="text-yellow-600 ml-1 sm:ml-2">Mentors</span></span>
+            <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#006CB5' }}>
+              <FaGraduationCap className="mr-2 sm:mr-3" style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+              <span>Our Esteemed Mentors</span>
             </h2>
-            <p className="text-sm sm:text-base text-gray-700">In 2008, Yeshwanth B R began training under</p>
+            <p className="text-lg sm:text-xl text-gray-700">In 2008, Yeshwanth B R began training under</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* Mentor 1 */}
             <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500 border-t-4 border-yellow-500">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <FaGraduationCap className="text-lg sm:text-xl lg:text-2xl text-white" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                <FaUser style={{ color: '#006CB5', fontSize: '2rem' }} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-black mb-2">Mr. Subbaray</h3>
               <p className="text-red-600 font-bold mb-1 text-sm sm:text-base">5th DAN Black Belt</p>
@@ -359,8 +332,8 @@ function About() {
 
             {/* Mentor 2 */}
             <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500 border-t-4 border-yellow-500">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <FaGraduationCap className="text-lg sm:text-xl lg:text-2xl text-white" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                <FaUser style={{ color: '#006CB5', fontSize: '2rem' }} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-black mb-2">Mr. Lokesh Anjanappa</h3>
               <p className="text-red-600 font-bold mb-1 text-sm sm:text-base">5th DAN Black Belt</p>
@@ -369,8 +342,8 @@ function About() {
 
             {/* Mentor 3 */}
             <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500 border-t-4 border-yellow-500">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <FaGraduationCap className="text-lg sm:text-xl lg:text-2xl text-white" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                <FaUser style={{ color: '#006CB5', fontSize: '2rem' }} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-black mb-2">Mr. Vijay Kumar</h3>
               <p className="text-red-600 font-bold mb-1 text-sm sm:text-base">Chief Mentor</p>
@@ -379,8 +352,8 @@ function About() {
 
             {/* Mentor 4 */}
             <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500 border-t-4 border-yellow-500">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <FaGraduationCap className="text-lg sm:text-xl lg:text-2xl text-white" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #006CB5' }}>
+                <FaUser style={{ color: '#006CB5', fontSize: '2rem' }} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-black mb-2">Mr. V. Maruthi Prasad</h3>
               <p className="text-red-600 font-bold mb-1 text-sm sm:text-base">8th DAN Black Belt</p>
@@ -401,18 +374,18 @@ function About() {
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4 flex items-center justify-center flex-wrap">
-              <FaUsers className="text-red-600 mr-2 sm:mr-3 animate-pulse" />
-              <span>CWTAK <span className="text-yellow-600 ml-1 sm:ml-2">Leadership</span></span>
+            <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#006CB5' }}>
+              <FaUsers className="mr-2 sm:mr-3" style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+              <span>CWTAK Leadership</span>
             </h2>
-            <p className="text-sm sm:text-base text-gray-700">Combat Warrior Taekwon-Do Association of Karnataka</p>
+            <p className="text-lg sm:text-xl text-gray-700">Combat Warrior Taekwon-Do Association of Karnataka</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* President */}
             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 border-t-4 border-yellow-500 transform hover:-translate-y-2">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
-                <FaGraduationCap className="text-3xl sm:text-4xl text-white" />
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg" style={{ border: '3px solid #006CB5' }}>
+                <FaUser style={{ fontSize: '2rem', color: '#006CB5' }} />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">Yeshwanth B R</h3>
               <div className="mb-3">
@@ -428,8 +401,8 @@ function About() {
 
             {/* Vice President */}
             <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 border-t-4 border-red-500 transform hover:-translate-y-2">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
-                <FaGraduationCap className="text-3xl sm:text-4xl text-white" />
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg" style={{ border: '3px solid #006CB5' }}>
+                <FaUser style={{ fontSize: '2rem', color: '#006CB5' }} />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">Manjunath</h3>
               <div className="mb-3">
@@ -450,55 +423,55 @@ function About() {
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600 mb-3">
+            <h2 className="text-4xl font-bold mb-3" style={{ color: '#006CB5' }}>
               Achievements
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#006CB5' }}></div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Instructor Achievements */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-t-4 border-yellow-500">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mr-4">
-                  <FaMedal className="text-white text-2xl" />
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4" style={{ border: '3px solid #006CB5' }}>
+                  <FaMedal style={{ color: '#006CB5', fontSize: '1.5rem' }} />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800">Instructor Achievements</h3>
+                <h3 className="text-2xl font-bold" style={{ color: '#006CB5' }}>Instructor Achievements</h3>
               </div>
               <ul className="space-y-4">
-                <li className="flex items-start group hover:bg-yellow-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-yellow-200 transition-colors">
-                    <FaMedal className="text-yellow-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaMedal style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Asian games Umpire June 2019.</span>
                 </li>
-                <li className="flex items-start group hover:bg-yellow-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-yellow-200 transition-colors">
-                    <FaMedal className="text-yellow-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaMedal style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Won Gold medal in 3rd International Taekwon-Do Championship- 2013.</span>
                 </li>
-                <li className="flex items-start group hover:bg-yellow-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-yellow-200 transition-colors">
-                    <FaMedal className="text-yellow-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaMedal style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Won Bronze in South Asian Taekwon-Do Championship.</span>
                 </li>
-                <li className="flex items-start group hover:bg-yellow-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-yellow-200 transition-colors">
-                    <FaMedal className="text-yellow-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaMedal style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">National level 23 Gold, 15 Silver, 36 Bronze and Umpire Certification.</span>
                 </li>
-                <li className="flex items-start group hover:bg-yellow-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-yellow-200 transition-colors">
-                    <FaMedal className="text-yellow-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaMedal style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Won several medals as Taekwon-Do Student. (Club, State and National level).</span>
                 </li>
-                <li className="flex items-start group hover:bg-yellow-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-yellow-200 transition-colors">
-                    <FaMedal className="text-yellow-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaMedal style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">There are 10 Black Belt students who have Trained Under him.</span>
                 </li>
@@ -506,41 +479,41 @@ function About() {
             </div>
 
             {/* Students Achievement */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-t-4 border-red-500">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center mr-4">
-                  <FaAward className="text-white text-2xl" />
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4" style={{ border: '3px solid #006CB5' }}>
+                  <FaAward style={{ color: '#006CB5', fontSize: '1.5rem' }} />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800">Students Achievement</h3>
+                <h3 className="text-2xl font-bold" style={{ color: '#006CB5' }}>Students Achievement</h3>
               </div>
               <ul className="space-y-4">
-                <li className="flex items-start group hover:bg-red-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-red-200 transition-colors">
-                    <FaAward className="text-red-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaAward style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Won 1 Silver and 2 Bronze in Asian Games.</span>
                 </li>
-                <li className="flex items-start group hover:bg-red-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-red-200 transition-colors">
-                    <FaAward className="text-red-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaAward style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Several Gold and Silver in 8 National matches.</span>
                 </li>
-                <li className="flex items-start group hover:bg-red-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-red-200 transition-colors">
-                    <FaAward className="text-red-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaAward style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Several Gold, Silver and Bronze at State level, District level and Club level.</span>
                 </li>
-                <li className="flex items-start group hover:bg-red-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-red-200 transition-colors">
-                    <FaAward className="text-red-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaAward style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">Gold at Hyderabad Nationals.</span>
                 </li>
-                <li className="flex items-start group hover:bg-red-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-red-200 transition-colors">
-                    <FaAward className="text-red-600 text-sm" />
+                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #006CB5' }}>
+                    <FaAward style={{ color: '#006CB5', fontSize: '0.875rem' }} />
                   </div>
                   <span className="text-gray-700 leading-relaxed">80 Gold, 50 Silver and 5 Bronze at I Tiger Dojong State level and South Zone Vifa.</span>
                 </li>

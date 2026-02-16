@@ -62,7 +62,7 @@ function AttendanceTracking() {
   const [studentSuggestions, setStudentSuggestions] = useState([]);
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Helper function to get week range
   function getWeekRange(date) {
@@ -574,23 +574,11 @@ function AttendanceTracking() {
         <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">Today Present</p>
-              <p className="text-3xl font-bold text-green-600">{statistics.todayPresent}</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Today Present</p>
+              <p className="text-3xl font-bold" style={{ color: '#000000' }}>{statistics.todayPresent}</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <FaUserCheck className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-600 text-sm font-medium">Today Late</p>
-              <p className="text-3xl font-bold text-yellow-600">{statistics.todayLate}</p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <FaClock className="w-6 h-6 text-yellow-600" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+              <FaUserCheck className="w-6 h-6" style={{ color: '#006CB5' }} />
             </div>
           </div>
         </div>
@@ -598,11 +586,11 @@ function AttendanceTracking() {
         <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">Total Records</p>
-              <p className="text-3xl font-bold text-blue-600">{statistics.totalRecords}</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Today Late</p>
+              <p className="text-3xl font-bold" style={{ color: '#000000' }}>{statistics.todayLate}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FaUsers className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+              <FaClock className="w-6 h-6" style={{ color: '#006CB5' }} />
             </div>
           </div>
         </div>
@@ -610,8 +598,20 @@ function AttendanceTracking() {
         <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">Attendance Rate</p>
-              <p className="text-3xl font-bold text-purple-600">{statistics.attendanceRate}%</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Total Records</p>
+              <p className="text-3xl font-bold" style={{ color: '#000000' }}>{statistics.totalRecords}</p>
+            </div>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+              <FaUsers className="w-6 h-6" style={{ color: '#006CB5' }} />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Attendance Rate</p>
+              <p className="text-3xl font-bold" style={{ color: '#000000' }}>{statistics.attendanceRate}%</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <FaCheckCircle className="w-6 h-6 text-purple-600" />
@@ -625,31 +625,22 @@ function AttendanceTracking() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setViewMode('daily')}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              viewMode === 'daily'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+            className="px-6 py-2 rounded-lg font-semibold transition-colors"
+            style={viewMode === 'daily' ? { backgroundColor: '#006CB5', color: 'white' } : { backgroundColor: '#f3f4f6', color: '#374151' }}
           >
             Daily View
           </button>
           <button
             onClick={() => setViewMode('weekly')}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              viewMode === 'weekly'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+            className="px-6 py-2 rounded-lg font-semibold transition-colors"
+            style={viewMode === 'weekly' ? { backgroundColor: '#006CB5', color: 'white' } : { backgroundColor: '#f3f4f6', color: '#374151' }}
           >
             Weekly View
           </button>
           <button
             onClick={() => setViewMode('monthly')}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              viewMode === 'monthly'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+            className="px-6 py-2 rounded-lg font-semibold transition-colors"
+            style={viewMode === 'monthly' ? { backgroundColor: '#006CB5', color: 'white' } : { backgroundColor: '#f3f4f6', color: '#374151' }}
           >
             Monthly View
           </button>
@@ -747,7 +738,8 @@ function AttendanceTracking() {
           <div className="flex items-end">
             <button 
               onClick={() => setShowMarkAttendanceModal(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+              className="w-full text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors hover:opacity-90"
+              style={{ backgroundColor: '#006CB5' }}
             >
               <FaPlus className="w-4 h-4" />
               <span>Mark Attendance</span>
@@ -759,7 +751,8 @@ function AttendanceTracking() {
         <div className="flex justify-end mt-4">
           <button 
             onClick={handleMarkRemainingAbsent}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm"
+            className="text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm hover:opacity-90"
+            style={{ backgroundColor: '#006CB5' }}
             title="Mark all unmarked students as absent for today"
           >
             <FaUserTimes className="w-4 h-4" />
@@ -884,17 +877,18 @@ function AttendanceTracking() {
 
       {/* Mark Attendance Modal */}
       {showMarkAttendanceModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
-            <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl border-b border-gray-200" style={{ backgroundColor: 'white' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Mark Attendance</h2>
+                <h2 className="text-xl font-bold" style={{ color: '#006CB5' }}>Mark Attendance</h2>
                 <button 
                   onClick={() => {
                     setShowMarkAttendanceModal(false);
                     resetAttendanceForm();
                   }}
-                  className="text-white hover:text-gray-200 text-2xl"
+                  className="hover:text-gray-400 text-2xl"
+                  style={{ color: '#666666' }}
                 >
                   ✕
                 </button>
@@ -1015,7 +1009,8 @@ function AttendanceTracking() {
                 <div className="flex gap-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-semibold transition"
+                    className="flex-1 text-white py-2 px-4 rounded-lg hover:opacity-90 font-semibold transition"
+                    style={{ backgroundColor: '#006CB5' }}
                   >
                     Mark Attendance
                   </button>
@@ -1025,7 +1020,8 @@ function AttendanceTracking() {
                       setShowMarkAttendanceModal(false);
                       resetAttendanceForm();
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
                   >
                     Cancel
                   </button>
@@ -1038,17 +1034,18 @@ function AttendanceTracking() {
 
       {/* Bulk Mark Attendance Modal */}
       {showBulkMarkModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl">
-            <div className="bg-green-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl border-b border-gray-200" style={{ backgroundColor: 'white' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Bulk Mark Attendance</h2>
+                <h2 className="text-xl font-bold" style={{ color: '#006CB5' }}>Bulk Mark Attendance</h2>
                 <button 
                   onClick={() => {
                     setShowBulkMarkModal(false);
                     setSelectedStudents([]);
                   }}
-                  className="text-white hover:text-gray-200 text-2xl"
+                  className="hover:text-gray-400 text-2xl"
+                  style={{ color: '#666666' }}
                 >
                   ✕
                 </button>
@@ -1140,7 +1137,8 @@ function AttendanceTracking() {
                 <div className="flex gap-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 font-semibold transition"
+                    className="flex-1 text-white py-2 px-4 rounded-lg hover:opacity-90 font-semibold transition"
+                    style={{ backgroundColor: '#006CB5' }}
                   >
                     Mark Attendance for {selectedStudents.length} Students
                   </button>
@@ -1150,7 +1148,8 @@ function AttendanceTracking() {
                       setShowBulkMarkModal(false);
                       setSelectedStudents([]);
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
                   >
                     Cancel
                   </button>
@@ -1163,18 +1162,19 @@ function AttendanceTracking() {
 
       {/* Edit Attendance Modal */}
       {showEditModal && selectedAttendance && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
-            <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl border-b border-gray-200" style={{ backgroundColor: 'white' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Edit Attendance</h2>
+                <h2 className="text-xl font-bold" style={{ color: '#006CB5' }}>Edit Attendance</h2>
                 <button 
                   onClick={() => {
                     setShowEditModal(false);
                     setSelectedAttendance(null);
                     resetAttendanceForm();
                   }}
-                  className="text-white hover:text-gray-200 text-2xl"
+                  className="hover:text-gray-400 text-2xl"
+                  style={{ color: '#666666' }}
                 >
                   ✕
                 </button>
@@ -1239,7 +1239,8 @@ function AttendanceTracking() {
                 <div className="flex gap-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 font-semibold transition"
+                    className="flex-1 text-white py-2 px-4 rounded-lg hover:opacity-90 font-semibold transition"
+                    style={{ backgroundColor: '#006CB5' }}
                   >
                     Update Attendance
                   </button>
@@ -1250,7 +1251,8 @@ function AttendanceTracking() {
                       setSelectedAttendance(null);
                       resetAttendanceForm();
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
                   >
                     Cancel
                   </button>

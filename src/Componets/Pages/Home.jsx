@@ -26,7 +26,7 @@ function Home() {
   const [heroSlides, setHeroSlides] = useState([]);
   const [loadingBanners, setLoadingBanners] = useState(true);
 
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Fetch banners from API
   useEffect(() => {
@@ -229,7 +229,7 @@ function Home() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full">
             <div className="flex justify-start items-center min-h-screen pt-16 sm:pt-20">
               <div className="text-white text-left max-w-lg hero-content">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 leading-tight" style={{ color: 'white' }}>
                   {heroSlides[currentSlide].title.split(' ').map((word, index) => (
                     <span
                       key={index}
@@ -241,22 +241,22 @@ function Home() {
                   ))}
                 </h1>
                 
-                <p className="text-base sm:text-lg mb-3 sm:mb-4 font-bold text-yellow-300 tracking-wide">
+                <p className="text-base sm:text-lg mb-3 sm:mb-4 font-bold tracking-wide" style={{ color: 'white' }}>
                   {heroSlides[currentSlide].subtitle}
                 </p>
                 
-                <p className="text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed text-gray-100">
+                <p className="text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed" style={{ color: 'white' }}>
                   {heroSlides[currentSlide].description}
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8 justify-start">
                   <Link
                     to="/admission"
-                    className="group bg-yellow-400 text-black px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:bg-yellow-300 hover:shadow-2xl transition-all duration-300 text-center border-2 border-yellow-400 touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-yellow-500"
+                    className="px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:shadow-2xl transition-all duration-300 text-center"
                     style={{
-                      minHeight: '48px',
-                      touchAction: 'manipulation',
-                      WebkitTapHighlightColor: 'transparent'
+                      backgroundColor: 'white',
+                      color: '#006CB5',
+                      minHeight: '48px'
                     }}
                   >
                     <span className="flex items-center justify-center">
@@ -269,11 +269,12 @@ function Home() {
                   </Link>
                   <Link
                     to="/courses"
-                    className="border-2 border-red-500 text-red-500 bg-black bg-opacity-50 px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:bg-red-500 hover:text-white transition-all duration-300 text-center backdrop-blur-sm touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-red-600 active:text-white"
+                    className="px-4 sm:px-6 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold hover:shadow-2xl transition-all duration-300 text-center"
                     style={{
-                      minHeight: '48px',
-                      touchAction: 'manipulation',
-                      WebkitTapHighlightColor: 'transparent'
+                      backgroundColor: 'white',
+                      color: '#006CB5',
+                      border: '2px solid white',
+                      minHeight: '48px'
                     }}
                   >
                     <span className="flex items-center justify-center">
@@ -331,8 +332,8 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-black mb-6">
-                About <span className="text-red-600">Combat Warrior</span> <span className="text-yellow-600">Dojang</span>
+              <h2 className="text-4xl font-bold mb-6" style={{ color: '#006CB5' }}>
+                About Combat Warrior Dojang
               </h2>
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
                 Taekwon-Do is a South Korean form of martial arts. It is a combat sport characterised by punching and kicking techniques and was developed during 1940's and 1950's by Korean Martial artists. The main International Taekwon-Do Federation (ITF), founded by Choi Hong- hi in 1966 and Kukkiwon and World Taekwon-Do Federation (WTF).
@@ -342,7 +343,8 @@ function Home() {
               </p>
               <Link
                 to="/about"
-                className="inline-flex items-center bg-gradient-to-r from-yellow-400 to-red-500 text-black px-8 py-4 rounded-full text-lg font-bold hover:from-yellow-300 hover:to-red-400 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="inline-flex items-center px-8 py-4 rounded-full text-lg font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+                style={{ backgroundColor: '#006CB5' }}
               >
                 Read More About Us
                 <svg className="ml-2 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -351,25 +353,14 @@ function Home() {
               </Link>
             </div>
             
-            <div className="relative group">
-              <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-gradient-to-r from-yellow-500 to-red-500 transform transition-all duration-500 hover:scale-105 hover:rotate-1">
-                <div className="relative overflow-hidden">
-                  <img 
-                    src={image1} 
-                    alt="Combat Warrior Dojang Training" 
-                    className="w-full h-96 object-cover transition-all duration-700 group-hover:scale-110 filter group-hover:brightness-110 group-hover:contrast-110"
-                  />
-                  
-                  {/* Multiple gradient overlays for depth */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-transparent to-red-500/10"></div>
-                </div>
+            <div className="relative">
+              <div className="rounded-2xl overflow-hidden shadow-xl" style={{ border: '4px solid #006CB5' }}>
+                <img 
+                  src={image1} 
+                  alt="Combat Warrior Dojang Training" 
+                  className="w-full h-96 object-cover"
+                />
               </div>
-
-              {/* Floating elements around the image */}
-              <div className="absolute -top-2 -left-2 w-6 h-6 bg-yellow-400 rounded-full opacity-60 animate-bounce" style={{animationDelay: '0s'}}></div>
-              <div className="absolute -top-4 right-10 w-4 h-4 bg-red-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '1s'}}></div>
-              <div className="absolute bottom-10 -right-2 w-5 h-5 bg-yellow-500 rounded-full opacity-60 animate-bounce" style={{animationDelay: '2s'}}></div>
             </div>
           </div>
         </div>
@@ -378,7 +369,7 @@ function Home() {
       {/* Enhanced Features Section */}
       <section className="py-12 bg-gradient-to-br from-gray-50 via-yellow-50 to-red-50 relative overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-r from-yellow-100 via-white to-red-100 opacity-50"></div>
+        <div className="absolute inset-0 bg-gray-50 opacity-50"></div>
         
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div 
@@ -388,42 +379,35 @@ function Home() {
               isVisible['features-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
-            <h2 className="text-3xl font-bold text-black mb-3">
-              Why Choose <span className="text-red-600">Combat Warrior</span> <span className="text-yellow-600">Dojang?</span>
+            <h2 className="text-4xl font-bold mb-3" style={{ color: '#006CB5' }}>
+              Why Choose Combat Warrior Dojang?
             </h2>
             <p className="text-lg text-gray-700 max-w-2xl mx-auto">
               Building character and life skills through traditional martial arts training
             </p>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 via-red-500 to-black mx-auto mt-4 rounded-full"></div>
+            <div className="w-24 h-1 mx-auto mt-4 rounded-full" style={{ backgroundColor: '#006CB5' }}></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <div 
                 key={index} 
-                className={`group text-center p-6 rounded-xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-4 hover:rotate-2 border-t-4 ${
-                  index % 2 === 0 ? 'border-yellow-500 hover:border-yellow-600' : 'border-red-500 hover:border-red-600'
-                } perspective-1000`}
+                className="group text-center p-6 rounded-xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-4"
                 style={{ 
                   animationDelay: feature.delay,
-                  background: `linear-gradient(135deg, white 0%, ${index % 2 === 0 ? '#fefce8' : '#fef2f2'} 100%)`,
-                  transform: 'rotateX(5deg) rotateY(5deg)',
-                  transformStyle: 'preserve-3d'
+                  borderTop: '4px solid #006CB5'
                 }}
               >
-                <div className="transform group-hover:rotateY-12 transition-transform duration-500">
-                  <div className={`text-${index % 2 === 0 ? 'yellow' : 'red'}-600 group-hover:text-${index % 2 === 0 ? 'yellow' : 'red'}-700`}>
+                <div className="transform transition-transform duration-500">
+                  <div style={{ color: '#006CB5' }}>
                     {feature.icon}
                   </div>
-                  <h3 className={`text-lg font-bold mb-3 transition-colors ${
-                    index % 2 === 0 ? 'text-black group-hover:text-yellow-600' : 'text-black group-hover:text-red-600'
-                  }`}>
+                  <h3 className="text-lg font-bold mb-3" style={{ color: '#006CB5' }}>
                     {feature.title}
                   </h3>
                   <p className="text-gray-700 leading-relaxed text-sm">{feature.description}</p>
                   
-                  {/* 3D Hover effect decoration */}
-                  <div className={`mt-4 h-1 bg-gradient-to-r ${feature.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full shadow-lg`}></div>
+                  <div className="mt-4 h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-full shadow-lg" style={{ backgroundColor: '#006CB5' }}></div>
                 </div>
               </div>
             ))}
@@ -431,128 +415,111 @@ function Home() {
         </div>
       </section>
 
-      {/* Enhanced Programs Section */}
-      <section className="py-12 bg-white text-black relative overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-yellow-600/10 to-red-600/10"></div>
-          {/* Martial Arts pattern background */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="text-9xl font-bold text-yellow-400 absolute top-20 left-20 rotate-12">TKD</div>
-            <div className="text-9xl font-bold text-red-400 absolute bottom-20 right-20 -rotate-12">ITF</div>
-            <div className="text-6xl font-bold text-yellow-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">MARTIAL ARTS</div>
-          </div>
-        </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Training Benefits Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3 text-black">
-              Traditional <span className="text-red-600">Training</span> <span className="text-yellow-600">Programs</span>
+            <h2 className="text-4xl font-bold mb-3" style={{ color: '#006CB5' }}>
+              Benefits of Training with Us
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              Authentic ITF Taekwon-Do curriculum designed for every age and skill level, from white belt to black belt mastery
+              Discover how Taekwon-Do training transforms lives through physical fitness, mental discipline, and character development
             </p>
-            <div className="w-32 h-2 bg-gradient-to-r from-yellow-400 via-red-500 to-black mx-auto mt-4 rounded-full"></div>
+            <div className="w-32 h-2 mx-auto mt-4 rounded-full" style={{ backgroundColor: '#006CB5' }}></div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {programs.map((program, index) => (
-              <div 
-                key={index} 
-                className="group relative bg-white backdrop-blur-sm rounded-2xl p-6 hover:bg-gray-50 transition-all duration-500 transform hover:-translate-y-4 border-2 border-gray-200 hover:border-yellow-400 shadow-lg"
-              >
-                {/* Program icon with gradient background */}
-                <div className={`absolute -top-4 left-6 w-12 h-12 bg-gradient-to-r ${program.color} rounded-full flex items-center justify-center text-2xl shadow-lg border-2 border-white`}>
-                  {program.icon}
-                </div>
-                
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-yellow-600 transition-colors text-black">
-                    {program.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4 leading-relaxed text-sm">{program.description}</p>
-                  
-                  {/* Program details */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-sm">
-                      <span className="text-yellow-600 font-semibold w-20 flex items-center">
-                        ⏱️ Duration:
-                      </span>
-                      <span className="text-gray-700 text-xs">{program.duration}</span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="text-yellow-600 font-semibold w-20 flex items-center">
-                        📅 Schedule:
-                      </span>
-                      <span className="text-gray-700 text-xs">{program.schedule}</span>
-                    </div>
-                  </div>
 
-                  {/* Program features */}
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-yellow-600 mb-2">Training Focus:</h4>
-                    <div className="grid grid-cols-2 gap-1">
-                      {program.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center text-xs text-gray-600">
-                          <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                          {feature}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <Link
-                    to="/admission"
-                    className="inline-block w-full text-center bg-gradient-to-r from-yellow-400 to-red-500 text-black px-4 py-3 rounded-lg font-bold hover:shadow-lg transition-all duration-300 hover:from-yellow-300 hover:to-red-400 text-sm touch-manipulation cursor-pointer relative z-10 active:scale-95 active:from-yellow-500 active:to-red-600"
-                    style={{
-                      minHeight: '44px',
-                      touchAction: 'manipulation',
-                      WebkitTapHighlightColor: 'transparent'
-                    }}
-                  >
-                    Join This Program
-                  </Link>
-                </div>
-
-                {/* Hover effect overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/0 to-red-500/0 group-hover:from-yellow-400/5 group-hover:to-red-500/5 rounded-2xl transition-all duration-500"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4" style={{ border: '3px solid #006CB5' }}>
+                <FaDumbbell style={{ color: '#006CB5', fontSize: '1.5rem' }} />
               </div>
-            ))}
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#006CB5' }}>Physical Fitness</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Improve strength, flexibility, cardiovascular health, and overall physical conditioning through structured training programs.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4" style={{ border: '3px solid #006CB5' }}>
+                <FaBullseye style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+              </div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#006CB5' }}>Mental Focus</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Develop concentration, mental clarity, and the ability to stay calm under pressure through mindful practice.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4" style={{ border: '3px solid #006CB5' }}>
+                <FaUserTie style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+              </div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#006CB5' }}>Character Building</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Build confidence, respect, integrity, and perseverance through the traditional values of martial arts.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4" style={{ border: '3px solid #006CB5' }}>
+                <FaFistRaised style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+              </div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#006CB5' }}>Self-Defense Skills</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Learn practical self-defense techniques and gain the confidence to protect yourself in real-world situations.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4" style={{ border: '3px solid #006CB5' }}>
+                <FaUsers style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+              </div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#006CB5' }}>Community</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Join a supportive community of like-minded individuals who share your passion for martial arts excellence.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #006CB5' }}>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4" style={{ border: '3px solid #006CB5' }}>
+                <FaMedal style={{ color: '#006CB5', fontSize: '1.5rem' }} />
+              </div>
+              <h3 className="text-xl font-bold mb-3" style={{ color: '#006CB5' }}>Achievement</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Progress through belt ranks, compete in tournaments, and achieve personal goals in your martial arts journey.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-12 bg-gradient-to-r from-yellow-50 via-white to-red-50">
+      <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-black mb-3">
-              What Our <span className="text-red-600">Martial</span> <span className="text-yellow-600">Artists</span> Say
+            <h2 className="text-4xl font-bold mb-3" style={{ color: '#006CB5' }}>
+              What Our Martial Artists Say
             </h2>
             <p className="text-lg text-gray-700">Testimonials from our Taekwon-Do family</p>
-            <div className="w-32 h-2 bg-gradient-to-r from-yellow-500 via-red-500 to-black mx-auto mt-4 rounded-full"></div>
+            <div className="w-32 h-2 mx-auto mt-4 rounded-full" style={{ backgroundColor: '#006CB5' }}></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-xl p-6 transform hover:-translate-y-4 hover:rotate-2 transition-all duration-500 border-t-4 border-yellow-500 hover:border-red-500 group perspective-1000"
-                   style={{
-                     transform: 'rotateX(5deg) rotateY(5deg)',
-                     transformStyle: 'preserve-3d'
-                   }}>
+              <div key={index} className="bg-white rounded-2xl shadow-xl p-6 transform hover:-translate-y-4 transition-all duration-500"
+                   style={{ borderTop: '4px solid #006CB5' }}>
                 <div className="flex items-center mb-4">
-                  <div className="mr-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+                  <div className="mr-3 transition-all duration-300">
                     {testimonial.icon}
                   </div>
                   <div>
-                    <h4 className="font-bold text-black text-base">{testimonial.name}</h4>
+                    <h4 className="font-bold text-base" style={{ color: '#006CB5' }}>{testimonial.name}</h4>
                     <p className="text-gray-600 text-sm">{testimonial.role}</p>
                   </div>
                 </div>
                 
                 <div className="flex mb-3">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <FaStar key={i} className="text-yellow-500 text-lg animate-pulse" style={{animationDelay: `${i * 100}ms`}} />
+                    <FaStar key={i} className="text-lg" style={{ color: '#006CB5' }} />
                   ))}
                 </div>
                 
@@ -564,34 +531,29 @@ function Home() {
       </section>
 
       {/* Enhanced Stats Section */}
-      <section className="py-12 bg-gradient-to-br from-yellow-50 via-white to-red-50">
+      <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-black mb-3">Our <span className="text-red-600">Dojang</span> <span className="text-yellow-600">Excellence</span></h2>
+            <h2 className="text-4xl font-bold mb-3" style={{ color: '#006CB5' }}>Our Dojang Excellence</h2>
             <p className="text-lg text-gray-700">Proven results in traditional martial arts training</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { number: '500+', label: 'Students Trained', icon: <FaUsers className="text-2xl" />, color: 'from-yellow-400 to-yellow-600' },
-              { number: '15+', label: 'Years Excellence', icon: <FaCalendarAlt className="text-2xl" />, color: 'from-red-500 to-red-700' },
-              { number: '50+', label: 'Champions Forged', icon: <FaMedal className="text-2xl" />, color: 'from-yellow-400 to-yellow-600' },
-              { number: '10+', label: 'Black Belt Masters', icon: <FaGraduationCap className="text-2xl" />, color: 'from-red-500 to-red-700' }
+              { number: '500+', label: 'Students Trained', icon: <FaUsers className="text-2xl" /> },
+              { number: '15+', label: 'Years Excellence', icon: <FaCalendarAlt className="text-2xl" /> },
+              { number: '50+', label: 'Champions Forged', icon: <FaMedal className="text-2xl" /> },
+              { number: '10+', label: 'Black Belt Masters', icon: <FaGraduationCap className="text-2xl" /> }
             ].map((stat, index) => (
               <div key={index} className="text-center group">
-                <div className={`w-16 h-16 bg-gradient-to-r ${stat.color} rounded-full flex items-center justify-center text-black mx-auto mb-3 group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 shadow-2xl border-2 border-white transform-gpu perspective-1000`}
-                     style={{
-                       transform: 'rotateX(10deg) rotateY(10deg)',
-                       transformStyle: 'preserve-3d'
-                     }}>
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-all duration-500 shadow-lg"
+                     style={{ border: '3px solid #006CB5', color: '#006CB5' }}>
                   {stat.icon}
                 </div>
-                <div className={`text-3xl font-bold mb-2 group-hover:scale-110 transition-all duration-500 ${
-                  index % 2 === 0 ? 'text-yellow-600' : 'text-red-500'
-                } animate-pulse`}>
+                <div className="text-3xl font-bold mb-2 transition-all duration-500" style={{ color: '#006CB5' }}>
                   {stat.number}
                 </div>
-                <div className="text-gray-600 font-medium text-sm transform group-hover:translate-y-1 transition-transform duration-300">{stat.label}</div>
+                <div className="text-gray-600 font-medium text-sm">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -622,8 +584,8 @@ function Home() {
         </div>
         
         <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-black mb-4">
-            Ready to Begin Your <span className="text-red-600">Taekwon-Do</span> <span className="text-yellow-600">Journey?</span>
+          <h2 className="text-4xl font-bold mb-4" style={{ color: '#006CB5' }}>
+            Ready to Begin Your Taekwon-Do Journey?
           </h2>
           <p className="text-lg text-gray-700 mb-6 leading-relaxed">
             Join hundreds of martial artists who have discovered strength, discipline, and honor through authentic Korean Taekwon-Do. 
@@ -633,11 +595,10 @@ function Home() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-center">
             <Link
               to="/admission"
-              className="group bg-yellow-600 text-white px-8 py-4 rounded-full text-base font-bold hover:bg-yellow-700 hover:shadow-2xl transition-all duration-300 border-2 border-yellow-600 touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-yellow-800"
+              className="text-white px-8 py-4 rounded-full text-base font-bold hover:shadow-2xl transition-all duration-300"
               style={{
-                minHeight: '52px',
-                touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent'
+                backgroundColor: '#006CB5',
+                minHeight: '52px'
               }}
             >
               <span className="flex items-center justify-center">
@@ -650,16 +611,16 @@ function Home() {
             </Link>
             <Link
               to="/contact"
-              className="border-2 border-red-500 text-red-500 bg-white px-8 py-4 rounded-full text-base font-bold hover:bg-red-500 hover:text-white transition-all duration-300 touch-manipulation cursor-pointer relative z-10 active:scale-95 active:bg-red-600 active:text-white"
+              className="bg-white px-8 py-4 rounded-full text-base font-bold hover:shadow-2xl transition-all duration-300"
               style={{
-                minHeight: '52px',
-                touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent'
+                border: '2px solid #006CB5',
+                color: '#006CB5',
+                minHeight: '52px'
               }}
             >
               <span className="flex items-center justify-center">
-                <FaGraduationCap className="mr-2" />
-                Visit Our Dojang
+                <FaPhone className="mr-2" />
+                Contact Us
               </span>
             </Link>
           </div>

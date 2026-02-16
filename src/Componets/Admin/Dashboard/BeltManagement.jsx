@@ -46,15 +46,20 @@ function BeltManagement() {
 
   // Predefined belt colors with names
   const beltColors = [
-    { name: 'White', value: 'white', hex: '#FFFFFF' },
-    { name: 'Yellow', value: 'yellow', hex: '#FFD700' },
-    { name: 'Orange', value: 'orange', hex: '#FFA500' },
-    { name: 'Green', value: 'green', hex: '#008000' },
-    { name: 'Blue', value: 'blue', hex: '#0000FF' },
-    { name: 'Purple', value: 'purple', hex: '#800080' },
-    { name: 'Brown', value: 'brown', hex: '#8B4513' },
-    { name: 'Red', value: 'red', hex: '#FF0000' },
-    { name: 'Black', value: 'black', hex: '#000000' }
+    { name: 'White Belt', value: 'white', hex: '#FFFFFF' },
+    { name: 'White Belt / Yellow Stripe', value: 'white-yellow-stripe', hex: '#FFFFFF' },
+    { name: 'Yellow Belt', value: 'yellow', hex: '#FFD700' },
+    { name: 'Yellow Belt / Green Stripe', value: 'yellow-green-stripe', hex: '#FFD700' },
+    { name: 'Green Belt', value: 'green', hex: '#008000' },
+    { name: 'Green Belt / Blue Stripe', value: 'green-blue-stripe', hex: '#008000' },
+    { name: 'Blue Belt', value: 'blue', hex: '#0000FF' },
+    { name: 'Blue Belt / Red Stripe', value: 'blue-red-stripe', hex: '#0000FF' },
+    { name: 'Red Belt', value: 'red', hex: '#FF0000' },
+    { name: 'Red Belt / Black Stripe', value: 'red-black-stripe', hex: '#FF0000' },
+    { name: 'Black Belt 1st Dan', value: 'black', hex: '#000000' },
+    { name: 'Orange Belt', value: 'orange', hex: '#FFA500' },
+    { name: 'Purple Belt', value: 'purple', hex: '#800080' },
+    { name: 'Brown Belt', value: 'brown', hex: '#8B4513' }
   ];
 
   const [promotionForm, setPromotionForm] = useState({
@@ -89,7 +94,7 @@ function BeltManagement() {
   const [showEditTestModal, setShowEditTestModal] = useState(false);
 
   // API base URL - using direct backend URL to bypass proxy issues
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Log API URL on component mount
   useEffect(() => {
@@ -935,17 +940,23 @@ function BeltManagement() {
   };
 
   const handleEditTest = (test) => {
+    console.log('✏️ Edit test called with:', test);
+    console.log('✏️ Test ID:', test._id || test.id);
+    
     setSelectedTest(test);
     // Format date to YYYY-MM-DD for input type="date"
     const formattedDate = test.testDate ? new Date(test.testDate).toISOString().split('T')[0] : '';
     
-    setTestForm({
+    const formData = {
       studentName: test.studentName,
       currentBelt: test.currentBelt,
       testingFor: test.testingFor,
       testDate: formattedDate,
       readiness: test.readiness || ''
-    });
+    };
+    
+    console.log('✏️ Setting form data:', formData);
+    setTestForm(formData);
     setShowEditTestModal(true);
   };
 
@@ -980,7 +991,11 @@ function BeltManagement() {
   const handleUpdateTest = async (e) => {
     e.preventDefault();
     
-    if (!selectedTest) return;
+    if (!selectedTest) {
+      console.error('❌ No test selected');
+      alert('No test selected. Please try again.');
+      return;
+    }
     
     // Basic validation
     if (!testForm.studentName || !testForm.currentBelt || !testForm.testingFor || !testForm.testDate) {
@@ -988,14 +1003,23 @@ function BeltManagement() {
       return;
     }
 
+    console.log('📤 Updating test with ID:', selectedTest._id);
+    console.log('📤 Test form data:', testForm);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/belts/tests/${selectedTest._id}`, {
+      const url = `${API_BASE_URL}/belts/tests/${selectedTest._id}`;
+      console.log('📤 PUT request to:', url);
+      
+      const response = await fetch(url, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(testForm)
       });
 
+      console.log('📥 Response status:', response.status);
+      
       const data = await response.json();
+      console.log('📥 Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to update test');
@@ -1010,7 +1034,7 @@ function BeltManagement() {
         await fetchStatistics();
       }
     } catch (error) {
-      console.error('Error updating test:', error);
+      console.error('❌ Error updating test:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -1025,8 +1049,8 @@ function BeltManagement() {
               <p className="text-slate-600 text-sm font-medium">Total Students</p>
               <p className="text-3xl font-bold text-slate-900">{statistics.totalStudents}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FaUsers className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+              <FaUsers className="w-6 h-6" style={{ color: '#006CB5' }} />
             </div>
           </div>
         </div>
@@ -1078,17 +1102,19 @@ function BeltManagement() {
               fetchBeltLevels();
               fetchStatistics();
             }}
-            className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors hover:opacity-90"
+            style={{ backgroundColor: '#6b7280', color: 'white' }}
           >
-            <FaHistory className="w-4 h-4" />
-            <span>Refresh</span>
+            <FaHistory className="w-4 h-4" style={{ color: 'white' }} />
+            <span style={{ color: 'white' }}>Refresh</span>
           </button>
           <button 
             onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors hover:opacity-90"
+            style={{ backgroundColor: '#006CB5', color: 'white' }}
           >
-            <FaPlus className="w-4 h-4" />
-            <span>Add Belt Level</span>
+            <FaPlus className="w-4 h-4" style={{ color: 'white' }} />
+            <span style={{ color: 'white' }}>Add Belt Level</span>
           </button>
         </div>
       </div>
@@ -1131,7 +1157,7 @@ function BeltManagement() {
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex justify-center">
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#e3f2fd', color: '#006CB5' }}>
                         {belt.level}
                       </span>
                     </div>
@@ -1153,22 +1179,25 @@ function BeltManagement() {
                       <div className="flex justify-center gap-2">
                         <button 
                           onClick={() => handleViewBelt(belt)}
-                          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="View"
+                          style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                         >
                           <FaEye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleEditBelt(belt)}
-                          className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Edit"
+                          style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                         >
                           <FaEdit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteBelt(belt._id)}
-                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Delete"
+                          style={{ color: '#dc2626', backgroundColor: 'transparent' }}
                         >
                           <FaTrash className="w-4 h-4" />
                         </button>
@@ -1190,10 +1219,11 @@ function BeltManagement() {
         <h3 className="text-xl font-bold text-slate-900">Recent Promotions</h3>
         <button 
           onClick={() => setShowPromotionModal(true)}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          className="px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors hover:opacity-90"
+          style={{ backgroundColor: '#006CB5', color: 'white' }}
         >
-          <FaPlus className="w-4 h-4" />
-          <span>Record Promotion</span>
+          <FaPlus className="w-4 h-4" style={{ color: 'white' }} />
+          <span style={{ color: 'white' }}>Record Promotion</span>
         </button>
       </div>
 
@@ -1240,22 +1270,25 @@ function BeltManagement() {
                     <div className="flex justify-center gap-2">
                       <button 
                         onClick={() => handleViewPromotion(promotion)}
-                        className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                         title="View"
+                        style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                       >
                         <FaEye className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleEditPromotion(promotion)}
-                        className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                         title="Edit"
+                        style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                       >
                         <FaEdit className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDeletePromotion(promotion._id)}
-                        className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                         title="Delete"
+                        style={{ color: '#dc2626', backgroundColor: 'transparent' }}
                       >
                         <FaTrash className="w-4 h-4" />
                       </button>
@@ -1277,10 +1310,11 @@ function BeltManagement() {
         <h3 className="text-xl font-bold text-slate-900">Upcoming Belt Tests</h3>
         <button 
           onClick={() => setShowTestModal(true)}
-          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          className="px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors hover:opacity-90"
+          style={{ backgroundColor: '#006CB5', color: 'white' }}
         >
-          <FaCalendarAlt className="w-4 h-4" />
-          <span>Schedule Test</span>
+          <FaCalendarAlt className="w-4 h-4" style={{ color: 'white' }} />
+          <span style={{ color: 'white' }}>Schedule Test</span>
         </button>
       </div>
 
@@ -1326,7 +1360,7 @@ function BeltManagement() {
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#e3f2fd', color: '#006CB5' }}>
                         {test.testingFor}
                       </span>
                     </td>
@@ -1356,22 +1390,25 @@ function BeltManagement() {
                       <div className="flex justify-center gap-2">
                         <button 
                           onClick={() => handleViewTest(test)}
-                          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="View"
+                          style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                         >
                           <FaEye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleEditTest(test)}
-                          className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Edit"
+                          style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                         >
                           <FaEdit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteTest(test._id)}
-                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Delete"
+                          style={{ color: '#dc2626', backgroundColor: 'transparent' }}
                         >
                           <FaTrash className="w-4 h-4" />
                         </button>
@@ -1413,9 +1450,10 @@ function BeltManagement() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-md'
+                  ? 'text-white shadow-md'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
+              style={activeTab === tab.id ? { backgroundColor: '#006CB5' } : {}}
             >
               <tab.icon className="w-4 h-4" />
               <span className="font-medium">{tab.name}</span>
@@ -1433,12 +1471,12 @@ function BeltManagement() {
 
       {/* Add Belt Level Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-start justify-center p-4 pt-8" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl my-8">
             {/* Modal Header */}
-            <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Add New Belt Level</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Add New Belt Level</h2>
                 <button 
                   onClick={() => {
                     setShowAddModal(false);
@@ -1567,7 +1605,8 @@ function BeltManagement() {
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Add Belt Level
                   </button>
@@ -1580,12 +1619,12 @@ function BeltManagement() {
 
       {/* Edit Belt Level Modal */}
       {showEditModal && selectedBelt && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-start justify-center p-4 pt-8" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl my-8">
             {/* Modal Header */}
-            <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Edit Belt Level</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Edit Belt Level</h2>
                 <button 
                   onClick={() => {
                     setShowEditModal(false);
@@ -1716,7 +1755,8 @@ function BeltManagement() {
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 bg-amber-600 text-white py-2 rounded-md font-medium hover:bg-amber-700 transition-colors"
+                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Update Belt Level
                   </button>
@@ -1729,12 +1769,12 @@ function BeltManagement() {
 
       {/* Record Promotion Modal */}
       {showPromotionModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
-            <div className="bg-green-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Record Promotion</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Record Promotion</h2>
                 <button 
                   onClick={() => {
                     setShowPromotionModal(false);
@@ -1882,7 +1922,8 @@ function BeltManagement() {
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 bg-green-600 text-white py-2 rounded-md font-medium hover:bg-green-700 transition-colors"
+                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Record Promotion
                   </button>
@@ -1895,7 +1936,7 @@ function BeltManagement() {
 
       {/* View Promotion Modal */}
       {showViewPromotionModal && selectedPromotion && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
             <div className="bg-slate-600 px-6 py-4 rounded-t-xl">
@@ -1966,12 +2007,12 @@ function BeltManagement() {
 
       {/* Edit Promotion Modal */}
       {showEditPromotionModal && selectedPromotion && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
-            <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Edit Promotion</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Edit Promotion</h2>
                 <button 
                   onClick={() => {
                     setShowEditPromotionModal(false);
@@ -2082,7 +2123,8 @@ function BeltManagement() {
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 bg-amber-600 text-white py-2 rounded-md font-medium hover:bg-amber-700 transition-colors"
+                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Update Promotion
                   </button>
@@ -2095,12 +2137,12 @@ function BeltManagement() {
 
       {/* Schedule Test Modal */}
       {showTestModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl">
             {/* Modal Header */}
-            <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Schedule Belt Test</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Schedule Belt Test</h2>
                 <button 
                   onClick={() => {
                     setShowTestModal(false);
@@ -2246,7 +2288,8 @@ function BeltManagement() {
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 bg-amber-600 text-white py-2 rounded-md font-medium hover:bg-amber-700 transition-colors"
+                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Schedule Test
                   </button>
@@ -2259,21 +2302,30 @@ function BeltManagement() {
 
       {/* View Belt Details Modal */}
       {showViewModal && selectedBelt && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+          <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl border-2 border-black">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-5 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-4">
                   <div 
-                    className="w-12 h-12 rounded-full border-2 border-white flex items-center justify-center shadow-lg"
-                    style={{ backgroundColor: getBeltColor(selectedBelt.color, selectedBelt.hex) }}
+                    className="w-14 h-14 rounded-full border-3 flex items-center justify-center shadow-lg"
+                    style={{ 
+                      backgroundColor: getBeltColor(selectedBelt.color, selectedBelt.hex),
+                      borderColor: 'white',
+                      borderWidth: '3px',
+                      borderStyle: 'solid'
+                    }}
                   >
-                    <FaMedal className="w-6 h-6 text-white drop-shadow" />
+                    <FaMedal className="w-7 h-7" style={{ color: selectedBelt.color === 'white' ? '#006CB5' : 'white' }} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">{selectedBelt.name}</h2>
-                    <p className="text-blue-100 text-sm">Level {selectedBelt.level}</p>
+                    <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold', margin: 0, marginBottom: '4px' }}>
+                      {selectedBelt.name}
+                    </h2>
+                    <p style={{ color: 'white', fontSize: '0.95rem', margin: 0, opacity: 0.95 }}>
+                      Level {selectedBelt.level}
+                    </p>
                   </div>
                 </div>
                 <button 
@@ -2281,7 +2333,8 @@ function BeltManagement() {
                     setShowViewModal(false);
                     setSelectedBelt(null);
                   }}
-                  className="text-white hover:text-gray-200 text-2xl"
+                  className="hover:opacity-80 text-3xl"
+                  style={{ color: 'white' }}
                 >
                   ✕
                 </button>
@@ -2305,7 +2358,7 @@ function BeltManagement() {
                 
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                   <p className="text-sm text-slate-600 mb-1">Belt Level</p>
-                  <p className="text-2xl font-bold text-blue-600">{selectedBelt.level}</p>
+                  <p className="text-2xl font-bold" style={{ color: '#006CB5' }}>{selectedBelt.level}</p>
                 </div>
                 
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
@@ -2329,7 +2382,7 @@ function BeltManagement() {
                     <ul className="space-y-2">
                       {selectedBelt.requirements.map((req, index) => (
                         <li key={index} className="flex items-start space-x-2">
-                          <span className="text-blue-600 font-bold mt-1">{index + 1}.</span>
+                          <span style={{ color: '#006CB5' }} className="font-bold mt-1">{index + 1}.</span>
                           <span className="text-slate-700 flex-1">{req}</span>
                         </li>
                       ))}
@@ -2383,17 +2436,19 @@ function BeltManagement() {
                     setSelectedBelt(null);
                     handleEditBelt(selectedBelt);
                   }}
-                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                  className="flex-1 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center justify-center space-x-2"
+                  style={{ backgroundColor: '#006CB5', color: 'white' }}
                 >
-                  <FaEdit className="w-4 h-4" />
-                  <span>Edit Belt</span>
+                  <FaEdit className="w-4 h-4" style={{ color: 'white' }} />
+                  <span style={{ color: 'white' }}>Edit Belt</span>
                 </button>
                 <button 
                   onClick={() => {
                     setShowViewModal(false);
                     setSelectedBelt(null);
                   }}
-                  className="flex-1 bg-slate-200 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-300 transition-colors"
+                  className="flex-1 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#6b7280', color: 'white' }}
                 >
                   Close
                 </button>
@@ -2403,9 +2458,261 @@ function BeltManagement() {
         </div>
       )}
 
+      {/* View Test Details Modal */}
+      {showViewTestModal && selectedTest && (
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border-2 border-black">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
+              <div className="flex justify-between items-center">
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Test Details</h2>
+                <button 
+                  onClick={() => {
+                    setShowViewTestModal(false);
+                    setSelectedTest(null);
+                  }}
+                  className="hover:opacity-80 text-2xl"
+                  style={{ color: 'white' }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-1">Student Name</p>
+                  <p className="text-lg font-semibold text-slate-900">{selectedTest.studentName}</p>
+                </div>
+                
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-1">Current Belt</p>
+                  <span className="inline-block px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm font-medium">
+                    {selectedTest.currentBelt}
+                  </span>
+                </div>
+                
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-1">Testing For</p>
+                  <span className="inline-block px-3 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: '#e3f2fd', color: '#006CB5' }}>
+                    {selectedTest.testingFor}
+                  </span>
+                </div>
+                
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-1">Test Date</p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    {new Date(selectedTest.testDate).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              {selectedTest.readiness && (
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-2">Readiness Level</p>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-1 bg-slate-200 rounded-full h-3">
+                      <div 
+                        className={`h-3 rounded-full ${
+                          selectedTest.readiness >= 90 ? 'bg-green-500' : 
+                          selectedTest.readiness >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${selectedTest.readiness}%` }}
+                      ></div>
+                    </div>
+                    <span className={`text-lg font-bold ${
+                      selectedTest.readiness >= 90 ? 'text-green-600' : 
+                      selectedTest.readiness >= 80 ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {selectedTest.readiness}%
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex space-x-3 pt-4 border-t border-slate-200">
+                <button 
+                  onClick={() => {
+                    const testToEdit = selectedTest;
+                    setShowViewTestModal(false);
+                    setSelectedTest(null);
+                    // Use setTimeout to ensure view modal closes before edit opens
+                    setTimeout(() => {
+                      handleEditTest(testToEdit);
+                    }, 100);
+                  }}
+                  className="flex-1 py-2 rounded-lg font-semibold hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#006CB5', color: 'white' }}
+                >
+                  Edit Test
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowViewTestModal(false);
+                    setSelectedTest(null);
+                  }}
+                  className="flex-1 py-2 rounded-lg font-semibold hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#6b7280', color: 'white' }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Test Modal */}
+      {showEditTestModal && selectedTest && (
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border-2 border-black">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
+              <div className="flex justify-between items-center">
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Edit Belt Test</h2>
+                <button 
+                  onClick={() => {
+                    setShowEditTestModal(false);
+                    setSelectedTest(null);
+                    resetTestForm();
+                  }}
+                  className="hover:opacity-80 text-2xl"
+                  style={{ color: 'white' }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <form onSubmit={handleUpdateTest} className="space-y-4">
+                <div className="autocomplete-container relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={testForm.studentName}
+                    onChange={(e) => handleTestFormChange('studentName', e.target.value)}
+                    placeholder="Type student name..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                    autoComplete="off"
+                  />
+                  
+                  {showTestSuggestions && testStudentSuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      {testStudentSuggestions.map((student) => (
+                        <div
+                          key={student._id}
+                          onClick={() => selectTestStudent(student)}
+                          className="px-4 py-2 cursor-pointer"
+                          style={{ backgroundColor: '#f0f9ff' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f9ff'}
+                        >
+                          <p className="font-medium text-gray-900">{student.fullName}</p>
+                          <p className="text-sm text-gray-500">{student.currentBelt || 'No belt assigned'}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Current Belt <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={testForm.currentBelt}
+                      onChange={(e) => handleTestFormChange('currentBelt', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    >
+                      <option value="">Select Current Belt</option>
+                      {beltLevels.map((belt) => (
+                        <option key={belt._id} value={belt.name}>
+                          {belt.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Testing For <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={testForm.testingFor}
+                      onChange={(e) => handleTestFormChange('testingFor', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    >
+                      <option value="">Select Target Belt</option>
+                      {beltLevels.map((belt) => (
+                        <option key={belt._id} value={belt.name}>
+                          {belt.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Test Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={testForm.testDate}
+                      onChange={(e) => handleTestFormChange('testDate', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Readiness Level (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={testForm.readiness}
+                      onChange={(e) => handleTestFormChange('readiness', e.target.value)}
+                      placeholder="e.g., 85"
+                      min="0"
+                      max="100"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setShowEditTestModal(false);
+                      setSelectedTest(null);
+                      resetTestForm();
+                    }}
+                    className="flex-1 py-2 rounded-md font-medium hover:opacity-90 transition-colors"
+                    style={{ backgroundColor: '#6b7280', color: 'white' }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
+                  >
+                    Update Test
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border-2 border-black">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -2449,8 +2756,8 @@ function BeltManagement() {
                 />
               </div>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <div className="text-sm text-blue-800">
+              <div className="rounded-xl p-4" style={{ backgroundColor: '#e3f2fd', border: '1px solid #006CB5' }}>
+                <div className="text-sm" style={{ color: '#006CB5' }}>
                   <strong>Demo Credentials:</strong><br/>
                   Email: admin@combatwarrior.com<br/>
                   Password: admin123

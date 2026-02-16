@@ -27,7 +27,7 @@ function StudentManagement() {
   const [formAge, setFormAge] = useState(null);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Helper function to calculate age
   const calculateAge = (dateOfBirth) => {
@@ -440,58 +440,58 @@ function StudentManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+        <div className="bg-white rounded-lg shadow p-6" style={{ borderLeft: '4px solid #006CB5' }}>
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">👥</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>👥</span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total Students</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Total Students</p>
+              <p className="text-2xl font-bold" style={{ color: '#000000' }}>{stats.total}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-lg shadow p-6" style={{ borderLeft: '4px solid #006CB5' }}>
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">✅</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>✅</span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Active Students</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Active Students</p>
+              <p className="text-2xl font-bold" style={{ color: '#000000' }}>{stats.active}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+        <div className="bg-white rounded-lg shadow p-6" style={{ borderLeft: '4px solid #006CB5' }}>
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">🥋</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>🥋</span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Black Belts</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.blackBelts}</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Black Belts</p>
+              <p className="text-2xl font-bold" style={{ color: '#000000' }}>{stats.blackBelts}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+        <div className="bg-white rounded-lg shadow p-6" style={{ borderLeft: '4px solid #006CB5' }}>
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">📅</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>📅</span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">New This Month</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.newThisMonth}</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>New This Month</p>
+              <p className="text-2xl font-bold" style={{ color: '#000000' }}>{stats.newThisMonth}</p>
             </div>
           </div>
         </div>
@@ -524,7 +524,8 @@ function StudentManagement() {
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+              className="px-6 py-2 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
+              style={{ backgroundColor: '#006CB5' }}
             >
               Add Student
             </button>
@@ -600,27 +601,27 @@ function StudentManagement() {
                           setSelectedStudent(student);
                           setShowViewModal(true);
                         }}
-                        className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                        className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                         title="View"
                       >
-                        <FaEye className="w-4 h-4" />
+                        <FaEye className="w-4 h-4" style={{ color: '#006CB5' }} />
                       </button>
                       <button 
                         onClick={() => {
                           setSelectedStudent(student);
                           setShowEditModal(true);
                         }}
-                        className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                        className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                         title="Edit"
                       >
-                        <FaEdit className="w-4 h-4" />
+                        <FaEdit className="w-4 h-4" style={{ color: '#006CB5' }} />
                       </button>
                       <button 
                         onClick={() => deleteStudentHandler(student.id)}
-                        className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                        className="p-2 bg-white rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center"
                         title="Delete"
                       >
-                        <FaTrash className="w-4 h-4" />
+                        <FaTrash className="w-4 h-4" style={{ color: '#dc2626' }} />
                       </button>
                     </div>
                   </td>
@@ -643,7 +644,8 @@ function StudentManagement() {
           {stats.total === 0 && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+              className="px-6 py-2 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
+              style={{ backgroundColor: '#006CB5' }}
             >
               Add First Student
             </button>
@@ -717,7 +719,7 @@ function StudentManagement() {
 
       {/* Add Student Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Add New Student</h2>
@@ -862,13 +864,15 @@ function StudentManagement() {
                 <button 
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-6 py-3 bg-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-400 transition-colors"
+                  className="px-6 py-3 rounded-xl font-semibold transition-colors"
+                  style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-colors"
+                  className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#006CB5' }}
                 >
                   Add Student
                 </button>
@@ -880,7 +884,7 @@ function StudentManagement() {
 
       {/* Edit Student Modal */}
       {showEditModal && selectedStudent && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Edit Student</h2>
@@ -998,13 +1002,15 @@ function StudentManagement() {
                     setShowEditModal(false);
                     setSelectedStudent(null);
                   }}
-                  className="px-6 py-3 bg-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-400 transition-colors"
+                  className="px-6 py-3 rounded-xl font-semibold transition-colors"
+                  style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-colors"
+                  className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#006CB5' }}
                 >
                   Update Student
                 </button>
@@ -1016,7 +1022,7 @@ function StudentManagement() {
 
       {/* View Student Modal */}
       {showViewModal && selectedStudent && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Student Details</h2>
@@ -1119,7 +1125,8 @@ function StudentManagement() {
                   setSelectedStudent(selectedStudent);
                   setShowEditModal(true);
                 }}
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"
+                style={{ backgroundColor: '#006CB5' }}
               >
                 Edit Student
               </button>
@@ -1139,7 +1146,7 @@ function StudentManagement() {
 
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-md border-2 border-black">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Admin Login</h2>

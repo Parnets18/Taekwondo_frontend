@@ -101,11 +101,11 @@ function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'white' }}>
       {/* Fixed Sidebar */}
-      <div className="w-80 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col h-screen flex-shrink-0 fixed left-0 top-0 z-10">
+      <div className="w-80 bg-white text-black flex flex-col h-screen flex-shrink-0 fixed left-0 top-0 z-10 shadow-lg" style={{ borderRight: '1px solid #e5e7eb' }}>
         {/* Header */}
-        <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+        <div className="p-6 border-b border-gray-200 bg-white">
           <div className="flex items-center space-x-4">
             <img 
               src="/WhatsApp Image 2025-12-30 at 5.45.49 PM.jpeg" 
@@ -113,16 +113,13 @@ function AdminLayout() {
               className="w-12 h-12 rounded-xl object-cover shadow-lg"
             />
             <div>
-              <h2 className="text-xl font-bold text-white">Admin Panel</h2>
-              
+              <h2 className="text-xl font-bold" style={{ color: '#000000' }}>Admin Panel</h2>
             </div>
           </div>
         </div>
 
-       
-
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {menuGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="mb-6">
               {group.items.map((item) => {
@@ -133,11 +130,12 @@ function AdminLayout() {
                     to={item.path}
                     className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 group mb-2 ${
                       location.pathname === item.path
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
-                        : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                        ? 'text-white shadow-lg'
+                        : 'hover:bg-gray-100'
                     }`}
+                    style={location.pathname === item.path ? { backgroundColor: '#006CB5', color: 'white' } : { color: '#000000' }}
                   >
-                    <IconComponent className="w-5 h-5 mr-3 flex-shrink-0" />
+                    <IconComponent className="w-5 h-5 mr-3 flex-shrink-0" style={location.pathname === item.path ? { color: 'white' } : { color: '#006CB5' }} />
                     <div className="flex-1 text-left">
                       <div className="font-semibold text-sm leading-tight">{item.name}</div>
                     </div>
@@ -148,13 +146,12 @@ function AdminLayout() {
           ))}
         </nav>
 
-        
-
         {/* Logout */}
-        <div className="p-4 border-t border-slate-700 bg-gradient-to-r from-slate-800 to-slate-900">
+        <div className="p-4 border-t border-gray-200 bg-white">
           <button
             onClick={handleLogout}
-            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center font-semibold shadow-lg"
+            className="w-full text-white py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center font-semibold shadow-lg hover:opacity-90"
+            style={{ backgroundColor: '#dc2626' }}
           >
             <FaSignOutAlt className="w-5 h-5 mr-2" />
             <span>Logout</span>
@@ -163,7 +160,7 @@ function AdminLayout() {
       </div>
 
       {/* Main Content */}
-      <div className="ml-80 min-h-screen">
+      <div className="ml-80 min-h-screen" style={{ backgroundColor: 'white' }}>
         <div className="p-8">
           <Outlet />
         </div>

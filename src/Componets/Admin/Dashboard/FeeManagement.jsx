@@ -46,7 +46,7 @@ function FeeManagement() {
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Check for existing token on component mount
   useEffect(() => {
@@ -659,7 +659,7 @@ function FeeManagement() {
 
       {/* Payment Modal */}
       {showPaymentModal && selectedRecord && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Record Payment</h2>
@@ -859,13 +859,15 @@ function FeeManagement() {
                 <button 
                   type="button"
                   onClick={() => setShowPaymentModal(false)}
-                  className="flex-1 bg-slate-300 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-400 transition-colors"
+                  className="flex-1 py-3 rounded-xl font-semibold transition-colors border-2"
+                  style={{ backgroundColor: '#006CB5', color: 'white', borderColor: '#006CB5' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg"
+                  className="flex-1 text-white py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg border-2"
+                  style={{ backgroundColor: '#006CB5', borderColor: '#006CB5' }}
                 >
                   Record Payment
                 </button>
@@ -877,7 +879,7 @@ function FeeManagement() {
 
       {/* Add Fee Modal */}
       {showAddFeeModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Add Fee Record</h2>
@@ -1108,13 +1110,15 @@ function FeeManagement() {
                 <button 
                   type="button"
                   onClick={() => setShowAddFeeModal(false)}
-                  className="flex-1 bg-slate-300 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-400 transition-colors"
+                  className="flex-1 py-3 rounded-xl font-semibold transition-colors border-2"
+                  style={{ backgroundColor: '#006CB5', color: 'white', borderColor: '#006CB5' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg"
+                  className="flex-1 text-white py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg border-2"
+                  style={{ backgroundColor: '#006CB5', borderColor: '#006CB5' }}
                 >
                   Add Fee Record
                 </button>
@@ -1126,7 +1130,7 @@ function FeeManagement() {
 
       {/* View Details Modal */}
       {showPreviewModal && selectedRecord && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Fee Record Details</h2>
@@ -1368,7 +1372,8 @@ function FeeManagement() {
             <div className="flex space-x-4 mt-8">
               <button 
                 onClick={() => setShowPreviewModal(false)}
-                className="flex-1 bg-slate-300 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-400 transition-colors"
+                className="flex-1 py-3 rounded-xl font-semibold transition-colors border-2"
+                style={{ backgroundColor: '#006CB5', color: 'white', borderColor: '#006CB5' }}
               >
                 Close
               </button>
@@ -1384,13 +1389,12 @@ function FeeManagement() {
                       handleRecordPayment(selectedRecord);
                     }}
                     disabled={isFullyPaid}
-                    className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg ${
+                    className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg border-2 ${
                       isFullyPaid
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : selectedRecord.status === 'Paid'
-                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700'
-                        : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300'
+                        : ''
                     }`}
+                    style={!isFullyPaid ? { backgroundColor: '#006CB5', color: 'white', borderColor: '#006CB5' } : {}}
                   >
                     {isFullyPaid ? 'Payment Complete' : selectedRecord.status === 'Paid' ? 'Add Additional Payment' : 'Record Payment'}
                   </button>
@@ -1403,7 +1407,7 @@ function FeeManagement() {
 
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border-2 border-black">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -61,7 +61,7 @@ function Contact() {
 
     try {
       // Send to backend API
-      const response = await fetch('https://taekwon-frontend.onrender.com/api/contact', {
+      const response = await fetch('http://localhost:5000/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -210,7 +210,7 @@ function Contact() {
         </div>
       </section>
 
-      <div className="py-16 bg-slate-50">
+      <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
             {/* Contact Information - Takes 2 columns */}
@@ -223,12 +223,12 @@ function Contact() {
                   <div className="group">
                     <div className="flex items-start space-x-4 p-4 rounded-2xl bg-amber-50 border border-amber-100 hover:bg-amber-100 transition-all duration-300 hover:scale-105 hover:shadow-xl">
                       <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:rotate-6 transition-transform duration-300">
-                        <FaMapMarkerAlt className="w-7 h-7 text-white" />
+                        <FaMapMarkerAlt style={{ fontSize: '1.75rem', color: '#006CB5' }} />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-base font-bold text-slate-900 mb-2 flex items-center">
                           Academy Location
-                          <span className="ml-2 text-xs bg-amber-500 text-white px-2 py-1 rounded-full">Visit Us</span>
+                          
                         </h3>
                         <p className="text-sm text-gray-700 leading-relaxed">
                           #368/A, 3rd Main, 4th Phase, 707 CHS, Near Shristi College, Yelahanka New Town, Bengaluru -560064
@@ -240,12 +240,12 @@ function Contact() {
                   <div className="group">
                     <div className="flex items-start space-x-4 p-4 rounded-2xl bg-green-50 border border-green-100 hover:bg-green-100 transition-all duration-300 hover:scale-105 hover:shadow-xl">
                       <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:rotate-6 transition-transform duration-300">
-                        <FaPhone className="w-7 h-7 text-white" />
+                        <FaPhone style={{ fontSize: '1.75rem', color: '#006CB5' }} />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-base font-bold text-slate-900 mb-2 flex items-center">
                           Call Us Now
-                          <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">Available</span>
+                          
                         </h3>
                         <a href="tel:+917259113288" className="text-sm text-gray-700 hover:text-green-600 transition-colors block font-semibold">+91 7259113288</a>
                         <a href="tel:+919663333247" className="text-sm text-gray-700 hover:text-green-600 transition-colors block font-semibold">+91 9663333247</a>
@@ -256,12 +256,12 @@ function Contact() {
                   <div className="group">
                     <div className="flex items-start space-x-4 p-4 rounded-2xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-all duration-300 hover:scale-105 hover:shadow-xl">
                       <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:rotate-6 transition-transform duration-300">
-                        <FaEnvelope className="w-7 h-7 text-white" />
+                        <FaEnvelope style={{ fontSize: '1.75rem', color: '#006CB5' }} />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center">
                           Email Us
-                          <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">24/7</span>
+                         
                         </h3>
                         <a href="mailto:yesh18390@gmail.com" className="text-sm text-gray-700 hover:text-blue-600 transition-colors break-all">yesh18390@gmail.com</a>
                       </div>
@@ -273,34 +273,35 @@ function Contact() {
 
             {/* Contact Form - Takes 3 columns */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white">
-                <h2 className="text-2xl font-bold mb-2 text-white">Send us a Message</h2>
-                <p className="text-base text-slate-300">We'll get back to you soon</p>
-              </div>
+              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+                {/* Header Section */}
+                <div className="bg-white border-b-2 border-gray-100 p-8">
+                  <h2 className="text-3xl font-bold mb-2" style={{ color: '#006CB5' }}>Send us a Message</h2>
+                  <p className="text-gray-500 text-base">We'll get back to you soon</p>
+                </div>
               
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleSubmit} className="p-8 space-y-6">
                 {/* Status Message */}
                 {submitStatus && (
-                  <div className={`p-4 rounded-lg mb-4 ${
+                  <div className={`p-4 rounded-xl mb-4 ${
                     submitStatus.type === 'success' 
-                      ? 'bg-green-50 border border-green-200 text-green-700' 
-                      : 'bg-red-50 border border-red-200 text-red-700'
+                      ? 'bg-green-50 border-2 border-green-200 text-green-700' 
+                      : 'bg-red-50 border-2 border-red-200 text-red-700'
                   }`}>
                     <div className="flex items-center">
                       {submitStatus.type === 'success' ? (
-                        <FaCheckCircle className="mr-2" />
+                        <FaCheckCircle className="mr-2 text-xl" />
                       ) : (
-                        <FaQuestionCircle className="mr-2" />
+                        <FaQuestionCircle className="mr-2 text-xl" />
                       )}
-                      <span className="text-sm">{submitStatus.message}</span>
+                      <span className="text-sm font-medium">{submitStatus.message}</span>
                     </div>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                    <label className="block text-sm font-bold mb-2 text-black">
                       Your Name *
                     </label>
                     <input
@@ -309,13 +310,14 @@ function Contact() {
                       value={formData.name}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
                       placeholder="Enter your name"
+                      style={{ borderColor: formData.name ? '#006CB5' : '' }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                    <label className="block text-sm font-bold mb-2 text-black">
                       Phone Number
                     </label>
                     <input
@@ -323,14 +325,15 @@ function Contact() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
                       placeholder="+91 XXXXX XXXXX"
+                      style={{ borderColor: formData.phone ? '#006CB5' : '' }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                  <label className="block text-sm font-bold mb-2 text-black">
                     Email Address *
                   </label>
                   <input
@@ -339,13 +342,14 @@ function Contact() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
                     placeholder="your.email@example.com"
+                    style={{ borderColor: formData.email ? '#006CB5' : '' }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                  <label className="block text-sm font-bold mb-2 text-black">
                     Inquiry Type *
                   </label>
                   <select 
@@ -353,7 +357,8 @@ function Contact() {
                     value={formData.inquiryType}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-300 hover:border-gray-300 bg-white"
+                    style={{ borderColor: formData.inquiryType ? '#006CB5' : '' }}
                   >
                     <option value="">Select inquiry type</option>
                     <option value="admission">Admission Information</option>
@@ -364,7 +369,7 @@ function Contact() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                  <label className="block text-sm font-bold mb-2 text-black">
                     Message * (minimum 10 characters)
                   </label>
                   <textarea
@@ -372,38 +377,44 @@ function Contact() {
                     value={formData.message}
                     onChange={handleInputChange}
                     required
-                    rows="4"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 resize-none"
+                    rows="5"
+                    className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all duration-300 hover:border-gray-300 resize-none"
                     placeholder="Tell us about your interest in Taekwon-do... (minimum 10 characters)"
+                    style={{ borderColor: formData.message.length >= 10 ? '#006CB5' : '' }}
                   ></textarea>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {formData.message.length}/2000 characters {formData.message.length < 10 && formData.message.length > 0 && '(minimum 10 required)'}
+                  <div className="text-sm text-gray-500 mt-2 flex justify-between items-center">
+                    <span>{formData.message.length}/2000 characters</span>
+                    {formData.message.length < 10 && formData.message.length > 0 && (
+                      <span className="text-red-500 font-medium">(minimum 10 required)</span>
+                    )}
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full py-4 rounded-lg font-bold text-base transition-all duration-300 shadow-lg touch-manipulation cursor-pointer relative z-10 active:scale-95 ${
+                  className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
                     isSubmitting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700'
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
+                      : 'text-white hover:opacity-90'
                   }`}
                   style={{
-                    minHeight: '52px',
+                    backgroundColor: isSubmitting ? '' : '#006CB5',
+                    minHeight: '56px',
                     touchAction: 'manipulation',
-                    WebkitTapHighlightColor: 'transparent'
+                    WebkitTapHighlightColor: 'transparent',
+                    color: 'white'
                   }}
                 >
-                  <span className="flex items-center justify-center">
+                  <span className="flex items-center justify-center" style={{ color: 'white' }}>
                     {isSubmitting ? (
                       <>
-                        <FaSpinner className="mr-2 animate-spin" />
-                        Sending...
+                        <FaSpinner className="mr-3 animate-spin text-xl text-white" />
+                        Sending Message...
                       </>
                     ) : (
                       <>
-                        <FaPaperPlane className="mr-2" />
+                        <FaPaperPlane className="mr-3 text-lg text-white" />
                         Send Message
                       </>
                     )}
@@ -417,13 +428,13 @@ function Contact() {
       </div>
 
       {/* Google Map Section */}
-      <div className="py-16 bg-slate-50">
+      <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-center">
             <div className="w-full max-w-4xl">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-black mb-6">
-                  Find <span className="text-red-600">Our</span> <span className="text-yellow-600">Location</span>
+                <h2 className="text-3xl font-bold mb-6" style={{ color: '#006CB5' }}>
+                  Find <span style={{ color: '#006CB5' }}>Our</span> <span style={{ color: '#006CB5' }}>Location</span>
                 </h2>
                 <p className="text-base text-gray-700">Visit our dojang and experience authentic Taekwon-Do training</p>
               </div>
@@ -449,18 +460,18 @@ function Contact() {
       </div>
 
       {/* FAQ Section */}
-      <div className="py-16 bg-slate-50">
+      <div className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="bg-white rounded-3xl p-12 shadow-2xl">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-black mb-6">
-                Frequently Asked <span className="text-red-600">Questions</span>
+              <h2 className="text-3xl font-bold mb-6" style={{ color: '#006CB5' }}>
+                Frequently Asked <span style={{ color: '#006CB5' }}>Questions</span>
               </h2>
               <p className="text-base text-gray-700">Quick answers to common questions about our academy</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-slate-50 p-6 rounded-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-500 group"
+              <div className="bg-gray-50 p-6 rounded-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-500 group"
                    style={{
                      transform: 'rotateX(5deg)',
                      transformStyle: 'preserve-3d'
@@ -472,7 +483,7 @@ function Contact() {
                 <p className="text-base text-gray-700">We welcome students from 6 years old to adults. Our programs are designed for all age groups and fitness levels.</p>
               </div>
               
-              <div className="bg-slate-50 p-6 rounded-2xl transform hover:scale-105 hover:-rotate-1 transition-all duration-500 group"
+              <div className="bg-gray-50 p-6 rounded-2xl transform hover:scale-105 hover:-rotate-1 transition-all duration-500 group"
                    style={{
                      transform: 'rotateX(-5deg)',
                      transformStyle: 'preserve-3d'
@@ -484,7 +495,7 @@ function Contact() {
                 <p className="text-base text-gray-700">No prior experience is required. Our Foundation Level program is perfect for complete beginners.</p>
               </div>
               
-              <div className="bg-slate-50 p-6 rounded-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-500 group"
+              <div className="bg-gray-50 p-6 rounded-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-500 group"
                    style={{
                      transform: 'rotateX(5deg)',
                      transformStyle: 'preserve-3d'
@@ -496,7 +507,7 @@ function Contact() {
                 <p className="text-base text-gray-700">Just comfortable workout clothes and a water bottle. We provide all necessary equipment for beginners.</p>
               </div>
               
-              <div className="bg-slate-50 p-6 rounded-2xl transform hover:scale-105 hover:-rotate-1 transition-all duration-500 group"
+              <div className="bg-gray-50 p-6 rounded-2xl transform hover:scale-105 hover:-rotate-1 transition-all duration-500 group"
                    style={{
                      transform: 'rotateX(-5deg)',
                      transformStyle: 'preserve-3d'

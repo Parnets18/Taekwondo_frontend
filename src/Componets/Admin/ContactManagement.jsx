@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { FaEye, FaTrash } from 'react-icons/fa';
 
 const ContactManagement = () => {
   const [contacts, setContacts] = useState([]);
@@ -33,7 +34,7 @@ const ContactManagement = () => {
   const handleDeleteContact = async (id) => {
     if (window.confirm('Are you sure you want to permanently delete this contact? This action cannot be undone and will remove the contact from the database forever.')) {
       try {
-        const response = await fetch(`https://taekwon-frontend.onrender.com/api/contact/admin/${id}`, {
+        const response = await fetch(`http://localhost:5000/api/contact/admin/${id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -58,7 +59,7 @@ const ContactManagement = () => {
   const fetchContactsFromDatabase = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://taekwon-frontend.onrender.com/api/contact/admin', {
+      const response = await fetch('http://localhost:5000/api/contact/admin', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -126,8 +127,8 @@ const ContactManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: '#e3f2fd' }}>
+              <svg className="w-6 h-6" style={{ color: '#006CB5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3" />
               </svg>
             </div>
@@ -140,8 +141,8 @@ const ContactManagement = () => {
 
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: '#e3f2fd' }}>
+              <svg className="w-6 h-6" style={{ color: '#006CB5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -252,15 +253,17 @@ const ContactManagement = () => {
                             setSelectedContact(contact);
                             setShowModal(true);
                           }}
-                          className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
+                          title="View"
                         >
-                          View
+                          <FaEye className="w-4 h-4" style={{ color: '#006CB5' }} />
                         </button>
                         <button
                           onClick={() => handleDeleteContact(contact._id)}
-                          className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
+                          title="Delete"
                         >
-                          Delete
+                          <FaTrash className="w-4 h-4" style={{ color: '#dc2626' }} />
                         </button>
                       </div>
                     </td>
@@ -274,7 +277,7 @@ const ContactManagement = () => {
 
       {/* Contact Detail Modal - Read Only */}
       {showModal && selectedContact && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
@@ -335,7 +338,8 @@ const ContactManagement = () => {
                       setShowModal(false);
                       setSelectedContact(null);
                     }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    style={{ color: '#374151', backgroundColor: '#f3f4f6', border: '1px solid #d1d5db' }}
                   >
                     Close
                   </button>
@@ -345,7 +349,8 @@ const ContactManagement = () => {
                       setShowModal(false);
                       setSelectedContact(null);
                     }}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    style={{ backgroundColor: '#dc2626' }}
                   >
                     Delete Contact
                   </button>

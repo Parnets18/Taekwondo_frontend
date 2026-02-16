@@ -1,6 +1,34 @@
-import { FaCheckCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaHandshake, FaShieldAlt, FaMountain, FaBalanceScale, FaFistRaised } from 'react-icons/fa';
 
 function ClubRules() {
+  const tenets = [
+    {
+      title: "Courtesy (Ye Ui)",
+      description: "To be polite and respectful to others. Courtesy is the foundation of human relationships and helps create a harmonious society.",
+      icon: FaHandshake
+    },
+    {
+      title: "Integrity (Yom Chi)",
+      description: "To be honest and have strong moral principles. A person of integrity knows the difference between right and wrong and always chooses the right path.",
+      icon: FaShieldAlt
+    },
+    {
+      title: "Perseverance (In Nae)",
+      description: "To continue in a course of action despite difficulty or opposition. Success comes to those who persist and never give up.",
+      icon: FaMountain
+    },
+    {
+      title: "Self-Control (Guk Gi)",
+      description: "To have control over one's emotions, desires, and actions. Self-control is essential for maintaining discipline and achieving goals.",
+      icon: FaBalanceScale
+    },
+    {
+      title: "Indomitable Spirit (Baekjul Boolgool)",
+      description: "To have a spirit that cannot be broken or conquered. Face challenges with courage and determination, never surrendering to adversity.",
+      icon: FaFistRaised
+    }
+  ];
+
   const rules = [
     "Interaction of your ward in classes increases the tenets of Taekwon-Do i.e., Courtesy, Integrity, Perseverance, self-control, Indomitable Spirit towards society.",
     "Instructor shall train the ward both physically and mentally.",

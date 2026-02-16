@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { scrollToTop } from '../utils/useScrollToTop';
+import { FaMapMarkerAlt, FaPhone, FaFacebookF, FaInstagram } from 'react-icons/fa';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,103 +14,124 @@ function Navbar() {
     { name: 'Admission', href: '/admission' },
     { name: 'Belt Exam', href: '/belt-exam' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Verify Certificate', href: '/verify-certificate' },
   ];
 
   return (
-    <nav className="bg-white shadow-xl border-b-4 border-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 sticky top-0 z-50 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-18">
-          {/* Logo and Brand */}
-          <div className="flex items-center">
-            <Link 
-              to="/" 
-              className="flex items-center space-x-3 group"
-              onClick={scrollToTop}
-            >
-              <div className="relative">
-                <img 
-                  src="/combat-warrior-logo.png" 
-                  alt="Combat Warrior Taekwon-Do Association" 
-                  className="h-16 w-16 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 filter group-hover:brightness-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-red-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-              {/* <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 via-yellow-600 to-red-600 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
-                  Combat Warrior
-                </h1>
-                <p className="text-xs text-gray-600 font-semibold tracking-wide">ITF Taekwon-Do</p>
-              </div> */}
-            </Link>
+    <>
+      {/* Top Bar */}
+      <div className="bg-[#006CB5] text-white py-3 px-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-sm">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center gap-2">
+              <FaMapMarkerAlt style={{ color: 'white', fontSize: '1rem' }} />
+              <span>Bangalore, Karnataka</span>
+            </div>
+            <div className="hidden sm:flex items-center gap-2">
+              <FaPhone style={{ color: 'white', fontSize: '0.875rem' }} />
+              <span>+91 7259113288</span>
+            </div>
+            <div className="hidden sm:flex items-center gap-2">
+              <FaPhone style={{ color: 'white', fontSize: '0.875rem' }} />
+              <span>+91 9663333247</span>
+            </div>
           </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
-            {navigation.map((item, index) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={scrollToTop}
-                className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 group ${
-                  location.pathname === item.href
-                    ? 'text-white bg-gradient-to-r from-red-600 to-yellow-500 shadow-lg'
-                    : 'text-gray-800 hover:text-white hover:bg-gradient-to-r hover:from-yellow-500 hover:to-red-600 hover:shadow-md'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <span className="relative z-10">{item.name}</span>
-                {location.pathname !== item.href && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                )}
-              </Link>
-            ))}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-800 hover:text-red-700 focus:outline-none focus:text-red-700 p-2 rounded-lg hover:bg-yellow-50 transition-all duration-200"
-            >
-              <svg className="h-6 w-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
+          <div className="flex items-center space-x-4">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+              <FaFacebookF style={{ color: '#006CB5', fontSize: '0.875rem' }} />
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+              <FaInstagram style={{ color: '#006CB5', fontSize: '0.875rem' }} />
+            </a>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden animate-fade-in-down">
-            <div className="px-2 pt-2 pb-3 space-y-2 bg-gradient-to-br from-yellow-50 via-white to-red-50 rounded-xl mt-2 border-2 border-gradient-to-r from-yellow-200 to-red-200 shadow-lg backdrop-blur-sm">
-              {navigation.map((item, index) => (
+      {/* Main Navbar */}
+      <nav className="bg-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-24">
+            {/* Left Logo */}
+            <Link to="/" onClick={scrollToTop} className="flex-shrink-0">
+              <img 
+                src="/combat-warrior-logo.png" 
+                alt="Combat Warrior Logo" 
+                className="h-20 w-20 object-contain"
+              />
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-10">
+              {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 transform hover:scale-105 ${
-                    location.pathname === item.href
-                      ? 'text-white bg-gradient-to-r from-red-600 to-yellow-500 shadow-md'
-                      : 'text-gray-800 hover:text-white hover:bg-gradient-to-r hover:from-yellow-500 hover:to-red-600'
-                  }`}
-                  onClick={() => {
-                    setIsOpen(false);
-                    scrollToTop();
-                  }}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={scrollToTop}
+                  className="text-lg font-semibold transition-colors duration-200"
+                  style={{ color: '#006CB5' }}
                 >
                   {item.name}
                 </Link>
               ))}
             </div>
+
+            {/* Right Logos */}
+            <div className="hidden md:flex items-center space-x-4">
+              <img 
+                src="/logo img 2.png" 
+                alt="ITF Logo" 
+                className="h-18 w-18 object-contain"
+              />
+              <img 
+                src="/logo img 3.png" 
+                alt="Organization Logo" 
+                className="h-18 w-18 object-contain"
+              />
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-gray-800 hover:text-[#006CB5] focus:outline-none p-2"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {isOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
           </div>
-        )}
-      </div>
-    </nav>
+
+          {/* Mobile Navigation */}
+          {isOpen && (
+            <div className="md:hidden pb-4">
+              <div className="space-y-2">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`block px-4 py-2 rounded-lg text-base font-semibold ${
+                      location.pathname === item.href
+                        ? 'text-white bg-[#006CB5]'
+                        : 'text-gray-800 hover:bg-gray-100'
+                    }`}
+                    onClick={() => {
+                      setIsOpen(false);
+                      scrollToTop();
+                    }}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }
 

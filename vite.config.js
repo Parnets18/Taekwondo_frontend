@@ -17,12 +17,12 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'https://taekwon-frontend.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       },
       '/uploads': {
-        target: 'https://taekwon-frontend.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       }

@@ -52,7 +52,7 @@ function EventManagement() {
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Check for existing token on component mount
   useEffect(() => {
@@ -678,18 +678,20 @@ function EventManagement() {
         <div className="flex gap-3">
           <button 
             onClick={handleSyncParticipantCounts}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="hover:opacity-90 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            style={{ backgroundColor: '#006CB5', color: 'white' }}
             title="Sync participant counts if they're out of sync"
           >
-            <FaCheckCircle className="w-4 h-4" />
-            <span>Sync Counts</span>
+            <FaCheckCircle className="w-4 h-4" style={{ color: 'white' }} />
+            <span style={{ color: 'white' }}>Sync Counts</span>
           </button>
           <button 
             onClick={() => setShowAddEventModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="hover:opacity-90 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            style={{ backgroundColor: '#006CB5', color: 'white' }}
           >
-            <FaPlus className="w-4 h-4" />
-            <span>Create Event</span>
+            <FaPlus className="w-4 h-4" style={{ color: 'white' }} />
+            <span style={{ color: 'white' }}>Create Event</span>
           </button>
         </div>
       </div>
@@ -742,29 +744,33 @@ function EventManagement() {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => handleViewParticipants(event)}
-                          className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
+                          title="View Participants"
+                          style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                         >
-                          <FaUsers className="w-3.5 h-3.5" />
-                          <span>Participants</span>
+                          <FaUsers className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleOpenRegisterModal(event)}
-                          className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
+                          title="Register Student"
+                          style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                         >
-                          <FaPlus className="w-3.5 h-3.5" />
-                          <span>Register</span>
+                          <FaPlus className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleEditEvent(event)}
-                          className="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Edit"
+                          style={{ color: '#006CB5', backgroundColor: 'transparent' }}
                         >
                           <FaEdit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteEvent(event._id)}
-                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Delete"
+                          style={{ color: '#dc2626' }}
                         >
                           <FaTrash className="w-4 h-4" />
                         </button>
@@ -800,17 +806,18 @@ function EventManagement() {
 
       {/* Add Event Modal */}
       {showAddEventModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border-2 border-black">
-            <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Create New Event</h2>
+                <h2 style={{ color: '#FFFFFF', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Create New Event</h2>
                 <button 
                   onClick={() => {
                     setShowAddEventModal(false);
                     resetEventForm();
                   }}
-                  className="text-white hover:text-gray-200 text-2xl"
+                  className="hover:opacity-80 text-2xl"
+                  style={{ color: 'white' }}
                 >
                   ✕
                 </button>
@@ -946,7 +953,8 @@ function EventManagement() {
                 <div className="flex gap-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg hover:opacity-90 font-semibold transition"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Create Event
                   </button>
@@ -956,7 +964,8 @@ function EventManagement() {
                       setShowAddEventModal(false);
                       resetEventForm();
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg hover:opacity-90 font-semibold transition"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Cancel
                   </button>
@@ -969,18 +978,19 @@ function EventManagement() {
 
       {/* Edit Event Modal */}
       {showEditEventModal && selectedEvent && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border-2 border-black">
-            <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Edit Event</h2>
+                <h2 style={{ color: '#FFFFFF', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Edit Event</h2>
                 <button 
                   onClick={() => {
                     setShowEditEventModal(false);
                     setSelectedEvent(null);
                     resetEventForm();
                   }}
-                  className="text-white hover:text-gray-200 text-2xl"
+                  className="hover:opacity-80 text-2xl"
+                  style={{ color: 'white' }}
                 >
                   ✕
                 </button>
@@ -1112,7 +1122,8 @@ function EventManagement() {
                 <div className="flex gap-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 font-semibold transition"
+                    className="flex-1 text-white py-2 px-4 rounded-lg hover:opacity-90 font-semibold transition"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Update Event
                   </button>
@@ -1123,7 +1134,8 @@ function EventManagement() {
                       setSelectedEvent(null);
                       resetEventForm();
                     }}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg hover:opacity-90 font-semibold transition"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Cancel
                   </button>
@@ -1136,11 +1148,11 @@ function EventManagement() {
 
       {/* Register Student Modal */}
       {showRegisterStudentModal && selectedEvent && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border-2 border-black">
-            <div className="bg-green-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Register Student</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Register Student</h2>
                 <button 
                   onClick={() => {
                     setShowRegisterStudentModal(false);
@@ -1218,7 +1230,8 @@ function EventManagement() {
                 <div className="flex gap-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg font-semibold transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Register Student
                   </button>
@@ -1242,11 +1255,11 @@ function EventManagement() {
 
       {/* Edit Participant Modal */}
       {showEditParticipantModal && selectedParticipant && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border-2 border-black">
-            <div className="bg-amber-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Edit Participant</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Edit Participant</h2>
                 <button 
                   onClick={() => {
                     setShowEditParticipantModal(false);
@@ -1296,7 +1309,8 @@ function EventManagement() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 font-semibold transition"
+                    className="flex-1 py-2 px-4 rounded-lg font-semibold transition hover:opacity-90"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
                     Update Participant
                   </button>
@@ -1320,11 +1334,11 @@ function EventManagement() {
 
       {/* View Participants Modal */}
       {showViewParticipantsModal && selectedEvent && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl border-2 border-black">
-            <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
+            <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Event Participants</h2>
+                <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Event Participants</h2>
                 <button 
                   onClick={async () => {
                     setShowViewParticipantsModal(false);

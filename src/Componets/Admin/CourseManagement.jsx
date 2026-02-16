@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 
 function CourseManagement() {
   const [courses, setCourses] = useState([]);
@@ -23,7 +24,7 @@ function CourseManagement() {
   });
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Check for existing token on component mount
   useEffect(() => {
@@ -298,8 +299,8 @@ function CourseManagement() {
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">📚</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>📚</span>
               </div>
             </div>
             <div className="ml-4">
@@ -312,8 +313,8 @@ function CourseManagement() {
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">✅</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>✅</span>
               </div>
             </div>
             <div className="ml-4">
@@ -340,8 +341,8 @@ function CourseManagement() {
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">💰</span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
+                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>💰</span>
               </div>
             </div>
             <div className="ml-4">
@@ -379,7 +380,8 @@ function CourseManagement() {
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+              className="px-6 py-2 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
+              style={{ backgroundColor: '#006CB5' }}
             >
               Add Course
             </button>
@@ -443,15 +445,16 @@ function CourseManagement() {
                       <div className="text-sm font-bold text-red-600">₹{course.price}/month</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <button 
                           onClick={() => {
                             setSelectedCourse(course);
                             setShowViewModal(true);
                           }}
-                          className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                          title="View"
                         >
-                          View
+                          <FaEye style={{ color: '#006CB5' }} size={18} />
                         </button>
                         <button 
                           onClick={() => {
@@ -468,9 +471,10 @@ function CourseManagement() {
                             });
                             setShowEditModal(true);
                           }}
-                          className="px-3 py-1.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                          title="Edit"
                         >
-                          Edit
+                          <FaEdit style={{ color: '#006CB5' }} size={18} />
                         </button>
                         <button 
                           onClick={() => {
@@ -479,9 +483,10 @@ function CourseManagement() {
                               alert('Delete functionality not implemented yet');
                             }
                           }}
-                          className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                          title="Delete"
                         >
-                          Delete
+                          <FaTrash style={{ color: '#dc2626' }} size={18} />
                         </button>
                       </div>
                     </td>
@@ -495,7 +500,7 @@ function CourseManagement() {
 
       {/* Add Course Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative top-10 mx-auto p-6 border-2 border-black w-full max-w-4xl shadow-lg rounded-lg bg-white">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Add New Course</h2>
@@ -660,7 +665,8 @@ function CourseManagement() {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 bg-red-600 text-white py-2 rounded-md font-medium hover:bg-red-700 transition-colors"
+                  className="flex-1 text-white py-2 rounded-md font-medium hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#006CB5' }}
                 >
                   Add Course
                 </button>
@@ -672,7 +678,7 @@ function CourseManagement() {
 
       {/* Edit Course Modal */}
       {showEditModal && selectedCourse && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative top-10 mx-auto p-6 border-2 border-black w-full max-w-4xl shadow-lg rounded-lg bg-white">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Edit Course</h2>
@@ -837,7 +843,8 @@ function CourseManagement() {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 bg-red-600 text-white py-2 rounded-md font-medium hover:bg-red-700 transition-colors"
+                  className="flex-1 text-white py-2 rounded-md font-medium hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#006CB5' }}
                 >
                   Update Course
                 </button>
@@ -849,7 +856,7 @@ function CourseManagement() {
 
       {/* View Course Modal */}
       {showViewModal && selectedCourse && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="relative top-10 mx-auto p-6 border-2 border-black w-full max-w-3xl shadow-lg rounded-lg bg-white">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Course Details</h2>
@@ -938,7 +945,7 @@ function CourseManagement() {
 
       {/* Login Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-30 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-md border-2 border-black">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Admin Login</h2>
@@ -978,7 +985,8 @@ function CourseManagement() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                className="w-full text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-colors"
+                style={{ backgroundColor: '#006CB5' }}
               >
                 Login
               </button>
