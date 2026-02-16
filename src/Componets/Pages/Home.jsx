@@ -26,7 +26,7 @@ function Home() {
   const [heroSlides, setHeroSlides] = useState([]);
   const [loadingBanners, setLoadingBanners] = useState(true);
 
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   // Fetch banners from API
   useEffect(() => {

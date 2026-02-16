@@ -52,7 +52,7 @@ function EventManagement() {
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   // Check for existing token on component mount
   useEffect(() => {

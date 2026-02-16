@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const TemplateManagement = () => {
   // API base URL
-  const API_BASE_URL = 'https://taekwon-frontend.onrender.com/api';
+  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
   
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);

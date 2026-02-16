@@ -116,7 +116,7 @@ function Admission() {
         }
       });
 
-      const response = await fetch('https://taekwon-frontend.onrender.com/api/admissions', {
+      const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/admissions', {
         method: 'POST',
         body: formDataToSend
       });
