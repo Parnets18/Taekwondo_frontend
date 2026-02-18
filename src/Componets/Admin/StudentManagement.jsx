@@ -215,18 +215,24 @@ function StudentManagement() {
   };
 
   // Update student
-  const updateStudent = async (studentId, studentData) => {
+  const updateStudent = async (studentId, formData) => {
     if (!authToken) {
       alert('Please login first');
       return;
     }
 
     try {
+      // Send FormData directly (includes photo file if uploaded)
       const response = await fetch(`${API_BASE_URL}/students/${studentId}`, {
         method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(studentData)
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+          // Don't set Content-Type - browser will set it with boundary for FormData
+        },
+        body: formData
       });
+
+      const data = await response.json();
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -235,10 +241,9 @@ function StudentManagement() {
           setShowLoginModal(true);
           throw new Error('Authentication required');
         }
-        throw new Error('Failed to update student');
+        console.error('Update failed:', data);
+        throw new Error(data.message || 'Failed to update student');
       }
-
-      const data = await response.json();
       
       if (data.status === 'success') {
         // Refresh the students list
@@ -249,7 +254,7 @@ function StudentManagement() {
       }
     } catch (error) {
       console.error('Error updating student:', error);
-      alert('Error updating student. Please try again.');
+      alert(`Error updating student: ${error.message}`);
     }
   };
 
@@ -473,43 +478,20 @@ function StudentManagement() {
   const handleEditStudent = (formData) => {
     if (!selectedStudent) return;
 
-    const studentData = {
-      fullName: formData.get('fullName'),
-      phone: formData.get('phone'),
-      email: formData.get('email'),
-      address: formData.get('address'),
-      bloodGroup: formData.get('bloodGroup') || undefined,
-      fatherName: formData.get('fatherName') || undefined,
-      motherName: formData.get('motherName') || undefined,
-      fatherPhone: formData.get('fatherPhone') || undefined,
-      motherPhone: formData.get('motherPhone') || undefined,
-      fatherOccupation: formData.get('fatherOccupation') || undefined,
-      motherOccupation: formData.get('motherOccupation') || undefined,
-      schoolCollegeName: formData.get('schoolCollegeName') || undefined,
-      qualification: formData.get('qualification') || undefined,
-      instructorName: formData.get('instructorName') || undefined,
-      classAddress: formData.get('classAddress') || undefined,
-      organizationName: formData.get('organizationName') || undefined,
-      admissionNumber: formData.get('admissionNumber') || undefined,
-      joiningDate: formData.get('joiningDate') || undefined,
-      // Achievements (already stringified in form)
-      achievements: formData.get('achievements'),
-      // Exam Dates
-      examYellowStripe: formData.get('examYellowStripe') || undefined,
-      examYellowBelt: formData.get('examYellowBelt') || undefined,
-      examGreenStripe: formData.get('examGreenStripe') || undefined,
-      examGreenBelt: formData.get('examGreenBelt') || undefined,
-      examBlueStripe: formData.get('examBlueStripe') || undefined,
-      examBlueBelt: formData.get('examBlueBelt') || undefined,
-      examRedStripe: formData.get('examRedStripe') || undefined,
-      examRedBelt: formData.get('examRedBelt') || undefined,
-      examBlackStripe: formData.get('examBlackStripe') || undefined,
-      examBlackBelt: formData.get('examBlackBelt') || undefined,
-      currentBeltLevel: formData.get('currentBeltLevel') || undefined,
-      idNumber: formData.get('idNumber') || undefined
-    };
+    // Clean up FormData - remove empty values for optional fields
+    const cleanedFormData = new FormData();
+    
+    for (let [key, value] of formData.entries()) {
+      // Skip empty values for optional fields (but keep required fields even if empty)
+      if (value && value !== '' && value !== 'null' && value !== 'undefined') {
+        cleanedFormData.append(key, value);
+      } else if (['fullName', 'phone', 'email', 'address', 'admissionNumber', 'joiningDate'].includes(key)) {
+        // Keep required fields even if empty (will be validated by backend)
+        cleanedFormData.append(key, value);
+      }
+    }
 
-    updateStudent(selectedStudent.id, studentData);
+    updateStudent(selectedStudent.id, cleanedFormData);
   };
 
   if (loading) {

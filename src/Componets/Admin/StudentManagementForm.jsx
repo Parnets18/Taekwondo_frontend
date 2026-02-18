@@ -287,7 +287,6 @@ export const StudentFormModal = ({
                   defaultValue={student?.gender}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent" 
                   required
-                  disabled={isEdit}
                 >
                   <option value="">Select Gender</option>
                   <option value="male">Male</option>
