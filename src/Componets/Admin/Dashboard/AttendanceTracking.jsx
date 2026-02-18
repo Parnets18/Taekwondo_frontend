@@ -48,14 +48,12 @@ function AttendanceTracking() {
     checkInTime: new Date().toTimeString().slice(0, 5),
     checkOutTime: '',
     status: 'Present',
-    class: '',
     notes: ''
   });
 
   // Bulk mark states
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [bulkDate, setBulkDate] = useState(new Date().toISOString().split('T')[0]);
-  const [bulkClass, setBulkClass] = useState('');
   const [bulkStatus, setBulkStatus] = useState('Present');
 
   // Autocomplete states
@@ -207,7 +205,6 @@ function AttendanceTracking() {
       checkInTime: new Date().toTimeString().slice(0, 5),
       checkOutTime: '',
       status: 'Present',
-      class: '',
       notes: ''
     });
     setStudentSuggestions([]);
@@ -243,8 +240,7 @@ function AttendanceTracking() {
     setAttendanceForm(prev => ({
       ...prev,
       studentName: student.fullName,
-      student: studentId,
-      class: student.courseLevel ? student.courseLevel.charAt(0).toUpperCase() + student.courseLevel.slice(1) : ''
+      student: studentId
     }));
     setShowStudentSuggestions(false);
   };
@@ -266,8 +262,8 @@ function AttendanceTracking() {
   // CRUD operations
   const handleMarkAttendance = async (e) => {
     e.preventDefault();
-    if (!attendanceForm.student || !attendanceForm.class) {
-      alert('Please select a student and class');
+    if (!attendanceForm.student) {
+      alert('Please select a student');
       return;
     }
 
@@ -282,7 +278,6 @@ function AttendanceTracking() {
           date: attendanceForm.date,
           checkInTime: checkInDateTime.toISOString(),
           status: attendanceForm.status,
-          class: attendanceForm.class,
           notes: attendanceForm.notes
         })
       });
@@ -375,7 +370,6 @@ function AttendanceTracking() {
               date: today,
               checkInTime: new Date().toISOString(),
               status: 'Absent',
-              class: student.courseLevel ? student.courseLevel.charAt(0).toUpperCase() + student.courseLevel.slice(1) : 'Beginner',
               notes: 'Auto-marked absent'
             })
           });
@@ -399,8 +393,8 @@ function AttendanceTracking() {
 
   const handleBulkMarkAttendance = async (e) => {
     e.preventDefault();
-    if (selectedStudents.length === 0 || !bulkClass) {
-      alert('Please select students and class');
+    if (selectedStudents.length === 0) {
+      alert('Please select students');
       return;
     }
 
@@ -414,7 +408,6 @@ function AttendanceTracking() {
           students: selectedStudents,
           date: bulkDate,
           checkInTime: checkInDateTime.toISOString(),
-          class: bulkClass,
           status: bulkStatus
         })
       });
@@ -649,7 +642,7 @@ function AttendanceTracking() {
 
       {/* Filters and Actions */}
       <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Date selector based on view mode */}
           {viewMode === 'daily' && (
             <div>
@@ -693,21 +686,6 @@ function AttendanceTracking() {
               />
             </div>
           )}
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Class</label>
-            <select
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Classes</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-              <option value="Expert">Expert</option>
-            </select>
-          </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
@@ -784,9 +762,7 @@ function AttendanceTracking() {
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Date</th>
-                <th className="text-left py-4 px-6 font-semibold text-slate-700">Student ID</th>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Student Name</th>
-                <th className="text-left py-4 px-6 font-semibold text-slate-700">Class</th>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Check-In</th>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Check-Out</th>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Duration</th>
@@ -797,7 +773,7 @@ function AttendanceTracking() {
             <tbody>
               {filteredAttendance.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="py-12 text-center">
+                  <td colSpan="7" className="py-12 text-center">
                     <FaCalendarCheck className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                     <p className="text-slate-500 font-medium">No attendance records found</p>
                     <p className="text-slate-400 text-sm mt-1">Click "Mark Attendance" to add attendance</p>
@@ -810,14 +786,8 @@ function AttendanceTracking() {
                       {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </td>
                     <td className="py-4 px-6">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
-                        {record.student?.studentId || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
                       <span className="font-semibold text-slate-900">{record.studentName}</span>
                     </td>
-                    <td className="py-4 px-6 text-slate-600">{record.class}</td>
                     <td className="py-4 px-6 text-slate-600">
                       {(record.status === 'Absent' || record.status === 'Excused') ? '-' : formatTime(record.checkInTime)}
                     </td>
@@ -937,15 +907,15 @@ function AttendanceTracking() {
                 {attendanceForm.student && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-blue-700 font-semibold">Student ID</p>
-                        <p className="text-blue-900 font-bold">
-                          {students.find(s => (s._id || s.id) === attendanceForm.student)?.studentId || 'N/A'}
-                        </p>
+                      <div className="text-center">
+                        <p className="text-sm text-blue-700 font-semibold">Student Name</p>
+                        <p className="text-blue-900 font-bold">{attendanceForm.studentName}</p>
                       </div>
-                      <div>
-                        <p className="text-sm text-blue-700 font-semibold">Class Level</p>
-                        <p className="text-blue-900 font-bold">{attendanceForm.class || 'N/A'}</p>
+                      <div className="text-center">
+                        <p className="text-sm text-blue-700 font-semibold">Admission Number</p>
+                        <p className="text-blue-900 font-bold">
+                          {students.find(s => (s._id || s.id) === attendanceForm.student)?.admissionNumber || 'N/A'}
+                        </p>
                       </div>
                     </div>
                   </div>
