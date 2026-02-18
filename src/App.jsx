@@ -29,6 +29,7 @@ import ContactManagement from './Componets/Admin/ContactManagement';
 import CourseManagement from './Componets/Admin/CourseManagement';
 import StudentAchievements from './Componets/Student/StudentAchievements';
 import CertificateVerification from './Componets/Pages/CertificateVerification';
+import Membership from './Componets/Membership';
 
 // Layout wrapper component that includes scroll-to-top functionality
 function PublicLayout({ children }) {
@@ -65,6 +66,12 @@ function App() {
         <Route path="/courses" element={
           <PublicLayout>
             <Courses />
+          </PublicLayout>
+        } />
+        
+        <Route path="/membership" element={
+          <PublicLayout>
+            <Membership />
           </PublicLayout>
         } />
         

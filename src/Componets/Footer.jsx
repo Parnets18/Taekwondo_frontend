@@ -34,6 +34,7 @@ function Footer() {
               <li><Link to="/" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Home</Link></li>
               <li><Link to="/about" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">About Us</Link></li>
               <li><Link to="/courses" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Programs</Link></li>
+              <li><Link to="/membership" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Membership</Link></li>
               <li><Link to="/admission" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Admission</Link></li>
               <li><Link to="/belt-exam" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Belt Exam</Link></li>
               <li><Link to="/contact" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Contact</Link></li>

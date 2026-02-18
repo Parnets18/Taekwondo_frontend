@@ -11,6 +11,7 @@ function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Programs', href: '/courses' },
+    { name: 'Membership', href: '/membership' },
     { name: 'Admission', href: '/admission' },
     { name: 'Belt Exam', href: '/belt-exam' },
     { name: 'Contact', href: '/contact' },

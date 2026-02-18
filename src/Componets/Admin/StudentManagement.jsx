@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
+import { StudentFormModal } from './StudentManagementForm';
 
 function StudentManagement() {
   const [students, setStudents] = useState([]);
@@ -10,6 +11,8 @@ function StudentManagement() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -28,6 +31,7 @@ function StudentManagement() {
 
   // API base URL
   const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com'; // For static files like images
 
   // Helper function to calculate age
   const calculateAge = (dateOfBirth) => {
@@ -146,10 +150,29 @@ function StudentManagement() {
 
     try {
       console.log('📝 Creating student with data:', studentData);
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      
+      // Append all fields to FormData
+      Object.keys(studentData).forEach(key => {
+        if (key === 'emergencyContact') {
+          formData.append('emergencyContact[name]', studentData.emergencyContact.name);
+          formData.append('emergencyContact[phone]', studentData.emergencyContact.phone);
+          formData.append('emergencyContact[relationship]', studentData.emergencyContact.relationship);
+        } else if (key === 'photo' && studentData.photo instanceof File) {
+          formData.append('photo', studentData.photo);
+        } else if (studentData[key]) {
+          formData.append(key, studentData[key]);
+        }
+      });
+
       const response = await fetch(`${API_BASE_URL}/students`, {
         method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(studentData)
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+        },
+        body: formData
       });
 
       console.log('📥 Response status:', response.status);
@@ -173,6 +196,8 @@ function StudentManagement() {
         fetchStudents(pagination.currentPage, searchTerm, selectedBelt);
         setShowAddModal(false);
         setFormAge(null);
+        setPhotoPreview(null);
+        setPhotoFile(null);
         alert('Student created successfully!');
       }
     } catch (error) {
@@ -314,21 +339,16 @@ function StudentManagement() {
     const matchesSearch = student.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBelt = selectedBelt === '' || student.currentBelt === selectedBelt;
-    // Remove age filter as it's causing issues with age calculation
-    // const matchesAge = student.age >= 5;
-    const matchesStatus = student.status === 'active';
     
     // Debug logging
     console.log('Student filter debug:', {
       student: student.fullName,
       matchesSearch,
       matchesBelt,
-      matchesStatus,
-      status: student.status,
       age: student.age
     });
     
-    return matchesSearch && matchesBelt && matchesStatus;
+    return matchesSearch && matchesBelt;
   });
 
   const beltLevels = [
@@ -374,6 +394,29 @@ function StudentManagement() {
     return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Only JPG, JPEG, and PNG files are allowed');
+        return;
+      }
+      
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddStudent = (formData) => {
     // Client-side age validation
     const dateOfBirth = formData.get('dateOfBirth');
@@ -391,12 +434,36 @@ function StudentManagement() {
       phone: formData.get('phone'),
       email: formData.get('email'),
       address: formData.get('address'),
-      emergencyContact: {
-        name: formData.get('emergencyContactName'),
-        phone: formData.get('emergencyContactPhone'),
-        relationship: formData.get('emergencyContactRelationship')
-      },
-      courseLevel: formData.get('courseLevel')
+      bloodGroup: formData.get('bloodGroup') || undefined,
+      fatherName: formData.get('fatherName') || undefined,
+      motherName: formData.get('motherName') || undefined,
+      fatherPhone: formData.get('fatherPhone') || undefined,
+      motherPhone: formData.get('motherPhone') || undefined,
+      fatherOccupation: formData.get('fatherOccupation') || undefined,
+      motherOccupation: formData.get('motherOccupation') || undefined,
+      schoolCollegeName: formData.get('schoolCollegeName') || undefined,
+      qualification: formData.get('qualification') || undefined,
+      instructorName: formData.get('instructorName') || undefined,
+      classAddress: formData.get('classAddress') || undefined,
+      organizationName: formData.get('organizationName') || undefined,
+      admissionNumber: formData.get('admissionNumber') || undefined,
+      joiningDate: formData.get('joiningDate') || undefined,
+      photo: photoFile || undefined,
+      // Achievements (already stringified in form)
+      achievements: formData.get('achievements'),
+      // Exam Dates
+      examYellowStripe: formData.get('examYellowStripe') || undefined,
+      examYellowBelt: formData.get('examYellowBelt') || undefined,
+      examGreenStripe: formData.get('examGreenStripe') || undefined,
+      examGreenBelt: formData.get('examGreenBelt') || undefined,
+      examBlueStripe: formData.get('examBlueStripe') || undefined,
+      examBlueBelt: formData.get('examBlueBelt') || undefined,
+      examRedStripe: formData.get('examRedStripe') || undefined,
+      examRedBelt: formData.get('examRedBelt') || undefined,
+      examBlackStripe: formData.get('examBlackStripe') || undefined,
+      examBlackBelt: formData.get('examBlackBelt') || undefined,
+      currentBeltLevel: formData.get('currentBeltLevel') || undefined,
+      idNumber: formData.get('idNumber') || undefined
     };
 
     console.log('📋 Form data extracted:', studentData);
@@ -411,13 +478,35 @@ function StudentManagement() {
       phone: formData.get('phone'),
       email: formData.get('email'),
       address: formData.get('address'),
-      emergencyContact: {
-        name: formData.get('emergencyContactName'),
-        phone: formData.get('emergencyContactPhone'),
-        relationship: formData.get('emergencyContactRelationship')
-      },
-      courseLevel: formData.get('courseLevel'),
-      status: formData.get('status')
+      bloodGroup: formData.get('bloodGroup') || undefined,
+      fatherName: formData.get('fatherName') || undefined,
+      motherName: formData.get('motherName') || undefined,
+      fatherPhone: formData.get('fatherPhone') || undefined,
+      motherPhone: formData.get('motherPhone') || undefined,
+      fatherOccupation: formData.get('fatherOccupation') || undefined,
+      motherOccupation: formData.get('motherOccupation') || undefined,
+      schoolCollegeName: formData.get('schoolCollegeName') || undefined,
+      qualification: formData.get('qualification') || undefined,
+      instructorName: formData.get('instructorName') || undefined,
+      classAddress: formData.get('classAddress') || undefined,
+      organizationName: formData.get('organizationName') || undefined,
+      admissionNumber: formData.get('admissionNumber') || undefined,
+      joiningDate: formData.get('joiningDate') || undefined,
+      // Achievements (already stringified in form)
+      achievements: formData.get('achievements'),
+      // Exam Dates
+      examYellowStripe: formData.get('examYellowStripe') || undefined,
+      examYellowBelt: formData.get('examYellowBelt') || undefined,
+      examGreenStripe: formData.get('examGreenStripe') || undefined,
+      examGreenBelt: formData.get('examGreenBelt') || undefined,
+      examBlueStripe: formData.get('examBlueStripe') || undefined,
+      examBlueBelt: formData.get('examBlueBelt') || undefined,
+      examRedStripe: formData.get('examRedStripe') || undefined,
+      examRedBelt: formData.get('examRedBelt') || undefined,
+      examBlackStripe: formData.get('examBlackStripe') || undefined,
+      examBlackBelt: formData.get('examBlackBelt') || undefined,
+      currentBeltLevel: formData.get('currentBeltLevel') || undefined,
+      idNumber: formData.get('idNumber') || undefined
     };
 
     updateStudent(selectedStudent.id, studentData);
@@ -540,19 +629,25 @@ function StudentManagement() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student ID
+                  Photo
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student
+                  Student Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Admission No.
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Instructor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contact
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Course Level
+                  School/College
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Joining Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -563,7 +658,23 @@ function StudentManagement() {
               {filteredStudents.map((student) => (
                 <tr key={student.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{student.studentId || 'N/A'}</div>
+                    <div className="flex-shrink-0 h-10 w-10">
+                      {student.photo ? (
+                        <img 
+                          className="h-10 w-10 rounded-full object-cover" 
+                          src={`${BASE_URL}/${student.photo}`} 
+                          alt={student.fullName}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect fill="%23ddd" width="40" height="40"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="20"%3E👤%3C/text%3E%3C/svg%3E';
+                          }}
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500 text-lg">👤</span>
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
@@ -576,23 +687,30 @@ function StudentManagement() {
                       >
                         {student.fullName}
                       </button>
-                      <div className="text-sm text-gray-500">Age: {student.age || 'N/A'}</div>
+                      <div className="text-sm text-gray-500">
+                        Age: {student.age || 'N/A'} | {student.gender ? student.gender.charAt(0).toUpperCase() + student.gender.slice(1) : 'N/A'}
+                      </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{student.admissionNumber || 'N/A'}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{student.instructorName || 'N/A'}</div>
+                    <div className="text-sm text-gray-500 truncate max-w-xs">{student.classAddress || 'N/A'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{student.email}</div>
                     <div className="text-sm text-gray-500">{student.phone}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 capitalize">{student.courseLevel}</div>
-                    <div className="text-sm text-gray-500">
-                      Joined: {new Date(student.enrollmentDate).toLocaleDateString()}
-                    </div>
+                    <div className="text-sm text-gray-900">{student.schoolCollegeName || 'N/A'}</div>
+                    <div className="text-sm text-gray-500">{student.qualification || 'N/A'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
-                      {student.status?.charAt(0).toUpperCase() + student.status?.slice(1)}
-                    </span>
+                    <div className="text-sm text-gray-900">
+                      {student.joiningDate ? new Date(student.joiningDate).toLocaleDateString() : 'N/A'}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex gap-2">
@@ -717,8 +835,42 @@ function StudentManagement() {
         </div>
       )}
 
-      {/* Add Student Modal */}
-      {showAddModal && (
+      {/* Student Form Modals */}
+      <StudentFormModal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddStudent}
+        student={null}
+        formAge={formAge}
+        setFormAge={setFormAge}
+        calculateAge={calculateAge}
+        photoPreview={photoPreview}
+        setPhotoPreview={setPhotoPreview}
+        photoFile={photoFile}
+        setPhotoFile={setPhotoFile}
+        handlePhotoChange={handlePhotoChange}
+      />
+
+      <StudentFormModal
+        show={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedStudent(null);
+        }}
+        onSubmit={handleEditStudent}
+        student={selectedStudent}
+        formAge={formAge}
+        setFormAge={setFormAge}
+        calculateAge={calculateAge}
+        photoPreview={photoPreview}
+        setPhotoPreview={setPhotoPreview}
+        photoFile={photoFile}
+        setPhotoFile={setPhotoFile}
+        handlePhotoChange={handlePhotoChange}
+      />
+
+      {/* View Student Modal */}
+      {showViewModal && selectedStudent && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
@@ -882,148 +1034,10 @@ function StudentManagement() {
         </div>
       )}
 
-      {/* Edit Student Modal */}
-      {showEditModal && selectedStudent && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Edit Student</h2>
-              <button 
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedStudent(null);
-                }}
-                className="text-slate-500 hover:text-slate-700 text-2xl"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              handleEditStudent(formData);
-            }} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name *</label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    defaultValue={selectedStudent.fullName}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    defaultValue={selectedStudent.email}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Phone *</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    defaultValue={selectedStudent.phone}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Course Level *</label>
-                  <select name="courseLevel" defaultValue={selectedStudent.courseLevel} className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent" required>
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Status *</label>
-                  <select name="status" defaultValue={selectedStudent.status} className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent" required>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="graduated">Graduated</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Emergency Contact Name *</label>
-                  <input
-                    type="text"
-                    name="emergencyContactName"
-                    defaultValue={selectedStudent.emergencyContact?.name}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Emergency Contact Phone *</label>
-                  <input
-                    type="tel"
-                    name="emergencyContactPhone"
-                    defaultValue={selectedStudent.emergencyContact?.phone}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Relationship *</label>
-                  <input
-                    type="text"
-                    name="emergencyContactRelationship"
-                    defaultValue={selectedStudent.emergencyContact?.relationship}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Address *</label>
-                <textarea
-                  name="address"
-                  rows="3"
-                  defaultValue={selectedStudent.address}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
-                  required
-                ></textarea>
-              </div>
-              
-              <div className="flex justify-end space-x-4 pt-4">
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setSelectedStudent(null);
-                  }}
-                  className="px-6 py-3 rounded-xl font-semibold transition-colors"
-                  style={{ backgroundColor: '#e5e7eb', color: '#374151' }}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"
-                  style={{ backgroundColor: '#006CB5' }}
-                >
-                  Update Student
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* View Student Modal */}
       {showViewModal && selectedStudent && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto border-2 border-black">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">Student Details</h2>
               <button 
@@ -1038,84 +1052,240 @@ function StudentManagement() {
             </div>
             
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Personal Information</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Full Name</label>
-                      <p className="text-slate-900">{selectedStudent.fullName}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Age</label>
-                      <p className="text-slate-900">{selectedStudent.age || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Email</label>
-                      <p className="text-slate-900">{selectedStudent.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Phone</label>
-                      <p className="text-slate-900">{selectedStudent.phone}</p>
-                    </div>
+              {/* Photo Section */}
+              <div className="flex justify-center">
+                {selectedStudent.photo ? (
+                  <img 
+                    src={`${BASE_URL}/${selectedStudent.photo}`} 
+                    alt={selectedStudent.fullName}
+                    className="w-32 h-32 object-cover rounded-lg border-2 border-slate-300"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect fill="%23ddd" width="128" height="128"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="48"%3E👤%3C/text%3E%3C/svg%3E';
+                    }}
+                  />
+                ) : (
+                  <div className="w-32 h-32 bg-slate-200 rounded-lg flex items-center justify-center border-2 border-slate-300">
+                    <span className="text-6xl">👤</span>
                   </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Training Information</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Current Belt</label>
-                      <p className="text-slate-900">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getBeltColor(selectedStudent.currentBelt)}`}>
-                          {getBeltLabel(selectedStudent.currentBelt)}
-                        </span>
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Course Level</label>
-                      <p className="text-slate-900 capitalize">{selectedStudent.courseLevel}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Status</label>
-                      <p className="text-slate-900">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedStudent.status)}`}>
-                          {selectedStudent.status?.charAt(0).toUpperCase() + selectedStudent.status?.slice(1)}
-                        </span>
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">Enrollment Date</label>
-                      <p className="text-slate-900">{new Date(selectedStudent.enrollmentDate).toLocaleDateString()}</p>
-                    </div>
+                )}
+              </div>
+
+              {/* Personal Information */}
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">Personal Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Instructor Name</label>
+                    <p className="text-slate-900">{selectedStudent.instructorName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Class Address</label>
+                    <p className="text-slate-900">{selectedStudent.classAddress || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Full Name</label>
+                    <p className="text-slate-900">{selectedStudent.fullName}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Date of Birth</label>
+                    <p className="text-slate-900">{selectedStudent.dateOfBirth ? new Date(selectedStudent.dateOfBirth).toLocaleDateString() : 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Age</label>
+                    <p className="text-slate-900">{selectedStudent.age || 'N/A'} years</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Gender</label>
+                    <p className="text-slate-900 capitalize">{selectedStudent.gender || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Blood Group</label>
+                    <p className="text-slate-900">{selectedStudent.bloodGroup || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Joining Date</label>
+                    <p className="text-slate-900">{selectedStudent.joiningDate ? new Date(selectedStudent.joiningDate).toLocaleDateString() : 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Admission Number</label>
+                    <p className="text-slate-900">{selectedStudent.admissionNumber || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">School/College Name</label>
+                    <p className="text-slate-900">{selectedStudent.schoolCollegeName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Organization Name</label>
+                    <p className="text-slate-900">{selectedStudent.organizationName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Qualification</label>
+                    <p className="text-slate-900">{selectedStudent.qualification || 'N/A'}</p>
                   </div>
                 </div>
               </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Emergency Contact</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              {/* Contact Information */}
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">Contact Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-slate-600">Name</label>
-                    <p className="text-slate-900">{selectedStudent.emergencyContact?.name || 'N/A'}</p>
+                    <label className="text-sm font-medium text-slate-600">Email</label>
+                    <p className="text-slate-900">{selectedStudent.email}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-600">Phone</label>
-                    <p className="text-slate-900">{selectedStudent.emergencyContact?.phone || 'N/A'}</p>
+                    <p className="text-slate-900">{selectedStudent.phone}</p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-slate-600">Relationship</label>
-                    <p className="text-slate-900">{selectedStudent.emergencyContact?.relationship || 'N/A'}</p>
+                  <div className="md:col-span-2">
+                    <label className="text-sm font-medium text-slate-600">Address</label>
+                    <p className="text-slate-900">{selectedStudent.address || 'N/A'}</p>
                   </div>
                 </div>
               </div>
-              
-              {selectedStudent.address && (
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Address</h3>
-                  <p className="text-slate-900">{selectedStudent.address}</p>
+
+              {/* Family Information */}
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">Family Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Father Name</label>
+                    <p className="text-slate-900">{selectedStudent.fatherName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Mother Name</label>
+                    <p className="text-slate-900">{selectedStudent.motherName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Father Phone</label>
+                    <p className="text-slate-900">{selectedStudent.fatherPhone || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Mother Phone</label>
+                    <p className="text-slate-900">{selectedStudent.motherPhone || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Father Occupation</label>
+                    <p className="text-slate-900">{selectedStudent.fatherOccupation || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Mother Occupation</label>
+                    <p className="text-slate-900">{selectedStudent.motherOccupation || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Training Information */}
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">Training Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">Current Belt Level</label>
+                    <p className="text-slate-900">{selectedStudent.currentBeltLevel || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-600">ID Number</label>
+                    <p className="text-slate-900">{selectedStudent.idNumber || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Achievements */}
+              {selectedStudent.achievements && selectedStudent.achievements.length > 0 && (
+                <div className="bg-slate-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Achievements</h3>
+                  {selectedStudent.achievements.map((achievement, index) => (
+                    <div key={index} className="mb-3 p-3 bg-white rounded-lg border border-slate-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-xs font-medium text-slate-600">Tournament</label>
+                          <p className="text-sm text-slate-900">{achievement.tournamentName || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-slate-600">Address</label>
+                          <p className="text-sm text-slate-900">{achievement.address || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-slate-600">Date</label>
+                          <p className="text-sm text-slate-900">{achievement.date ? new Date(achievement.date).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-slate-600">Prize</label>
+                          <p className="text-sm text-slate-900">{achievement.prize || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
+
+              {/* Exam Dates */}
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">Exam Dates</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {selectedStudent.examYellowStripe && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Yellow Stripe</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examYellowStripe).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examYellowBelt && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Yellow Belt</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examYellowBelt).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examGreenStripe && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Green Stripe</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examGreenStripe).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examGreenBelt && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Green Belt</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examGreenBelt).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examBlueStripe && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Blue Stripe</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examBlueStripe).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examBlueBelt && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Blue Belt</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examBlueBelt).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examRedStripe && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Red Stripe</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examRedStripe).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examRedBelt && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Red Belt</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examRedBelt).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examBlackStripe && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Black Stripe</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examBlackStripe).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                  {selectedStudent.examBlackBelt && (
+                    <div>
+                      <label className="text-sm font-medium text-slate-600">Black Belt</label>
+                      <p className="text-slate-900">{new Date(selectedStudent.examBlackBelt).toLocaleDateString()}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             
             <div className="flex justify-end space-x-4 pt-6">
