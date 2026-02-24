@@ -7,14 +7,82 @@
     background-color: white !important;
   }
 
-  /* Override ALL heading elements to use #006CB5 - EXCEPT when explicitly set to white */
-  h1:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]), 
-  h2:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]), 
-  h3:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]), 
-  h4:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]), 
-  h5:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]), 
-  h6:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]) {
+  /* Override ALL heading elements to use #006CB5 - EXCEPT when explicitly set to white OR in about-page OR home-section-title */
+  h1:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]):not(.about-page *):not(.about-page):not(.home-section-title), 
+  h2:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]):not(.about-page *):not(.about-page):not(.home-section-title), 
+  h3:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]):not(.about-page *):not(.about-page):not(.home-section-title), 
+  h4:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]):not(.about-page *):not(.about-page):not(.home-section-title), 
+  h5:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]):not(.about-page *):not(.about-page):not(.home-section-title), 
+  h6:not([style*="color: white"]):not([style*="color: #FFFFFF"]):not([style*="color:#FFFFFF"]):not([style*="color:white"]):not(.about-page *):not(.about-page):not(.home-section-title) {
     color: #006CB5 !important;
+  }
+
+  /* ABOUT PAGE ONLY - DO NOT override inline styled text */
+  .about-page-wrapper h1:not([style*="color"]),
+  .about-page-wrapper h2:not([style*="color"]),
+  .about-page-wrapper h3:not([style*="color"]),
+  .about-page-wrapper h4:not([style*="color"]),
+  .about-page-wrapper h5:not([style*="color"]),
+  .about-page-wrapper h6:not([style*="color"]),
+  .about-page-wrapper p:not([style*="color"]):not(.hero-section *),
+  .about-page-wrapper span:not([style*="color"]):not(.hero-section *),
+  .about-page-wrapper div:not([style*="color"]):not(.hero-section *),
+  .about-page h1:not([style*="color"]),
+  .about-page h2:not([style*="color"]),
+  .about-page h3:not([style*="color"]),
+  .about-page h4:not([style*="color"]),
+  .about-page h5:not([style*="color"]),
+  .about-page h6:not([style*="color"]),
+  .about-page p:not([style*="color"]):not(.hero-section *),
+  .about-page span:not([style*="color"]):not(.hero-section *),
+  .about-page div:not([style*="color"]):not(.hero-section *) {
+    color: #000000 !important;
+  }
+  
+  /* Force hero section text to be white */
+  .about-page .hero-section p,
+  .about-page .hero-section span {
+    color: #FFFFFF !important;
+  }
+  
+  /* Preserve white text in About page hero */
+  .about-page .text-white,
+  .about-page .text-white *,
+  .about-page [class*="text-white"],
+  .about-page [class*="text-white"] * {
+    color: white !important;
+  }
+  
+  /* Preserve red text in About page */
+  .about-page [style*="color: #DC2626"],
+  .about-page [style*="color: #DC2626"] *,
+  .about-page [style*="color:#DC2626"],
+  .about-page [style*="color:#DC2626"] * {
+    color: #DC2626 !important;
+  }
+  
+  /* Preserve yellow text in About page */
+  .about-page [style*="color: #CA8A04"],
+  .about-page [style*="color: #CA8A04"] *,
+  .about-page [style*="color:#CA8A04"],
+  .about-page [style*="color:#CA8A04"] *,
+  .about-page [style*="color: #EAB308"],
+  .about-page [style*="color: #EAB308"] *,
+  .about-page [style*="color:#EAB308"],
+  .about-page [style*="color:#EAB308"] * {
+    color: #CA8A04 !important;
+  }
+  
+  /* Preserve gray text in About page */
+  .about-page [style*="color: #374151"],
+  .about-page [style*="color: #374151"] *,
+  .about-page [style*="color:#374151"],
+  .about-page [style*="color:#374151"] *,
+  .about-page [style*="color: #4B5563"],
+  .about-page [style*="color: #4B5563"] *,
+  .about-page [style*="color:#4B5563"],
+  .about-page [style*="color:#4B5563"] * {
+    color: #374151 !important;
   }
 
   /* Exception: White headings on blue backgrounds and hero section */
@@ -401,6 +469,13 @@ html {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #005a9c;
+}
+
+/* Home page section headers - force white text */
+.home-section-header,
+.home-section-header *,
+.home-section-title {
+  color: #FFFFFF !important;
 }
 
 /* Enhanced hover effects */

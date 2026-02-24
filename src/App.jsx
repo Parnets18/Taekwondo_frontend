@@ -30,6 +30,13 @@ import CourseManagement from './Componets/Admin/CourseManagement';
 import StudentAchievements from './Componets/Student/StudentAchievements';
 import CertificateVerification from './Componets/Pages/CertificateVerification';
 import Membership from './Componets/Membership';
+import Gallery from './Componets/Pages/Gallery';
+import GalleryManagement from './Componets/Admin/GalleryManagement';
+import Community from './Componets/Pages/Community';
+import BlackBelt from './Componets/Pages/BlackBelt';
+import CommunityManagement from './Componets/Admin/CommunityManagement';
+import BlackBeltManagement from './Componets/Admin/BlackBeltManagement';
+import LocationManagement from './Componets/Admin/LocationManagement';
 
 // Layout wrapper component that includes scroll-to-top functionality
 function PublicLayout({ children }) {
@@ -72,6 +79,24 @@ function App() {
         <Route path="/membership" element={
           <PublicLayout>
             <Membership />
+          </PublicLayout>
+        } />
+        
+        <Route path="/community" element={
+          <PublicLayout>
+            <Community />
+          </PublicLayout>
+        } />
+        
+        <Route path="/black-belt" element={
+          <PublicLayout>
+            <BlackBelt />
+          </PublicLayout>
+        } />
+        
+        <Route path="/gallery" element={
+          <PublicLayout>
+            <Gallery />
           </PublicLayout>
         } />
         
@@ -131,6 +156,10 @@ function App() {
           <Route path="courses" element={<CourseManagement />} />
           <Route path="achievements" element={<AchievementManagement />} />
           <Route path="templates" element={<TemplateManagement />} />
+          <Route path="gallery" element={<GalleryManagement />} />
+          <Route path="community" element={<CommunityManagement />} />
+          <Route path="black-belt" element={<BlackBeltManagement />} />
+          <Route path="locations" element={<LocationManagement />} />
         </Route>
       </Routes>
     </Router>

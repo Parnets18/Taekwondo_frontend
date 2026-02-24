@@ -125,7 +125,7 @@ function ClubRules() {
           <p className="text-gray-600 mb-3">For any queries, please contact:</p>
           <div className="text-gray-700">
             <p>📞 +91 7259113288</p>
-            <p>✉️ yesh18390@gmail.com</p>
+            <p>✉️ contact@cwtakarnataka.com</p>
           </div>
         </div>
       </div>

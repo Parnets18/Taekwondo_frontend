@@ -70,7 +70,11 @@ function AdminLayout() {
         { path: '/admin/certificates', name: 'Certificate Upload', icon: FaCertificate},
         { path: '/admin/admissions', name: 'Admissions', icon: FaUserPlus},
         { path: '/admin/belt-exams', name: 'Belt Exams', icon: FaMedal},
-        { path: '/admin/banners', name: 'Banner Management', icon: FaImage}
+        { path: '/admin/banners', name: 'Banner Management', icon: FaImage},
+        { path: '/admin/gallery', name: 'Gallery Management', icon: FaImage},
+        { path: '/admin/community', name: 'Community Management', icon: FaUsers},
+        { path: '/admin/black-belt', name: 'Black Belt Management', icon: FaMedal},
+        { path: '/admin/locations', name: 'Locations & School Partnerships', icon: FaBook}
       ]
     },
     {

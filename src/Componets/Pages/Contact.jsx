@@ -263,7 +263,7 @@ function Contact() {
                           Email Us
                          
                         </h3>
-                        <a href="mailto:yesh18390@gmail.com" className="text-sm text-gray-700 hover:text-blue-600 transition-colors break-all">yesh18390@gmail.com</a>
+                        <a href="mailto:contact@cwtakarnataka.com" className="text-sm text-gray-700 hover:text-blue-600 transition-colors break-all">contact@cwtakarnataka.com</a>
                       </div>
                     </div>
                   </div>

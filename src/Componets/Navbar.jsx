@@ -1,17 +1,27 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { scrollToTop } from '../utils/useScrollToTop';
-import { FaMapMarkerAlt, FaPhone, FaFacebookF, FaInstagram } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhone, FaFacebookF, FaInstagram, FaChevronDown } from 'react-icons/fa';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [membersDropdownOpen, setMembersDropdownOpen] = useState(false);
   const location = useLocation();
 
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Programs', href: '/courses' },
-    { name: 'Membership', href: '/membership' },
+    { 
+      name: 'Members', 
+      href: '#',
+      dropdown: [
+        { name: 'Our Students', href: '/membership' },
+        { name: 'Our Community', href: '/community' },
+        { name: 'Black Belt', href: '/black-belt' }
+      ]
+    },
+    { name: 'Gallery', href: '/gallery' },
     { name: 'Admission', href: '/admission' },
     { name: 'Belt Exam', href: '/belt-exam' },
     { name: 'Contact', href: '/contact' },
@@ -63,15 +73,47 @@ function Navbar() {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-10">
               {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onClick={scrollToTop}
-                  className="text-lg font-semibold transition-colors duration-200"
-                  style={{ color: '#006CB5' }}
-                >
-                  {item.name}
-                </Link>
+                item.dropdown ? (
+                  <div 
+                    key={item.name}
+                    className="relative"
+                    onMouseEnter={() => setMembersDropdownOpen(true)}
+                    onMouseLeave={() => setMembersDropdownOpen(false)}
+                  >
+                    <button
+                      className="text-lg font-semibold transition-colors duration-200 flex items-center gap-1"
+                      style={{ color: '#006CB5' }}
+                    >
+                      {item.name}
+                      <FaChevronDown className="text-sm" />
+                    </button>
+                    
+                    {membersDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2 z-50">
+                        {item.dropdown.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            to={subItem.href}
+                            onClick={scrollToTop}
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={scrollToTop}
+                    className="text-lg font-semibold transition-colors duration-200"
+                    style={{ color: '#006CB5' }}
+                  >
+                    {item.name}
+                  </Link>
+                )
               ))}
             </div>
 
@@ -111,21 +153,51 @@ function Navbar() {
             <div className="md:hidden pb-4">
               <div className="space-y-2">
                 {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`block px-4 py-2 rounded-lg text-base font-semibold ${
-                      location.pathname === item.href
-                        ? 'text-white bg-[#006CB5]'
-                        : 'text-gray-800 hover:bg-gray-100'
-                    }`}
-                    onClick={() => {
-                      setIsOpen(false);
-                      scrollToTop();
-                    }}
-                  >
-                    {item.name}
-                  </Link>
+                  item.dropdown ? (
+                    <div key={item.name}>
+                      <button
+                        onClick={() => setMembersDropdownOpen(!membersDropdownOpen)}
+                        className="w-full text-left px-4 py-2 rounded-lg text-base font-semibold text-gray-800 hover:bg-gray-100 flex items-center justify-between"
+                      >
+                        {item.name}
+                        <FaChevronDown className={`text-sm transition-transform ${membersDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      {membersDropdownOpen && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {item.dropdown.map((subItem) => (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.href}
+                              className="block px-4 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
+                              onClick={() => {
+                                setIsOpen(false);
+                                setMembersDropdownOpen(false);
+                                scrollToTop();
+                              }}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`block px-4 py-2 rounded-lg text-base font-semibold ${
+                        location.pathname === item.href
+                          ? 'text-white bg-[#006CB5]'
+                          : 'text-gray-800 hover:bg-gray-100'
+                      }`}
+                      onClick={() => {
+                        setIsOpen(false);
+                        scrollToTop();
+                      }}
+                    >
+                      {item.name}
+                    </Link>
+                  )
                 ))}
               </div>
             </div>

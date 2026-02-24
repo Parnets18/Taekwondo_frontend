@@ -1,0 +1,143 @@
+/* About Page Specific Styles - Override ALL blue colors to BLACK */
+/* CRITICAL: This file MUST load after index.css to override global blue styles */
+
+/* ========================================
+   NUCLEAR OPTION - FORCE BLACK COLOR
+   ======================================== */
+
+/* Force all elements to be BLACK by default, breaking the global blue cascade */
+.about-page * {
+  color: #000000 !important;
+}
+
+/* ========================================
+   HEADINGS - Force to BLACK
+   ======================================== */
+
+.about-page h1,
+.about-page h2,
+.about-page h3,
+.about-page h4,
+.about-page h5,
+.about-page h6 {
+  color: #000000 !important;
+}
+
+/* ========================================
+   PRESERVE SPECIFIC COLORS (NOT BLACK)
+   ======================================== */
+
+/* Preserve white text in hero sections */
+.about-page .text-white,
+.about-page .text-white *,
+.about-page [class*="text-white"],
+.about-page [class*="text-white"] * {
+  color: white !important;
+}
+
+/* Preserve explicitly styled red text */
+.about-page [style*="color: #DC2626"],
+.about-page [style*="color: #DC2626"] *,
+.about-page [style*="color:#DC2626"],
+.about-page [style*="color:#DC2626"] *,
+.about-page [style*="color: rgb(220, 38, 38)"],
+.about-page [style*="color: rgb(220, 38, 38)"] * {
+  color: #DC2626 !important;
+}
+
+/* Preserve explicitly styled yellow text */
+.about-page [style*="color: #CA8A04"],
+.about-page [style*="color: #CA8A04"] *,
+.about-page [style*="color:#CA8A04"],
+.about-page [style*="color:#CA8A04"] *,
+.about-page [style*="color: #EAB308"],
+.about-page [style*="color: #EAB308"] *,
+.about-page [style*="color:#EAB308"],
+.about-page [style*="color:#EAB308"] *,
+.about-page [style*="color: rgb(202, 138, 4)"],
+.about-page [style*="color: rgb(202, 138, 4)"] *,
+.about-page [style*="color: rgb(234, 179, 8)"],
+.about-page [style*="color: rgb(234, 179, 8)"] * {
+  color: #CA8A04 !important;
+}
+
+/* Preserve gray text */
+.about-page [style*="color: #374151"],
+.about-page [style*="color: #374151"] *,
+.about-page [style*="color:#374151"],
+.about-page [style*="color:#374151"] *,
+.about-page [style*="color: #4B5563"],
+.about-page [style*="color: #4B5563"] *,
+.about-page [style*="color:#4B5563"],
+.about-page [style*="color:#4B5563"] *,
+.about-page [style*="color: rgb(55, 65, 81)"],
+.about-page [style*="color: rgb(55, 65, 81)"] *,
+.about-page [style*="color: rgb(75, 85, 99)"],
+.about-page [style*="color: rgb(75, 85, 99)"] * {
+  color: #374151 !important;
+}
+
+/* ========================================
+   FORCE BLUE TO BLACK
+   ======================================== */
+
+/* Override ANY blue color to BLACK */
+.about-page [style*="color: #006CB5"],
+.about-page [style*="color:#006CB5"],
+.about-page [style*="color: rgb(0, 108, 181)"],
+.about-page [class*="text-blue"] {
+  color: #000000 !important;
+}
+
+/* ========================================
+   TEXT ELEMENTS - Force to BLACK
+   ======================================== */
+
+/* All text elements default to BLACK */
+.about-page p,
+.about-page span,
+.about-page div,
+.about-page a,
+.about-page li,
+.about-page label,
+.about-page button {
+  color: #000000 !important;
+}
+
+/* ========================================
+   BACKGROUNDS - Override blue backgrounds
+   ======================================== */
+
+.about-page [style*="background-color: #006CB5"],
+.about-page [style*="backgroundColor: #006CB5"],
+.about-page .bg-blue-500,
+.about-page .bg-blue-600,
+.about-page [class*="bg-blue"] {
+  background-color: #f8fafc !important;
+}
+
+/* ========================================
+   BORDERS - Override blue borders to red
+   ======================================== */
+
+.about-page [style*="border-color: #006CB5"],
+.about-page [style*="borderColor: #006CB5"],
+.about-page .border-blue-500,
+.about-page .border-blue-600,
+.about-page [class*="border-blue"] {
+  border-color: #DC2626 !important;
+}
+
+/* ========================================
+   SELECTION COLOR - Override blue selection
+   ======================================== */
+
+.about-page ::selection {
+  background-color: #DC2626 !important;
+  color: white !important;
+}
+
+.about-page ::-moz-selection {
+  background-color: #DC2626 !important;
+  color: white !important;
+}

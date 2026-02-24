@@ -491,7 +491,18 @@ function Home() {
           </div>
         </div>
       </section>
-
+ {/* Recent Promotions & Members' Birthdays Section */}
+      <section className="py-12 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Promotions */}
+            <RecentPromotions />
+            
+            {/* Members' Birthdays */}
+            <MembersBirthdaysCard />
+          </div>
+        </div>
+      </section>
       {/* Testimonials Section */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -626,6 +637,401 @@ function Home() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+// Recent Promotions Component
+function RecentPromotions() {
+  const [promotions, setPromotions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      try {
+        console.log('🏆 Fetching promotions from API...');
+        const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/belts/promotions/public?limit=10');
+        console.log('📡 Response status:', response.status);
+        const data = await response.json();
+        console.log('📦 Promotions data received:', data);
+        
+        if (data.status === 'success') {
+          console.log('✅ Promotions found:', data.data.promotions?.length || 0);
+          // Sort by date descending and take last 10
+          const sortedPromotions = (data.data.promotions || [])
+            .sort((a, b) => new Date(b.promotionDate) - new Date(a.promotionDate))
+            .slice(0, 10);
+          setPromotions(sortedPromotions);
+        } else {
+          console.log('⚠️ No promotions or error:', data.message);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Error fetching promotions:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchPromotions();
+  }, []);
+
+  const getBeltColor = (beltName) => {
+    if (!beltName) return '#6B7280';
+    
+    const beltLower = beltName.toLowerCase();
+    
+    // Handle striped belts with gradients - check specific combinations
+    if (beltLower.includes('white') && beltLower.includes('yellow') && beltLower.includes('stripe')) {
+      return 'linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 40%, #FCD34D 40%, #FCD34D 60%, #FFFFFF 60%, #FFFFFF 100%)';
+    }
+    if (beltLower.includes('yellow') && beltLower.includes('green') && beltLower.includes('stripe')) {
+      return 'linear-gradient(to bottom, #FCD34D 0%, #FCD34D 40%, #10B981 40%, #10B981 60%, #FCD34D 60%, #FCD34D 100%)';
+    }
+    if (beltLower.includes('green') && beltLower.includes('blue') && beltLower.includes('stripe')) {
+      return 'linear-gradient(to bottom, #10B981 0%, #10B981 40%, #3B82F6 40%, #3B82F6 60%, #10B981 60%, #10B981 100%)';
+    }
+    if (beltLower.includes('blue') && beltLower.includes('red') && beltLower.includes('stripe')) {
+      return 'linear-gradient(to bottom, #3B82F6 0%, #3B82F6 40%, #EF4444 40%, #EF4444 60%, #3B82F6 60%, #3B82F6 100%)';
+    }
+    if (beltLower.includes('red') && beltLower.includes('black') && beltLower.includes('stripe')) {
+      return 'linear-gradient(to bottom, #EF4444 0%, #EF4444 40%, #000000 40%, #000000 60%, #EF4444 60%, #EF4444 100%)';
+    }
+    
+    // Solid color belts
+    const beltColors = {
+      'white': '#FFFFFF',
+      'yellow': '#FCD34D',
+      'orange': '#FB923C',
+      'green': '#10B981',
+      'blue': '#3B82F6',
+      'red': '#EF4444',
+      'black': '#000000',
+      '1st dan': '#000000',
+      '2nd dan': '#000000',
+      '3rd dan': '#000000'
+    };
+    
+    // Check for partial matches
+    for (const [key, color] of Object.entries(beltColors)) {
+      if (beltLower.includes(key)) {
+        return color;
+      }
+    }
+    
+    return '#6B7280';
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}${getDaySuffix(day)} ${month} ${year}`;
+  };
+
+  const getDaySuffix = (day) => {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  };
+
+  const groupByDate = () => {
+    const grouped = {};
+    promotions.forEach(promo => {
+      const date = formatDate(promo.promotionDate);
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(promo);
+    });
+    return grouped;
+  };
+
+  const groupedPromotions = groupByDate();
+
+  return (
+    <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+      <div className="p-4 text-center home-section-header" style={{ backgroundColor: '#006CB5' }}>
+        <h3 className="text-2xl font-bold home-section-title" style={{ color: '#FFFFFF' }}>Recent Promotions</h3>
+      </div>
+      <div className="p-4 max-h-96 overflow-y-auto">
+        {loading ? (
+          <p className="text-center text-gray-600">Loading promotions...</p>
+        ) : promotions.length === 0 ? (
+          <p className="text-center text-gray-600">No recent promotions</p>
+        ) : (
+          <div className="space-y-4">
+            {Object.entries(groupedPromotions).map(([date, promos]) => (
+              <div key={date}>
+                <h4 className="font-bold text-gray-700 mb-2">{date}</h4>
+                <div className="space-y-2">
+                  {promos.map((promo) => {
+                    const beltColor = getBeltColor(promo.toBelt);
+                    const isGradient = beltColor.startsWith('linear-gradient');
+                    const textColor = !isGradient && (beltColor === '#FFFFFF' || beltColor === '#FCD34D') ? '#000' : '#FFF';
+                    
+                    return (
+                      <div key={promo._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                        <div 
+                          className="w-16 h-8 rounded flex items-center justify-center text-xs font-bold border-2"
+                          style={{ 
+                            ...(isGradient ? { backgroundImage: beltColor } : { backgroundColor: beltColor }),
+                            borderColor: '#000',
+                            color: textColor
+                          }}
+                        >
+                          {promo.toBelt?.split(' ')[0] || 'Belt'}
+                        </div>
+                        <p className="text-gray-800 font-medium">{promo.studentName}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Members' Birthdays Card Component
+function MembersBirthdaysCard() {
+  const [birthdays, setBirthdays] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBirthdays = async () => {
+      try {
+        console.log('🎂 Fetching birthdays from API...');
+        const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/students/birthdays');
+        console.log('📡 Response status:', response.status);
+        const data = await response.json();
+        console.log('📦 Birthday data received:', data);
+        
+        if (data.status === 'success') {
+          console.log('✅ Birthdays found:', data.data.length);
+          setBirthdays(data.data);
+        } else {
+          console.log('⚠️ No birthdays or error:', data.message);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Error fetching birthdays:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchBirthdays();
+  }, []);
+
+  const getBeltColor = (beltLevel) => {
+    if (!beltLevel) return '#6B7280';
+    
+    // Convert to lowercase for case-insensitive matching
+    const beltLower = beltLevel.toLowerCase();
+    
+    // Check for striped belts - return gradient
+    if (beltLower.includes('stripe')) {
+      if (beltLower.includes('white') && beltLower.includes('yellow')) {
+        return 'linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 40%, #FCD34D 40%, #FCD34D 60%, #FFFFFF 60%, #FFFFFF 100%)';
+      }
+      if (beltLower.includes('yellow') && beltLower.includes('green')) {
+        return 'linear-gradient(to bottom, #FCD34D 0%, #FCD34D 40%, #10B981 40%, #10B981 60%, #FCD34D 60%, #FCD34D 100%)';
+      }
+      if (beltLower.includes('green') && beltLower.includes('blue')) {
+        return 'linear-gradient(to bottom, #10B981 0%, #10B981 40%, #3B82F6 40%, #3B82F6 60%, #10B981 60%, #10B981 100%)';
+      }
+      if (beltLower.includes('blue') && beltLower.includes('red')) {
+        return 'linear-gradient(to bottom, #3B82F6 0%, #3B82F6 40%, #EF4444 40%, #EF4444 60%, #3B82F6 60%, #3B82F6 100%)';
+      }
+      if (beltLower.includes('red') && beltLower.includes('black')) {
+        return 'linear-gradient(to bottom, #EF4444 0%, #EF4444 40%, #000000 40%, #000000 60%, #EF4444 60%, #EF4444 100%)';
+      }
+    }
+    
+    const beltColors = {
+      'white': '#FFFFFF',
+      'yellow': '#FCD34D',
+      'green': '#10B981',
+      'blue': '#3B82F6',
+      'red': '#EF4444',
+      'black': '#000000',
+      'black-1st': '#000000',
+      'black-2nd': '#000000',
+      'black-3rd': '#000000'
+    };
+    return beltColors[beltLower] || '#6B7280';
+  };
+
+  const groupByDate = () => {
+    const today = [];
+    const tomorrow = [];
+    const thisWeek = [];
+    const upcoming = [];
+
+    birthdays.forEach(student => {
+      if (student.daysUntil === 0) {
+        today.push(student);
+      } else if (student.daysUntil === 1) {
+        tomorrow.push(student);
+      } else if (student.daysUntil <= 7) {
+        thisWeek.push(student);
+      } else {
+        upcoming.push(student);
+      }
+    });
+
+    return { today, tomorrow, thisWeek, upcoming };
+  };
+
+  const { today, tomorrow, thisWeek, upcoming } = groupByDate();
+
+  return (
+    <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+      <div className="p-4 text-center home-section-header" style={{ backgroundColor: '#006CB5' }}>
+        <h3 className="text-2xl font-bold home-section-title" style={{ color: '#FFFFFF' }}>Members' Birthdays</h3>
+      </div>
+      <div className="p-4 max-h-96 overflow-y-auto">
+        {loading ? (
+          <p className="text-center text-gray-600">Loading birthdays...</p>
+        ) : birthdays.length === 0 ? (
+          <p className="text-center text-gray-600">No upcoming birthdays</p>
+        ) : (
+          <div className="space-y-4">
+            {/* Today */}
+            {today.length > 0 && (
+              <div>
+                <h4 className="font-bold text-gray-700 mb-2">Today</h4>
+                <div className="space-y-2">
+                  {today.map((student) => {
+                    const beltColor = getBeltColor(student.currentBelt);
+                    const isGradient = beltColor.startsWith('linear-gradient');
+                    const beltLower = (student.currentBelt || '').toLowerCase();
+                    const textColor = !isGradient && (beltLower.includes('white') || beltLower.includes('yellow')) ? '#000' : '#FFF';
+                    
+                    return (
+                      <div key={student._id} className="flex items-center gap-3 p-2 bg-yellow-50 rounded border-l-4 border-yellow-400">
+                        <div 
+                          className="w-16 h-8 rounded flex items-center justify-center text-xs font-bold border-2"
+                          style={{ 
+                            ...(isGradient ? { backgroundImage: beltColor } : { backgroundColor: beltColor }),
+                            borderColor: '#000',
+                            color: textColor
+                          }}
+                        >
+                          {student.currentBelt?.split(' ')[0] || 'Belt'}
+                        </div>
+                        <p className="text-gray-800 font-medium flex-1">{student.fullName}</p>
+                        <span className="text-yellow-600">🎂</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Tomorrow */}
+            {tomorrow.length > 0 && (
+              <div>
+                <h4 className="font-bold text-gray-700 mb-2">Tomorrow</h4>
+                <div className="space-y-2">
+                  {tomorrow.map((student) => {
+                    const beltColor = getBeltColor(student.currentBelt);
+                    const isGradient = beltColor.startsWith('linear-gradient');
+                    const beltLower = (student.currentBelt || '').toLowerCase();
+                    const textColor = !isGradient && (beltLower.includes('white') || beltLower.includes('yellow')) ? '#000' : '#FFF';
+                    
+                    return (
+                      <div key={student._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                        <div 
+                          className="w-16 h-8 rounded flex items-center justify-center text-xs font-bold border-2"
+                          style={{ 
+                            ...(isGradient ? { backgroundImage: beltColor } : { backgroundColor: beltColor }),
+                            borderColor: '#000',
+                            color: textColor
+                          }}
+                        >
+                          {student.currentBelt?.split(' ')[0] || 'Belt'}
+                        </div>
+                        <p className="text-gray-800 font-medium">{student.fullName}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* This Week */}
+            {thisWeek.length > 0 && (
+              <div>
+                <h4 className="font-bold text-gray-700 mb-2">This Week</h4>
+                <div className="space-y-2">
+                  {thisWeek.map((student) => {
+                    const beltColor = getBeltColor(student.currentBelt);
+                    const isGradient = beltColor.startsWith('linear-gradient');
+                    const beltLower = (student.currentBelt || '').toLowerCase();
+                    const textColor = !isGradient && (beltLower.includes('white') || beltLower.includes('yellow')) ? '#000' : '#FFF';
+                    
+                    return (
+                      <div key={student._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                        <div 
+                          className="w-16 h-8 rounded flex items-center justify-center text-xs font-bold border-2"
+                          style={{ 
+                            ...(isGradient ? { backgroundImage: beltColor } : { backgroundColor: beltColor }),
+                            borderColor: '#000',
+                            color: textColor
+                          }}
+                        >
+                          {student.currentBelt?.split(' ')[0] || 'Belt'}
+                        </div>
+                        <p className="text-gray-800 font-medium flex-1">{student.fullName}</p>
+                        <span className="text-gray-500 text-xs">In {student.daysUntil}d</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Upcoming (Next Month) */}
+            {upcoming.length > 0 && (
+              <div>
+                <h4 className="font-bold text-gray-700 mb-2">Next Month</h4>
+                <div className="space-y-2">
+                  {upcoming.map((student) => {
+                    const beltColor = getBeltColor(student.currentBelt);
+                    const isGradient = beltColor.startsWith('linear-gradient');
+                    const beltLower = (student.currentBelt || '').toLowerCase();
+                    const textColor = !isGradient && (beltLower.includes('white') || beltLower.includes('yellow')) ? '#000' : '#FFF';
+                    
+                    return (
+                      <div key={student._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                        <div 
+                          className="w-16 h-8 rounded flex items-center justify-center text-xs font-bold border-2"
+                          style={{ 
+                            ...(isGradient ? { backgroundImage: beltColor } : { backgroundColor: beltColor }),
+                            borderColor: '#000',
+                            color: textColor
+                          }}
+                        >
+                          {student.currentBelt?.split(' ')[0] || 'Belt'}
+                        </div>
+                        <p className="text-gray-800 font-medium flex-1">{student.fullName}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

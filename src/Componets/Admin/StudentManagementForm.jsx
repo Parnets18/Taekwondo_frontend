@@ -16,7 +16,7 @@ export const StudentFormModal = ({
   handlePhotoChange
 }) => {
   const [achievements, setAchievements] = useState(
-    student?.achievements || [{ tournamentName: '', address: '', date: '', prize: '' }]
+    student?.achievements || [{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]
   );
   const [expandedBelts, setExpandedBelts] = useState({
     yellow: false,
@@ -30,9 +30,16 @@ export const StudentFormModal = ({
   // Update achievements when student prop changes
   useEffect(() => {
     if (student?.achievements && Array.isArray(student.achievements) && student.achievements.length > 0) {
-      setAchievements(student.achievements);
+      // Ensure each achievement has typePrices array
+      const formattedAchievements = student.achievements.map(ach => ({
+        ...ach,
+        typePrices: ach.typePrices && ach.typePrices.length > 0 
+          ? ach.typePrices 
+          : [{ type: ach.type || '', price: ach.prize || '' }]
+      }));
+      setAchievements(formattedAchievements);
     } else {
-      setAchievements([{ tournamentName: '', address: '', date: '', prize: '' }]);
+      setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
     }
   }, [student]);
 
@@ -42,7 +49,7 @@ export const StudentFormModal = ({
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
   const handleAddAchievement = () => {
-    setAchievements([...achievements, { tournamentName: '', address: '', date: '', prize: '' }]);
+    setAchievements([...achievements, { tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
   };
 
   const handleRemoveAchievement = (index) => {
@@ -53,6 +60,31 @@ export const StudentFormModal = ({
   const handleAchievementChange = (index, field, value) => {
     const newAchievements = [...achievements];
     newAchievements[index][field] = value;
+    setAchievements(newAchievements);
+  };
+
+  const handleAddTypePrice = (achievementIndex) => {
+    const newAchievements = [...achievements];
+    if (!newAchievements[achievementIndex].typePrices) {
+      newAchievements[achievementIndex].typePrices = [];
+    }
+    newAchievements[achievementIndex].typePrices.push({ type: '', price: '' });
+    setAchievements(newAchievements);
+  };
+
+  const handleRemoveTypePrice = (achievementIndex, typePriceIndex) => {
+    const newAchievements = [...achievements];
+    newAchievements[achievementIndex].typePrices = newAchievements[achievementIndex].typePrices.filter((_, i) => i !== typePriceIndex);
+    // Keep at least one type-price pair
+    if (newAchievements[achievementIndex].typePrices.length === 0) {
+      newAchievements[achievementIndex].typePrices = [{ type: '', price: '' }];
+    }
+    setAchievements(newAchievements);
+  };
+
+  const handleTypePriceChange = (achievementIndex, typePriceIndex, field, value) => {
+    const newAchievements = [...achievements];
+    newAchievements[achievementIndex].typePrices[typePriceIndex][field] = value;
     setAchievements(newAchievements);
   };
 
@@ -76,7 +108,7 @@ export const StudentFormModal = ({
               setFormAge(null);
               setPhotoPreview(null);
               setPhotoFile(null);
-              setAchievements([{ tournamentName: '', address: '', date: '', prize: '' }]);
+              setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
             }}
             className="text-slate-500 hover:text-slate-700 text-2xl"
           >
@@ -196,7 +228,6 @@ export const StudentFormModal = ({
                     setFormAge(age);
                   }}
                   required
-                  disabled={isEdit}
                 />
                 {formAge !== null && formAge < 3 && (
                   <p className="text-red-600 text-sm mt-1">
@@ -474,27 +505,77 @@ export const StudentFormModal = ({
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
                   </div>
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-700 mb-2">Date</label>
                     <input
                       type="date"
                       name={`achievement_${index}_date`}
-                      value={achievement.date || ''}
+                      value={achievement.date ? (typeof achievement.date === 'string' ? achievement.date.split('T')[0] : new Date(achievement.date).toISOString().split('T')[0]) : ''}
                       onChange={(e) => handleAchievementChange(index, 'date', e.target.value)}
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Prize</label>
-                    <input
-                      type="text"
-                      name={`achievement_${index}_prize`}
-                      value={achievement.prize || ''}
-                      onChange={(e) => handleAchievementChange(index, 'prize', e.target.value)}
-                      placeholder="Enter prize/achievement (optional)"
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    />
+                </div>
+
+                {/* Type-Price Pairs Section */}
+                <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="block text-sm font-semibold text-slate-700">Achievement Types & Prices</label>
+                    <button
+                      type="button"
+                      onClick={() => handleAddTypePrice(index)}
+                      className="px-3 py-1 text-white rounded-md hover:opacity-90 transition-colors font-medium text-xs"
+                      style={{ backgroundColor: '#006CB5' }}
+                    >
+                      + Add Type-Price
+                    </button>
                   </div>
+                  {achievement.typePrices && achievement.typePrices.map((typePrice, tpIndex) => (
+                    <div key={tpIndex} className="mb-3 p-3 bg-white rounded-md border border-slate-200">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-semibold text-slate-600">Type-Price {tpIndex + 1}</span>
+                        {achievement.typePrices.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTypePrice(index, tpIndex)}
+                            className="text-red-600 hover:text-red-800 text-xs font-medium"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Type</label>
+                          <select
+                            name={`achievement_${index}_typePrice_${tpIndex}_type`}
+                            value={typePrice.type || ''}
+                            onChange={(e) => handleTypePriceChange(index, tpIndex, 'type', e.target.value)}
+                            className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          >
+                            <option value="">Select Type (optional)</option>
+                            <option value="Individual Sparring">Individual Sparring</option>
+                            <option value="Group Sparring">Group Sparring</option>
+                            <option value="Individual Tuls">Individual Tuls</option>
+                            <option value="Group Tuls">Group Tuls</option>
+                            <option value="Power Breaking">Power Breaking</option>
+                            <option value="Self Defence Techniques">Self Defence Techniques</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Price</label>
+                          <input
+                            type="text"
+                            name={`achievement_${index}_typePrice_${tpIndex}_price`}
+                            value={typePrice.price || ''}
+                            onChange={(e) => handleTypePriceChange(index, tpIndex, 'price', e.target.value)}
+                            placeholder="Enter price (optional)"
+                            className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
@@ -751,7 +832,7 @@ export const StudentFormModal = ({
                 setFormAge(null);
                 setPhotoPreview(null);
                 setPhotoFile(null);
-                setAchievements([{ tournamentName: '', address: '', date: '', prize: '' }]);
+                setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
               }}
               className="px-6 py-3 rounded-xl font-semibold transition-colors"
               style={{ backgroundColor: '#e5e7eb', color: '#374151' }}

@@ -575,17 +575,19 @@ function Admission() {
                 {/* Photo Upload */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-3">
-                   Upload Photo
+                   Upload Photo (Optional)
                   </label>
                   <div className="flex items-center gap-4">
                     <label className="flex-1 cursor-pointer">
                       <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-amber-500 transition-all duration-300 bg-slate-50 hover:bg-amber-50">
                         <div className="flex flex-col items-center">
-                          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-3">
-                            <FaUser className="text-amber-600 text-2xl" />
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mb-3">
+                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                            </svg>
                           </div>
                           <p className="text-sm font-semibold text-slate-700 mb-1">
-                            {formData.photo ? formData.photo.name : 'Click to upload photo'}
+                            {formData.photo ? formData.photo.name : 'Click to upload photo (optional)'}
                           </p>
                           <p className="text-xs text-gray-500">
                             PNG, JPG up to 5MB
@@ -600,7 +602,7 @@ function Admission() {
                         className="hidden"
                       />
                     </label>
-                    {formData.photo && (
+                    {formData.photo ? (
                       <div className="flex-shrink-0">
                         <div className="w-24 h-24 border-2 border-slate-200 rounded-lg overflow-hidden">
                           <img 
@@ -608,6 +610,14 @@ function Admission() {
                             alt="Preview" 
                             className="w-full h-full object-cover"
                           />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex-shrink-0">
+                        <div className="w-24 h-24 border-2 border-slate-200 rounded-lg overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                          </svg>
                         </div>
                       </div>
                     )}

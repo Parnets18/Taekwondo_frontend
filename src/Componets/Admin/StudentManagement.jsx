@@ -132,6 +132,13 @@ function StudentManagement() {
         setStudents(data.data.students);
         setStats(data.data.stats);
         setPagination(data.data.pagination);
+        
+        // Debug: Log photo paths
+        console.log('📸 Student photos:', data.data.students.map(s => ({ 
+          name: s.fullName, 
+          photo: s.photo,
+          photoUrl: s.photo ? `${BASE_URL}/${s.photo}` : 'No photo'
+        })));
       }
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -643,17 +650,28 @@ function StudentManagement() {
                     <div className="flex-shrink-0 h-10 w-10">
                       {student.photo ? (
                         <img 
-                          className="h-10 w-10 rounded-full object-cover" 
+                          className="h-10 w-10 rounded-full object-cover border-2 border-gray-300" 
                           src={`${BASE_URL}/${student.photo}`} 
                           alt={student.fullName}
                           onError={(e) => {
+                            console.error('Image failed to load:', `${BASE_URL}/${student.photo}`);
                             e.target.onerror = null;
-                            e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect fill="%23ddd" width="40" height="40"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="20"%3E👤%3C/text%3E%3C/svg%3E';
+                            // Show placeholder on error
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = `
+                              <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-2 border-blue-300">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                              </div>
+                            `;
                           }}
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-500 text-lg">👤</span>
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-2 border-blue-300">
+                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                          </svg>
                         </div>
                       )}
                     </div>
@@ -1040,15 +1058,25 @@ function StudentManagement() {
                   <img 
                     src={`${BASE_URL}/${selectedStudent.photo}`} 
                     alt={selectedStudent.fullName}
-                    className="w-32 h-32 object-cover rounded-lg border-2 border-slate-300"
+                    className="w-32 h-32 object-cover rounded-lg border-4 border-blue-300 shadow-lg"
                     onError={(e) => {
+                      console.error('View modal image failed to load:', `${BASE_URL}/${selectedStudent.photo}`);
                       e.target.onerror = null;
-                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect fill="%23ddd" width="128" height="128"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="48"%3E👤%3C/text%3E%3C/svg%3E';
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = `
+                        <div class="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center border-4 border-blue-300 shadow-lg">
+                          <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                          </svg>
+                        </div>
+                      `;
                     }}
                   />
                 ) : (
-                  <div className="w-32 h-32 bg-slate-200 rounded-lg flex items-center justify-center border-2 border-slate-300">
-                    <span className="text-6xl">👤</span>
+                  <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center border-4 border-blue-300 shadow-lg">
+                    <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                    </svg>
                   </div>
                 )}
               </div>
@@ -1191,6 +1219,10 @@ function StudentManagement() {
                         <div>
                           <label className="text-xs font-medium text-slate-600">Date</label>
                           <p className="text-sm text-slate-900">{achievement.date ? new Date(achievement.date).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-slate-600">Type</label>
+                          <p className="text-sm text-slate-900">{achievement.type || 'N/A'}</p>
                         </div>
                         <div>
                           <label className="text-xs font-medium text-slate-600">Prize</label>

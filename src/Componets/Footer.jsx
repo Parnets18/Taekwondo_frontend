@@ -30,15 +30,20 @@ function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-lg font-semibold mb-4" style={{ color: '#006CB5' }}>Quick Links</h4>
-            <ul className="space-y-2">
-              <li><Link to="/" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Home</Link></li>
-              <li><Link to="/about" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">About Us</Link></li>
-              <li><Link to="/courses" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Programs</Link></li>
-              <li><Link to="/membership" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Membership</Link></li>
-              <li><Link to="/admission" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Admission</Link></li>
-              <li><Link to="/belt-exam" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Belt Exam</Link></li>
-              <li><Link to="/contact" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Contact</Link></li>
-            </ul>
+            <div className="grid grid-cols-2 gap-x-4">
+              <ul className="space-y-2">
+                <li><Link to="/" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Home</Link></li>
+                <li><Link to="/about" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">About Us</Link></li>
+                <li><Link to="/courses" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Programs</Link></li>
+                <li><Link to="/membership" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Members</Link></li>
+              </ul>
+              <ul className="space-y-2">
+                <li><Link to="/gallery" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Gallery</Link></li>
+                <li><Link to="/admission" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Admission</Link></li>
+                <li><Link to="/belt-exam" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Belt Exam</Link></li>
+                <li><Link to="/contact" onClick={scrollToTop} className="text-gray-700 hover:opacity-70 transition-opacity">Contact</Link></li>
+              </ul>
+            </div>
           </div>
 
           {/* Contact Info */}
@@ -71,7 +76,7 @@ function Footer() {
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
-                <p className="text-sm text-gray-700">yesh18390@gmail.com</p>
+                <p className="text-sm text-gray-700">contact@cwtakarnataka.com</p>
               </div>
             </div>
           </div>

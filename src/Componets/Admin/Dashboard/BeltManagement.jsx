@@ -46,20 +46,20 @@ function BeltManagement() {
 
   // Predefined belt colors with names
   const beltColors = [
-    { name: 'White Belt', value: 'white', hex: '#FFFFFF' },
-    { name: 'White Belt / Yellow Stripe', value: 'white-yellow-stripe', hex: '#FFFFFF' },
-    { name: 'Yellow Belt', value: 'yellow', hex: '#FFD700' },
-    { name: 'Yellow Belt / Green Stripe', value: 'yellow-green-stripe', hex: '#FFD700' },
-    { name: 'Green Belt', value: 'green', hex: '#008000' },
-    { name: 'Green Belt / Blue Stripe', value: 'green-blue-stripe', hex: '#008000' },
-    { name: 'Blue Belt', value: 'blue', hex: '#0000FF' },
-    { name: 'Blue Belt / Red Stripe', value: 'blue-red-stripe', hex: '#0000FF' },
-    { name: 'Red Belt', value: 'red', hex: '#FF0000' },
-    { name: 'Red Belt / Black Stripe', value: 'red-black-stripe', hex: '#FF0000' },
-    { name: 'Black Belt 1st Dan', value: 'black', hex: '#000000' },
-    { name: 'Orange Belt', value: 'orange', hex: '#FFA500' },
-    { name: 'Purple Belt', value: 'purple', hex: '#800080' },
-    { name: 'Brown Belt', value: 'brown', hex: '#8B4513' }
+    { name: 'White', value: 'white', hex: '#FFFFFF' },
+    { name: 'White / Yellow Stripe', value: 'white-yellow-stripe', hex: '#FFFFFF' },
+    { name: 'Yellow', value: 'yellow', hex: '#FFD700' },
+    { name: 'Yellow / Green Stripe', value: 'yellow-green-stripe', hex: '#FFD700' },
+    { name: 'Green', value: 'green', hex: '#008000' },
+    { name: 'Green / Blue Stripe', value: 'green-blue-stripe', hex: '#008000' },
+    { name: 'Blue', value: 'blue', hex: '#0000FF' },
+    { name: 'Blue / Red Stripe', value: 'blue-red-stripe', hex: '#0000FF' },
+    { name: 'Red', value: 'red', hex: '#FF0000' },
+    { name: 'Red / Black Stripe', value: 'red-black-stripe', hex: '#FF0000' },
+    { name: 'Black 1st Dan', value: 'black', hex: '#000000' },
+    { name: 'Orange', value: 'orange', hex: '#FFA500' },
+    { name: 'Purple', value: 'purple', hex: '#800080' },
+    { name: 'Brown', value: 'brown', hex: '#8B4513' }
   ];
 
   const [promotionForm, setPromotionForm] = useState({
@@ -424,14 +424,14 @@ function BeltManagement() {
           if (exactMatch && exactMatch.currentBelt) {
             // Map student's currentBelt enum to belt name
             const beltMapping = {
-              'white': 'White Belt',
-              'yellow': 'Yellow Belt',
-              'green': 'Green Belt',
-              'blue': 'Blue Belt',
-              'red': 'Red Belt',
-              'black-1st': 'Black Belt 1st Dan',
-              'black-2nd': 'Black Belt 2nd Dan',
-              'black-3rd': 'Black Belt 3rd Dan'
+              'white': 'White',
+              'yellow': 'Yellow',
+              'green': 'Green',
+              'blue': 'Blue',
+              'red': 'Red',
+              'black-1st': 'Black 1st Dan',
+              'black-2nd': 'Black 2nd Dan',
+              'black-3rd': 'Black 3rd Dan'
             };
             
             const mappedBeltName = beltMapping[exactMatch.currentBelt];
@@ -465,14 +465,14 @@ function BeltManagement() {
       // Auto-populate belt
       if (student.currentBelt) {
         const beltMapping = {
-          'white': 'White Belt',
-          'yellow': 'Yellow Belt',
-          'green': 'Green Belt',
-          'blue': 'Blue Belt',
-          'red': 'Red Belt',
-          'black-1st': 'Black Belt 1st Dan',
-          'black-2nd': 'Black Belt 2nd Dan',
-          'black-3rd': 'Black Belt 3rd Dan'
+          'white': 'White',
+          'yellow': 'Yellow',
+          'green': 'Green',
+          'blue': 'Blue',
+          'red': 'Red',
+          'black-1st': 'Black 1st Dan',
+          'black-2nd': 'Black 2nd Dan',
+          'black-3rd': 'Black 3rd Dan'
         };
         
         const mappedBeltName = beltMapping[student.currentBelt];
@@ -531,14 +531,14 @@ function BeltManagement() {
             } else if (exactMatch.currentBelt) {
               // Fallback to student's currentBelt if no promotions found
               const beltMapping = {
-                'white': 'White Belt',
-                'yellow': 'Yellow Belt',
-                'green': 'Green Belt',
-                'blue': 'Blue Belt',
-                'red': 'Red Belt',
-                'black-1st': 'Black Belt 1st Dan',
-                'black-2nd': 'Black Belt 2nd Dan',
-                'black-3rd': 'Black Belt 3rd Dan'
+                'white': 'White',
+                'yellow': 'Yellow',
+                'green': 'Green',
+                'blue': 'Blue',
+                'red': 'Red',
+                'black-1st': 'Black 1st Dan',
+                'black-2nd': 'Black 2nd Dan',
+                'black-3rd': 'Black 3rd Dan'
               };
               
               const mappedBeltName = beltMapping[exactMatch.currentBelt];
@@ -586,14 +586,14 @@ function BeltManagement() {
       } else if (student.currentBelt) {
         // Fallback to student's currentBelt if no promotions found
         const beltMapping = {
-          'white': 'White Belt',
-          'yellow': 'Yellow Belt',
-          'green': 'Green Belt',
-          'blue': 'Blue Belt',
-          'red': 'Red Belt',
-          'black-1st': 'Black Belt 1st Dan',
-          'black-2nd': 'Black Belt 2nd Dan',
-          'black-3rd': 'Black Belt 3rd Dan'
+          'white': 'White',
+          'yellow': 'Yellow',
+          'green': 'Green',
+          'blue': 'Blue',
+          'red': 'Red',
+          'black-1st': 'Black 1st Dan',
+          'black-2nd': 'Black 2nd Dan',
+          'black-3rd': 'Black 3rd Dan'
         };
         
         const mappedBeltName = beltMapping[student.currentBelt];
