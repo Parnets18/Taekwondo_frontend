@@ -13,11 +13,16 @@ import {
   FaEnvelope,
   FaSignOutAlt,
   FaUserShield,
-  FaImage
+  FaImage,
+  FaHome,
+  FaChevronDown,
+  FaChevronRight,
+  FaInfoCircle
 } from 'react-icons/fa';
 
 function AdminLayout() {
   const [user, setUser] = useState(null);
+  const [openDropdowns, setOpenDropdowns] = useState({});
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -48,15 +53,41 @@ function AdminLayout() {
     navigate('/');
   };
 
+  const toggleDropdown = (groupIndex) => {
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [groupIndex]: !prev[groupIndex]
+    }));
+  };
+
   const menuGroups = [
     {
-     
       items: [
         { path: '/admin/dashboard', name: 'Dashboard & Analytics Reports', icon: FaChartLine }
       ]
     },
     {
-     
+      title: 'Home',
+      icon: FaHome,
+      isDropdown: true,
+      items: [
+        { path: '/admin/banners', name: 'Banner Management', icon: FaImage },
+        { path: '/admin/about-section', name: 'About Section (Home)', icon: FaInfoCircle}
+      ]
+    },
+    {
+      title: 'About',
+      icon: FaInfoCircle,
+      isDropdown: true,
+      items: [
+        { path: '/admin/about-dojang-story', name: 'Our Dojang Story', icon: FaInfoCircle},
+        { path: '/admin/mentors', name: 'Our Esteemed Mentors', icon: FaUsers},
+        { path: '/admin/leadership', name: 'CWTAK Leadership', icon: FaUsers},
+        { path: '/admin/achievements', name: 'Achievements', icon: FaMedal},
+        { path: '/admin/locations', name: 'Locations & School Partnerships', icon: FaBook}
+      ]
+    },
+    {
       items: [
         { path: '/admin/students', name: 'Student Account Management', icon: FaUsers},
         { path: '/admin/attendance', name: 'Attendance Management & Reports', icon: FaClipboardCheck},
@@ -64,31 +95,26 @@ function AdminLayout() {
       ]
     },
     {
-      title: 'Academy Operations',
       items: [
         { path: '/admin/events', name: 'Event Creation & Tracking', icon: FaCalendarAlt},
         { path: '/admin/certificates', name: 'Certificate Upload', icon: FaCertificate},
-        { path: '/admin/admissions', name: 'Admissions', icon: FaUserPlus},
-        { path: '/admin/belt-exams', name: 'Belt Exams', icon: FaMedal},
-        { path: '/admin/banners', name: 'Banner Management', icon: FaImage},
         { path: '/admin/gallery', name: 'Gallery Management', icon: FaImage},
         { path: '/admin/community', name: 'Community Management', icon: FaUsers},
         { path: '/admin/black-belt', name: 'Black Belt Management', icon: FaMedal},
-        { path: '/admin/locations', name: 'Locations & School Partnerships', icon: FaBook}
+        
       ]
     },
     {
-      
       items: [
         { path: '/admin/fees', name: 'Fee Setup & Tracking', icon: FaDollarSign}
       ]
     },
     {
-      
       items: [
-         { path: '/admin/courses', name: 'Course Management', icon: FaBook},
-        { path: '/admin/contacts', name: 'Contact Form', icon: FaEnvelope},
-       
+        { path: '/admin/courses', name: 'Course Management', icon: FaBook},
+        { path: '/admin/admissions', name: 'Admissions', icon: FaUserPlus},
+        { path: '/admin/belt-exams', name: 'Belt Exams', icon: FaMedal},
+        { path: '/admin/contacts', name: 'Contact Form', icon: FaEnvelope}
       ]
     }
   ];
@@ -126,26 +152,73 @@ function AdminLayout() {
         <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {menuGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="mb-6">
-              {group.items.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 group mb-2 ${
-                      location.pathname === item.path
-                        ? 'text-white shadow-lg'
-                        : 'hover:bg-gray-100'
-                    }`}
-                    style={location.pathname === item.path ? { backgroundColor: '#006CB5', color: 'white' } : { color: '#000000' }}
+              {group.isDropdown ? (
+                // Dropdown menu
+                <div>
+                  <button
+                    onClick={() => toggleDropdown(groupIndex)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 mb-2"
+                    style={{ color: '#000000' }}
                   >
-                    <IconComponent className="w-5 h-5 mr-3 flex-shrink-0" style={location.pathname === item.path ? { color: 'white' } : { color: '#006CB5' }} />
-                    <div className="flex-1 text-left">
-                      <div className="font-semibold text-sm leading-tight">{item.name}</div>
+                    <div className="flex items-center">
+                      <group.icon className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#006CB5' }} />
+                      <span className="font-semibold text-sm">{group.title}</span>
                     </div>
-                  </Link>
-                );
-              })}
+                    {openDropdowns[groupIndex] ? (
+                      <FaChevronDown className="w-4 h-4" style={{ color: '#006CB5' }} />
+                    ) : (
+                      <FaChevronRight className="w-4 h-4" style={{ color: '#006CB5' }} />
+                    )}
+                  </button>
+                  
+                  {openDropdowns[groupIndex] && (
+                    <div className="ml-4 space-y-1">
+                      {group.items.map((item) => {
+                        const IconComponent = item.icon;
+                        return (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 group ${
+                              location.pathname === item.path
+                                ? 'text-white shadow-lg'
+                                : 'hover:bg-gray-100'
+                            }`}
+                            style={location.pathname === item.path ? { backgroundColor: '#006CB5', color: 'white' } : { color: '#000000' }}
+                          >
+                            <IconComponent className="w-5 h-5 mr-3 flex-shrink-0" style={location.pathname === item.path ? { color: 'white' } : { color: '#006CB5' }} />
+                            <div className="flex-1 text-left">
+                              <div className="font-semibold text-sm leading-tight">{item.name}</div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Regular menu items
+                group.items.map((item) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 group mb-2 ${
+                        location.pathname === item.path
+                          ? 'text-white shadow-lg'
+                          : 'hover:bg-gray-100'
+                      }`}
+                      style={location.pathname === item.path ? { backgroundColor: '#006CB5', color: 'white' } : { color: '#000000' }}
+                    >
+                      <IconComponent className="w-5 h-5 mr-3 flex-shrink-0" style={location.pathname === item.path ? { color: 'white' } : { color: '#006CB5' }} />
+                      <div className="flex-1 text-left">
+                        <div className="font-semibold text-sm leading-tight">{item.name}</div>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
             </div>
           ))}
         </nav>

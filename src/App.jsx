@@ -37,6 +37,10 @@ import BlackBelt from './Componets/Pages/BlackBelt';
 import CommunityManagement from './Componets/Admin/CommunityManagement';
 import BlackBeltManagement from './Componets/Admin/BlackBeltManagement';
 import LocationManagement from './Componets/Admin/LocationManagement';
+import AboutSectionManagement from './Componets/Admin/AboutSectionManagement';
+import AboutDojangStoryManagement from './Componets/Admin/AboutDojangStoryManagement';
+import MentorManagement from './Componets/Admin/MentorManagement';
+import LeadershipManagement from './Componets/Admin/LeadershipManagement';
 
 // Layout wrapper component that includes scroll-to-top functionality
 function PublicLayout({ children }) {
@@ -160,6 +164,10 @@ function App() {
           <Route path="community" element={<CommunityManagement />} />
           <Route path="black-belt" element={<BlackBeltManagement />} />
           <Route path="locations" element={<LocationManagement />} />
+          <Route path="about-section" element={<AboutSectionManagement />} />
+          <Route path="about-dojang-story" element={<AboutDojangStoryManagement />} />
+          <Route path="mentors" element={<MentorManagement />} />
+          <Route path="leadership" element={<LeadershipManagement />} />
         </Route>
       </Routes>
     </Router>

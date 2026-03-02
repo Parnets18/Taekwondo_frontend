@@ -1,30 +1,31 @@
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 
-function GalleryManagement() {
-  const [photos, setPhotos] = useState([]);
+function AboutDojangStoryManagement() {
+  const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedStory, setSelectedStory] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [formData, setFormData] = useState({
-    category: ''
+    title: 'Our Dojang Story',
+    description: ''
   });
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
   const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
   useEffect(() => {
-    fetchPhotos();
+    fetchStories();
   }, []);
 
-  const fetchPhotos = async () => {
+  const fetchStories = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/gallery`, {
+      const response = await fetch(`${API_BASE_URL}/about-dojang-story/all`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -32,10 +33,10 @@ function GalleryManagement() {
       const data = await response.json();
       
       if (data.status === 'success') {
-        setPhotos(data.data.photos || []);
+        setStories(data.data.stories || []);
       }
     } catch (error) {
-      console.error('Error fetching photos:', error);
+      console.error('Error fetching stories:', error);
     } finally {
       setLoading(false);
     }
@@ -60,8 +61,13 @@ function GalleryManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!photoFile && !selectedPhoto) {
+    if (!photoFile && !selectedStory) {
       alert('Please select a photo');
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      alert('Please enter a description');
       return;
     }
 
@@ -73,14 +79,14 @@ function GalleryManagement() {
         formDataToSend.append('photo', photoFile);
       }
       
-      // Add category
-      formDataToSend.append('category', formData.category);
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
 
-      const url = selectedPhoto
-        ? `${API_BASE_URL}/gallery/${selectedPhoto._id}`
-        : `${API_BASE_URL}/gallery`;
+      const url = selectedStory
+        ? `${API_BASE_URL}/about-dojang-story/${selectedStory._id}`
+        : `${API_BASE_URL}/about-dojang-story`;
       
-      const method = selectedPhoto ? 'PUT' : 'POST';
+      const method = selectedStory ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -93,27 +99,27 @@ function GalleryManagement() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        alert(selectedPhoto ? 'Photo updated successfully!' : 'Photo uploaded successfully!');
+        alert(selectedStory ? 'Story updated successfully!' : 'Story created successfully!');
         setShowModal(false);
         resetForm();
-        fetchPhotos();
+        fetchStories();
       } else {
-        alert(data.message || 'Error saving photo');
+        alert(data.message || 'Error saving story');
       }
     } catch (error) {
-      console.error('Error saving photo:', error);
-      alert('Error saving photo');
+      console.error('Error saving story:', error);
+      alert('Error saving story');
     }
   };
 
-  const handleDelete = async (photoId) => {
-    if (!window.confirm('Are you sure you want to delete this photo?')) {
+  const handleDelete = async (storyId) => {
+    if (!window.confirm('Are you sure you want to delete this story?')) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/gallery/${photoId}`, {
+      const response = await fetch(`${API_BASE_URL}/about-dojang-story/${storyId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -123,14 +129,14 @@ function GalleryManagement() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        alert('Photo deleted successfully!');
-        fetchPhotos();
+        alert('Story deleted successfully!');
+        fetchStories();
       } else {
-        alert(data.message || 'Error deleting photo');
+        alert(data.message || 'Error deleting story');
       }
     } catch (error) {
-      console.error('Error deleting photo:', error);
-      alert('Error deleting photo');
+      console.error('Error deleting story:', error);
+      alert('Error deleting story');
     }
   };
 
@@ -139,21 +145,23 @@ function GalleryManagement() {
     setShowModal(true);
   };
 
-  const openEditModal = (photo) => {
-    setSelectedPhoto(photo);
-    setPhotoPreview(`${BASE_URL}/${photo.photo}`);
+  const openEditModal = (story) => {
+    setSelectedStory(story);
+    setPhotoPreview(`${BASE_URL}/${story.photo}`);
     setFormData({
-      category: photo.category || 'All'
+      title: story.title,
+      description: story.description
     });
     setShowModal(true);
   };
 
   const resetForm = () => {
-    setSelectedPhoto(null);
+    setSelectedStory(null);
     setPhotoFile(null);
     setPhotoPreview(null);
     setFormData({
-      category: ''
+      title: 'Our Dojang Story',
+      description: ''
     });
   };
 
@@ -169,42 +177,42 @@ function GalleryManagement() {
     <div className="p-8 bg-white min-h-screen">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gallery Management</h1>
-          <p className="text-gray-600">Manage gallery photos</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Our Dojang Story Management</h1>
+          <p className="text-gray-600">Manage the Our Dojang Story section on About page</p>
         </div>
         <button
           onClick={openAddModal}
           className="px-6 py-3 text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center gap-2"
           style={{ backgroundColor: '#006CB5' }}
         >
-          <FaPlus /> Add Photo
+          <FaPlus /> Add Story
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
-          <p className="text-sm font-medium text-gray-600">Total Photos</p>
-          <p className="text-2xl font-bold text-gray-900">{photos.length}</p>
+          <p className="text-sm font-medium text-gray-600">Total Stories</p>
+          <p className="text-2xl font-bold text-gray-900">{stories.length}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-600">
-          <p className="text-sm font-medium text-gray-600">Active Photos</p>
-          <p className="text-2xl font-bold text-gray-900">{photos.filter(p => p.isActive).length}</p>
+          <p className="text-sm font-medium text-gray-600">Active Story</p>
+          <p className="text-2xl font-bold text-gray-900">{stories.filter(s => s.isActive).length}</p>
         </div>
       </div>
 
-      {/* Photos Table */}
+      {/* Stories Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {photos.length === 0 ? (
+        {stories.length === 0 ? (
           <div className="text-center py-20 bg-white">
-            <h3 className="text-2xl font-semibold text-gray-700 mb-2">No Photos Yet</h3>
-            <p className="text-gray-500 mb-6">Start by adding your first photo</p>
+            <h3 className="text-2xl font-semibold text-gray-700 mb-2">No Story Yet</h3>
+            <p className="text-gray-500 mb-6">Start by adding your first story</p>
             <button
               onClick={openAddModal}
               className="px-6 py-3 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
               style={{ backgroundColor: '#006CB5' }}
             >
-              Add First Photo
+              Add First Story
             </button>
           </div>
         ) : (
@@ -216,10 +224,10 @@ function GalleryManagement() {
                     Photo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
+                    Title
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Upload Date
+                    Description
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -230,47 +238,42 @@ function GalleryManagement() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {photos.map((photo) => (
-                  <tr key={photo._id} className="hover:bg-gray-50">
+                {stories.map((story) => (
+                  <tr key={story._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-20 w-20">
                           <img
-                            src={`${BASE_URL}/${photo.photo}`}
-                            alt="Gallery photo"
+                            src={`${BASE_URL}/${story.photo}`}
+                            alt="Story"
                             className="h-20 w-20 rounded-lg object-cover border-2 border-gray-200"
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {photo.category || 'All'}
-                      </span>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">{story.title}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(photo.createdAt).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(photo.createdAt).toLocaleTimeString()}
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-md truncate">
+                        {story.description}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        photo.isActive 
+                        story.isActive 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {photo.isActive ? 'Active' : 'Inactive'}
+                        {story.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            setSelectedPhoto(photo);
-                            setPhotoPreview(`${BASE_URL}/${photo.photo}`);
+                            setSelectedStory(story);
+                            setPhotoPreview(`${BASE_URL}/${story.photo}`);
                             setShowViewModal(true);
                           }}
                           className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center border border-gray-300"
@@ -279,14 +282,14 @@ function GalleryManagement() {
                           <FaEye className="w-4 h-4" style={{ color: '#006CB5' }} />
                         </button>
                         <button
-                          onClick={() => openEditModal(photo)}
+                          onClick={() => openEditModal(story)}
                           className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center border border-gray-300"
                           title="Edit"
                         >
                           <FaEdit className="w-4 h-4" style={{ color: '#006CB5' }} />
                         </button>
                         <button
-                          onClick={() => handleDelete(photo._id)}
+                          onClick={() => handleDelete(story._id)}
                           className="p-2 bg-white rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center border border-gray-300"
                           title="Delete"
                         >
@@ -308,7 +311,7 @@ function GalleryManagement() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {selectedPhoto ? 'Edit Photo' : 'Add New Photo'}
+                {selectedStory ? 'Edit Story' : 'Add New Story'}
               </h2>
               <button
                 onClick={() => {
@@ -322,25 +325,32 @@ function GalleryManagement() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white">
-              {/* Category */}
+              {/* Title */}
               <div className="bg-white">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category *
+                  Title *
                 </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
-                >
-                  <option value="">Select Category</option>
-                  <option value="Seminars">Seminars</option>
-                  <option value="Stunts">Stunts</option>
-                  <option value="Our Memories">Our Memories</option>
-                  <option value="Video">Video</option>
-                  <option value="Competitions">Competitions</option>
-                  <option value="Belt Ceremonies">Belt Ceremonies</option>
-                </select>
+                />
+              </div>
+
+              {/* Description */}
+              <div className="bg-white">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows="6"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
               </div>
 
               {/* Photo Upload */}
@@ -365,7 +375,7 @@ function GalleryManagement() {
                       accept="image/*"
                       onChange={handlePhotoChange}
                       className="hidden"
-                      required={!selectedPhoto}
+                      required={!selectedStory}
                     />
                     <label
                       htmlFor="photo"
@@ -396,7 +406,7 @@ function GalleryManagement() {
                   className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"
                   style={{ backgroundColor: '#006CB5' }}
                 >
-                  {selectedPhoto ? 'Update Photo' : 'Upload Photo'}
+                  {selectedStory ? 'Update Story' : 'Create Story'}
                 </button>
               </div>
             </form>
@@ -405,15 +415,15 @@ function GalleryManagement() {
       )}
 
       {/* View Modal */}
-      {showViewModal && selectedPhoto && (
+      {showViewModal && selectedStory && (
         <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">View Photo</h2>
+              <h2 className="text-2xl font-bold text-gray-900">View Story</h2>
               <button
                 onClick={() => {
                   setShowViewModal(false);
-                  setSelectedPhoto(null);
+                  setSelectedStory(null);
                   setPhotoPreview(null);
                 }}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -428,41 +438,31 @@ function GalleryManagement() {
                 <div className="flex justify-center">
                   <img
                     src={photoPreview}
-                    alt="Gallery photo"
-                    className="max-w-full max-h-[70vh] object-contain rounded-lg border-2 border-gray-300"
+                    alt="Story"
+                    className="max-w-full max-h-[50vh] object-contain rounded-lg border-2 border-gray-300"
                   />
                 </div>
               </div>
 
-              {/* Photo Details */}
-              <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-lg border border-gray-200">
+              {/* Story Details */}
+              <div className="space-y-4 bg-white p-4 rounded-lg border border-gray-200">
                 <div>
-                  <p className="text-sm font-semibold text-gray-600">Upload Date</p>
-                  <p className="text-base text-gray-900">
-                    {new Date(selectedPhoto.createdAt).toLocaleDateString()}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-600">Title</p>
+                  <p className="text-base text-gray-900">{selectedStory.title}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-600">Upload Time</p>
-                  <p className="text-base text-gray-900">
-                    {new Date(selectedPhoto.createdAt).toLocaleTimeString()}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-600">Description</p>
+                  <p className="text-base text-gray-900 whitespace-pre-wrap">{selectedStory.description}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-600">Status</p>
                   <span className={`inline-flex px-3 py-1 text-xs leading-5 font-semibold rounded-full ${
-                    selectedPhoto.isActive 
+                    selectedStory.isActive 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {selectedPhoto.isActive ? 'Active' : 'Inactive'}
+                    {selectedStory.isActive ? 'Active' : 'Inactive'}
                   </span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-600">Photo ID</p>
-                  <p className="text-base text-gray-900 font-mono text-xs">
-                    {selectedPhoto._id}
-                  </p>
                 </div>
               </div>
 
@@ -472,7 +472,7 @@ function GalleryManagement() {
                   type="button"
                   onClick={() => {
                     setShowViewModal(false);
-                    setSelectedPhoto(null);
+                    setSelectedStory(null);
                     setPhotoPreview(null);
                   }}
                   className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
@@ -488,4 +488,4 @@ function GalleryManagement() {
   );
 }
 
-export default GalleryManagement;
+export default AboutDojangStoryManagement;

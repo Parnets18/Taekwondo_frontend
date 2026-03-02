@@ -61,7 +61,8 @@ function Contact() {
 
     try {
       // Send to backend API
-      const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/contact', {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+      const response = await fetch(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

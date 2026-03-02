@@ -25,8 +25,11 @@ function Home() {
   const [isVisible, setIsVisible] = useState({});
   const [heroSlides, setHeroSlides] = useState([]);
   const [loadingBanners, setLoadingBanners] = useState(true);
+  const [aboutSection, setAboutSection] = useState(null);
+  const [loadingAbout, setLoadingAbout] = useState(true);
 
-  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
   // Fetch banners from API
   useEffect(() => {
@@ -47,7 +50,7 @@ function Home() {
             title: banner.title,
             subtitle: banner.subtitle,
             description: banner.description,
-            image: `${API_BASE_URL.replace('/api', '')}/${banner.image}`,
+            image: `${BASE_URL}/${banner.image}`,
             buttonText: banner.buttonText,
             buttonLink: banner.buttonLink,
             secondaryButtonText: banner.secondaryButtonText,
@@ -68,6 +71,27 @@ function Home() {
     };
 
     fetchBanners();
+  }, []);
+
+  // Fetch about section from API
+  useEffect(() => {
+    const fetchAboutSection = async () => {
+      try {
+        setLoadingAbout(true);
+        const response = await fetch(`${API_BASE_URL}/about-section`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setAboutSection(data.data.aboutSection);
+        }
+      } catch (error) {
+        console.error('Error fetching about section:', error);
+      } finally {
+        setLoadingAbout(false);
+      }
+    };
+
+    fetchAboutSection();
   }, []);
 
   // Intersection Observer for animations
@@ -330,39 +354,47 @@ function Home() {
       {/* About Preview Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold mb-6" style={{ color: '#006CB5' }}>
-                About Combat Warrior Dojang
-              </h2>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Taekwon-Do is a South Korean form of martial arts. It is a combat sport characterised by punching and kicking techniques and was developed during 1940's and 1950's by Korean Martial artists. The main International Taekwon-Do Federation (ITF), founded by Choi Hong- hi in 1966 and Kukkiwon and World Taekwon-Do Federation (WTF).
-              </p>
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-                Taekwon-Do made it's Paralympic debut at Tokyo 2020 and is a sport governed by World Taekwon-Do (WT). The goal of this martial art is to give a sense of self-esteem, knowledge of self-defence heightened mental and physical well-being.
-              </p>
-              <Link
-                to="/about"
-                className="inline-flex items-center px-8 py-4 rounded-full text-lg font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
-                style={{ backgroundColor: '#006CB5' }}
-              >
-                Read More About Us
-                <svg className="ml-2 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </Link>
+          {loadingAbout ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
             </div>
-            
-            <div className="relative">
-              <div className="rounded-2xl overflow-hidden shadow-xl" style={{ border: '4px solid #006CB5' }}>
-                <img 
-                  src={image1} 
-                  alt="Combat Warrior Dojang Training" 
-                  className="w-full h-96 object-cover"
-                />
+          ) : aboutSection ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h2 className="text-4xl font-bold mb-6" style={{ color: '#006CB5' }}>
+                  {aboutSection.title}
+                </h2>
+                <p className="text-lg text-gray-700 mb-8 leading-relaxed whitespace-pre-wrap">
+                  {aboutSection.description}
+                </p>
+                <Link
+                  to="/about"
+                  className="inline-flex items-center px-8 py-4 rounded-full text-lg font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  style={{ backgroundColor: '#006CB5' }}
+                >
+                  Read More About Us
+                  <svg className="ml-2 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </Link>
+              </div>
+              
+              <div className="relative">
+                <div className="rounded-2xl overflow-hidden shadow-xl" style={{ border: '4px solid #006CB5' }}>
+                  <img 
+                    src={`${BASE_URL}/${aboutSection.photo}`}
+                    alt={aboutSection.title}
+                    className="w-full h-96 object-cover"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-20">
+              <h3 className="text-2xl font-semibold text-gray-700 mb-2">About Section Not Available</h3>
+              <p className="text-gray-500">Please contact the administrator</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -645,12 +677,14 @@ function Home() {
 function RecentPromotions() {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
         console.log('🏆 Fetching promotions from API...');
-        const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/belts/promotions/public?limit=10');
+        const response = await fetch(`${API_BASE_URL}/belts/promotions/public?limit=10`);
         console.log('📡 Response status:', response.status);
         const data = await response.json();
         console.log('📦 Promotions data received:', data);
@@ -804,12 +838,14 @@ function RecentPromotions() {
 function MembersBirthdaysCard() {
   const [birthdays, setBirthdays] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   useEffect(() => {
     const fetchBirthdays = async () => {
       try {
         console.log('🎂 Fetching birthdays from API...');
-        const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/students/birthdays');
+        const response = await fetch(`${API_BASE_URL}/students/birthdays`);
         console.log('📡 Response status:', response.status);
         const data = await response.json();
         console.log('📦 Birthday data received:', data);

@@ -399,7 +399,7 @@ function CertificationManagement() {
     console.log('Update called - selectedCertificate:', selectedCertificate);
     console.log('Update called - formData:', formData);
     
-    if (!formData.studentName || !formData.achievementType || !formData.achievementTitle) {
+    if (!formData.studentName || !formData.achievementType || !formData.achievementTitle || !formData.customVerificationCode) {
       alert('Please fill in all required fields');
       return;
     }
@@ -422,6 +422,7 @@ function CertificationManagement() {
       submitData.append('level', formData.level);
       submitData.append('grade', formData.grade);
       submitData.append('examiner', formData.examiner);
+      submitData.append('verificationCode', formData.customVerificationCode);
       
       if (certificateImage) {
         submitData.append('certificateImage', certificateImage);

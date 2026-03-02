@@ -60,7 +60,7 @@ function AttendanceTracking() {
   const [studentSuggestions, setStudentSuggestions] = useState([]);
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
-  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
 
   // Helper function to get week range
   function getWeekRange(date) {

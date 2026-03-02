@@ -6,9 +6,20 @@ function Gallery() {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
   const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+
+  const categories = [
+    'All', 
+    'Seminars', 
+    'Stunts', 
+    'Our Memories', 
+    'Video',
+    'Competitions',
+    'Belt Ceremonies'
+  ];
 
   useEffect(() => {
     fetchPhotos();
@@ -37,6 +48,10 @@ function Gallery() {
   const closeLightbox = () => {
     setSelectedPhoto(null);
   };
+
+  const filteredPhotos = selectedCategory === 'All' 
+    ? photos 
+    : photos.filter(photo => photo.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -68,22 +83,43 @@ function Gallery() {
             and special events. Each photo tells a story of dedication, discipline, and the spirit of Taekwon-Do.
           </p>
         </div>
+
+        {/* Category Filter */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+                selectedCategory === category
+                  ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Gallery Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
           </div>
-        ) : photos.length === 0 ? (
+        ) : filteredPhotos.length === 0 ? (
           <div className="text-center py-20">
             <h3 className="text-2xl font-semibold text-gray-700 mb-2">No Photos Found</h3>
-            <p className="text-gray-500">No photos available yet</p>
+            <p className="text-gray-500">
+              {selectedCategory === 'All' 
+                ? 'No photos available yet' 
+                : `No photos in ${selectedCategory} category`}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {photos.map((photo) => (
+            {filteredPhotos.map((photo) => (
               <div
                 key={photo._id}
                 className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer transform hover:scale-105 hover:shadow-2xl transition-all duration-300 border-4 border-white"
@@ -95,6 +131,12 @@ function Gallery() {
                     alt="Gallery photo"
                     className="w-full h-full object-cover"
                   />
+                </div>
+                {/* Category Badge */}
+                <div className="absolute top-3 right-3">
+                  <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-lg">
+                    {photo.category || 'All'}
+                  </span>
                 </div>
               </div>
             ))}
@@ -121,10 +163,15 @@ function Gallery() {
               className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
             />
             <div className="bg-white rounded-b-lg p-6 mt-2">
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-500">
-                  {new Date(selectedPhoto.createdAt).toLocaleDateString()}
-                </span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
+                    {selectedPhoto.category || 'All'}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {new Date(selectedPhoto.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

@@ -25,7 +25,7 @@ function Courses() {
   const [error, setError] = useState(null);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   // Fetch courses from backend
   const fetchCourses = async () => {
@@ -94,15 +94,15 @@ function Courses() {
 
   const belts = [
     { name: 'White Belt', requirements: 'Basic stances, blocks, and kicks', duration: '2-3 months', bgColor: '#FFFFFF', borderColor: '#9CA3AF' },
-    { name: 'White Belt / Yellow Stripe', requirements: 'Chon-Ji pattern introduction', duration: '2-3 months', bgColor: 'linear-gradient(to right, #FFFFFF, #FDE047, #FACC15)', borderColor: '#D1D5DB' },
+    { name: 'White Belt / Yellow Stripe', requirements: 'Chon-Ji pattern introduction', duration: '2-3 months', bgColor: 'linear-gradient(to right, #FFFFFF 0%, #FFFFFF 65%, #FEF3C7 70%, #FDE047 80%, #FACC15 90%, #FACC15 100%)', borderColor: '#D1D5DB' },
     { name: 'Yellow Belt', requirements: 'Chon-Ji pattern, basic combinations', duration: '3-4 months', bgColor: '#FACC15', borderColor: '#EAB308' },
-    { name: 'Yellow Belt / Green Stripe', requirements: 'Dan-Gun pattern introduction', duration: '3-4 months', bgColor: 'linear-gradient(to right, #FACC15, #FDE047, #22C55E)', borderColor: '#16A34A' },
+    { name: 'Yellow Belt / Green Stripe', requirements: 'Dan-Gun pattern introduction', duration: '3-4 months', bgColor: 'linear-gradient(to right, #FACC15 0%, #FACC15 60%, #FDE047 65%, #86EFAC 70%, #22C55E 80%, #22C55E 100%)', borderColor: '#16A34A' },
     { name: 'Green Belt', requirements: 'Dan-Gun pattern, intermediate techniques', duration: '4-5 months', bgColor: '#22C55E', borderColor: '#16A34A' },
-    { name: 'Green Belt / Blue Stripe', requirements: 'Do-San pattern introduction', duration: '4-5 months', bgColor: 'linear-gradient(to right, #22C55E, #60A5FA, #2563EB)', borderColor: '#1D4ED8' },
+    { name: 'Green Belt / Blue Stripe', requirements: 'Do-San pattern introduction', duration: '4-5 months', bgColor: 'linear-gradient(to right, #22C55E 0%, #22C55E 60%, #86EFAC 65%, #93C5FD 70%, #2563EB 80%, #2563EB 100%)', borderColor: '#1D4ED8' },
     { name: 'Blue Belt', requirements: 'Do-San pattern, advanced kicks', duration: '5-6 months', bgColor: '#2563EB', borderColor: '#1D4ED8' },
-    { name: 'Blue Belt / Red Stripe', requirements: 'Won-Hyo pattern introduction', duration: '5-6 months', bgColor: 'linear-gradient(to right, #2563EB, #F87171, #DC2626)', borderColor: '#B91C1C' },
+    { name: 'Blue Belt / Red Stripe', requirements: 'Won-Hyo pattern introduction', duration: '5-6 months', bgColor: 'linear-gradient(to right, #2563EB 0%, #2563EB 60%, #93C5FD 65%, #FCA5A5 70%, #DC2626 80%, #DC2626 100%)', borderColor: '#B91C1C' },
     { name: 'Red Belt', requirements: 'Won-Hyo pattern, sparring techniques', duration: '6-8 months', bgColor: '#DC2626', borderColor: '#B91C1C' },
-    { name: 'Red Belt / Black Stripe', requirements: 'Yul-Gok pattern, black belt preparation', duration: '8-10 months', bgColor: 'linear-gradient(to right, #DC2626, #4B5563, #000000)', borderColor: '#000000' },
+    { name: 'Red Belt / Black Stripe', requirements: 'Yul-Gok pattern, black belt preparation', duration: '8-10 months', bgColor: 'linear-gradient(to right, #DC2626 0%, #DC2626 60%, #EF4444 65%, #6B7280 70%, #000000 80%, #000000 100%)', borderColor: '#000000' },
     { name: 'Black Belt 1st Dan', requirements: 'All color belt patterns, breaking', duration: '12+ months', bgColor: '#000000', borderColor: '#4B5563' }
   ];
 

@@ -10,8 +10,6 @@ function CourseManagement() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [authToken, setAuthToken] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [courseForm, setCourseForm] = useState({
     title: '',
     ageGroup: '',
@@ -24,51 +22,14 @@ function CourseManagement() {
   });
 
   // API base URL
-  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
 
-  // Check for existing token on component mount
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setAuthToken(token);
-    } else {
-      setShowLoginModal(true);
-    }
-  }, []);
-
-  // Manual login function
-  const handleLogin = async (email, password) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === 'success') {
-          const token = data.data.token;
-          setAuthToken(token);
-          localStorage.setItem('authToken', token);
-          setShowLoginModal(false);
-          return true;
-        }
-      }
-      return false;
-    } catch (error) {
-      console.error('Login failed:', error);
-      return false;
-    }
-  };
-
-  // Get auth headers
+  // Get auth headers using the existing admin token
   const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
     return {
       'Content-Type': 'application/json',
-      ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+      ...(token && { 'Authorization': `Bearer ${token}` })
     };
   };
 
@@ -109,11 +70,6 @@ function CourseManagement() {
 
   // Create new course
   const createCourse = async (courseData) => {
-    if (!authToken) {
-      alert('Please login first');
-      return;
-    }
-
     try {
       const response = await fetch(`${API_BASE_URL}/courses`, {
         method: 'POST',
@@ -123,12 +79,6 @@ function CourseManagement() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        if (response.status === 401) {
-          localStorage.removeItem('authToken');
-          setAuthToken(null);
-          setShowLoginModal(true);
-          throw new Error('Authentication required');
-        }
         throw new Error(errorData.message || 'Failed to create course');
       }
 
@@ -148,11 +98,6 @@ function CourseManagement() {
 
   // Update course
   const updateCourse = async (courseId, courseData) => {
-    if (!authToken) {
-      alert('Please login first');
-      return;
-    }
-
     try {
       const response = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
         method: 'PUT',
@@ -162,12 +107,6 @@ function CourseManagement() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        if (response.status === 401) {
-          localStorage.removeItem('authToken');
-          setAuthToken(null);
-          setShowLoginModal(true);
-          throw new Error('Authentication required');
-        }
         throw new Error(errorData.message || 'Failed to update course');
       }
 
@@ -939,58 +878,6 @@ function CourseManagement() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md border-2 border-black">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Admin Login</h2>
-              <p className="text-slate-600 mt-2">Please login to access course management</p>
-            </div>
-            
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const email = formData.get('email');
-              const password = formData.get('password');
-              
-              const success = await handleLogin(email, password);
-              if (!success) {
-                alert('Login failed. Please check your credentials.');
-              }
-            }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  defaultValue="admin@combatwarrior.com"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  defaultValue="admin123"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-colors"
-                style={{ backgroundColor: '#006CB5' }}
-              >
-                Login
-              </button>
-            </form>
           </div>
         </div>
       )}

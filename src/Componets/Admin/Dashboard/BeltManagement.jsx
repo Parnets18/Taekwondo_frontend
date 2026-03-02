@@ -9,7 +9,8 @@ import {
   FaUsers,
   FaCalendarAlt,
   FaCheckCircle,
-  FaEye
+  FaEye,
+  FaDownload
 } from 'react-icons/fa';
 
 function BeltManagement() {
@@ -74,7 +75,8 @@ function BeltManagement() {
     currentBelt: '',
     testingFor: '',
     testDate: '',
-    readiness: ''
+    certificateCode: '',
+    certificateFile: null
   });
   
   // Autocomplete states
@@ -94,7 +96,7 @@ function BeltManagement() {
   const [showEditTestModal, setShowEditTestModal] = useState(false);
 
   // API base URL - using direct backend URL to bypass proxy issues
-  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   // Log API URL on component mount
   useEffect(() => {
@@ -394,7 +396,8 @@ function BeltManagement() {
       currentBelt: '',
       testingFor: '',
       testDate: '',
-      readiness: ''
+      certificateCode: '',
+      certificateFile: null
     });
   };
 
@@ -716,10 +719,20 @@ function BeltManagement() {
     }
 
     try {
+      const formData = new FormData();
+      formData.append('studentName', testForm.studentName);
+      formData.append('currentBelt', testForm.currentBelt);
+      formData.append('testingFor', testForm.testingFor);
+      formData.append('testDate', testForm.testDate);
+      if (testForm.certificateCode) formData.append('certificateCode', testForm.certificateCode);
+      if (testForm.certificateFile) formData.append('certificateFile', testForm.certificateFile);
+
       const response = await fetch(`${API_BASE_URL}/belts/tests`, {
         method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(testForm)
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+        },
+        body: formData
       });
 
       const data = await response.json();
@@ -952,7 +965,8 @@ function BeltManagement() {
       currentBelt: test.currentBelt,
       testingFor: test.testingFor,
       testDate: formattedDate,
-      readiness: test.readiness || ''
+      certificateCode: test.certificateCode || '',
+      certificateFile: null
     };
     
     console.log('✏️ Setting form data:', formData);
@@ -1010,10 +1024,20 @@ function BeltManagement() {
       const url = `${API_BASE_URL}/belts/tests/${selectedTest._id}`;
       console.log('📤 PUT request to:', url);
       
+      const formData = new FormData();
+      formData.append('studentName', testForm.studentName);
+      formData.append('currentBelt', testForm.currentBelt);
+      formData.append('testingFor', testForm.testingFor);
+      formData.append('testDate', testForm.testDate);
+      if (testForm.certificateCode) formData.append('certificateCode', testForm.certificateCode);
+      if (testForm.certificateFile) formData.append('certificateFile', testForm.certificateFile);
+      
       const response = await fetch(url, {
         method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(testForm)
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+        },
+        body: formData
       });
 
       console.log('📥 Response status:', response.status);
@@ -1328,14 +1352,13 @@ function BeltManagement() {
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Current Belt</th>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Testing For</th>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Test Date</th>
-                <th className="text-left py-4 px-6 font-semibold text-slate-700">Readiness</th>
                 <th className="text-left py-4 px-6 font-semibold text-slate-700">Actions</th>
               </tr>
             </thead>
             <tbody>
               {upcomingTests.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="py-12 text-center">
+                  <td colSpan="5" className="py-12 text-center">
                     <FaCalendarAlt className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                     <p className="text-slate-500 font-medium">No upcoming tests scheduled</p>
                     <p className="text-slate-400 text-sm mt-1">Click "Schedule Test" to add one</p>
@@ -1366,25 +1389,6 @@ function BeltManagement() {
                     </td>
                     <td className="py-4 px-6 text-slate-600">
                       {new Date(test.testDate).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-24 bg-slate-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full ${
-                              test.readiness >= 90 ? 'bg-green-500' : 
-                              test.readiness >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}
-                            style={{ width: `${test.readiness}%` }}
-                          ></div>
-                        </div>
-                        <span className={`text-xs font-semibold ${
-                          test.readiness >= 90 ? 'text-green-600' : 
-                          test.readiness >= 80 ? 'text-yellow-600' : 'text-red-600'
-                        }`}>
-                          {test.readiness}%
-                        </span>
-                      </div>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex justify-center gap-2">
@@ -2260,19 +2264,30 @@ function BeltManagement() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Readiness Level (%)
-                  </label>
-                  <input
-                    type="number"
-                    value={testForm.readiness}
-                    onChange={(e) => handleTestFormChange('readiness', e.target.value)}
-                    placeholder="e.g., 85"
-                    min="0"
-                    max="100"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Certificate Code
+                    </label>
+                    <input
+                      type="text"
+                      value={testForm.certificateCode}
+                      onChange={(e) => handleTestFormChange('certificateCode', e.target.value)}
+                      placeholder="e.g., CERT-2025-001"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Upload Certificate
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(e) => setTestForm(prev => ({ ...prev, certificateFile: e.target.files[0] }))}
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex space-x-3 pt-4 border-t border-gray-200">
@@ -2507,26 +2522,54 @@ function BeltManagement() {
                 </div>
               </div>
 
-              {selectedTest.readiness && (
+              {selectedTest.certificateCode && (
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                  <p className="text-sm text-slate-600 mb-2">Readiness Level</p>
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-1 bg-slate-200 rounded-full h-3">
-                      <div 
-                        className={`h-3 rounded-full ${
-                          selectedTest.readiness >= 90 ? 'bg-green-500' : 
-                          selectedTest.readiness >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${selectedTest.readiness}%` }}
-                      ></div>
-                    </div>
-                    <span className={`text-lg font-bold ${
-                      selectedTest.readiness >= 90 ? 'text-green-600' : 
-                      selectedTest.readiness >= 80 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                      {selectedTest.readiness}%
-                    </span>
-                  </div>
+                  <p className="text-sm text-slate-600 mb-1">Certificate Code</p>
+                  <p className="text-lg font-semibold text-slate-900">{selectedTest.certificateCode}</p>
+                </div>
+              )}
+
+              {selectedTest.certificateFile && (
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-2">Certificate</p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`${API_BASE_URL}/belts/tests/${selectedTest._id}/certificate/download`, {
+                          method: 'GET',
+                          headers: {
+                            'Authorization': `Bearer ${authToken}`
+                          }
+                        });
+
+                        if (!response.ok) {
+                          throw new Error('Failed to download certificate');
+                        }
+
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        
+                        // Get file extension from the certificateFile path
+                        const fileExt = selectedTest.certificateFile.split('.').pop();
+                        link.download = `certificate_${selectedTest.studentName.replace(/\s+/g, '_')}_${selectedTest.certificateCode || selectedTest._id}.${fileExt}`;
+                        
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url);
+                      } catch (error) {
+                        console.error('Error downloading certificate:', error);
+                        alert('Failed to download certificate. Please try again.');
+                      }
+                    }}
+                    className="px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-colors flex items-center space-x-2"
+                    style={{ backgroundColor: '#006CB5', color: 'white' }}
+                  >
+                    <FaDownload className="w-4 h-4" />
+                    <span>Download Certificate</span>
+                  </button>
                 </div>
               )}
 
@@ -2669,18 +2712,31 @@ function BeltManagement() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Readiness Level (%)
+                      Certificate Code
                     </label>
                     <input
-                      type="number"
-                      value={testForm.readiness}
-                      onChange={(e) => handleTestFormChange('readiness', e.target.value)}
-                      placeholder="e.g., 85"
-                      min="0"
-                      max="100"
+                      type="text"
+                      value={testForm.certificateCode}
+                      onChange={(e) => handleTestFormChange('certificateCode', e.target.value)}
+                      placeholder="e.g., CERT-2025-001"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Certificate
+                  </label>
+                  <input
+                    type="file"
+                    onChange={(e) => setTestForm(prev => ({ ...prev, certificateFile: e.target.files[0] }))}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {selectedTest?.certificateFile && (
+                    <p className="text-xs text-gray-600 mt-1">Current: {selectedTest.certificateFile.split('/').pop()}</p>
+                  )}
                 </div>
 
                 <div className="flex space-x-3 pt-4 border-t border-gray-200">

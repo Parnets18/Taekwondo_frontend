@@ -16,7 +16,7 @@ export const StudentFormModal = ({
   handlePhotoChange
 }) => {
   const [achievements, setAchievements] = useState(
-    student?.achievements || [{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]
+    student?.achievements || [{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]
   );
   const [expandedBelts, setExpandedBelts] = useState({
     yellow: false,
@@ -35,11 +35,11 @@ export const StudentFormModal = ({
         ...ach,
         typePrices: ach.typePrices && ach.typePrices.length > 0 
           ? ach.typePrices 
-          : [{ type: ach.type || '', price: ach.prize || '' }]
+          : [{ type: ach.type || '', price: ach.prize || '', certificateCode: '', certificateFile: '' }]
       }));
       setAchievements(formattedAchievements);
     } else {
-      setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
+      setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]);
     }
   }, [student]);
 
@@ -49,7 +49,7 @@ export const StudentFormModal = ({
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
   const handleAddAchievement = () => {
-    setAchievements([...achievements, { tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
+    setAchievements([...achievements, { tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]);
   };
 
   const handleRemoveAchievement = (index) => {
@@ -68,7 +68,7 @@ export const StudentFormModal = ({
     if (!newAchievements[achievementIndex].typePrices) {
       newAchievements[achievementIndex].typePrices = [];
     }
-    newAchievements[achievementIndex].typePrices.push({ type: '', price: '' });
+    newAchievements[achievementIndex].typePrices.push({ type: '', price: '', certificateCode: '', certificateFile: '' });
     setAchievements(newAchievements);
   };
 
@@ -77,7 +77,7 @@ export const StudentFormModal = ({
     newAchievements[achievementIndex].typePrices = newAchievements[achievementIndex].typePrices.filter((_, i) => i !== typePriceIndex);
     // Keep at least one type-price pair
     if (newAchievements[achievementIndex].typePrices.length === 0) {
-      newAchievements[achievementIndex].typePrices = [{ type: '', price: '' }];
+      newAchievements[achievementIndex].typePrices = [{ type: '', price: '', certificateCode: '', certificateFile: '' }];
     }
     setAchievements(newAchievements);
   };
@@ -108,7 +108,7 @@ export const StudentFormModal = ({
               setFormAge(null);
               setPhotoPreview(null);
               setPhotoFile(null);
-              setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
+              setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]);
             }}
             className="text-slate-500 hover:text-slate-700 text-2xl"
           >
@@ -119,8 +119,34 @@ export const StudentFormModal = ({
         <form onSubmit={(e) => {
           e.preventDefault();
           const formData = new FormData(e.target);
-          // Add achievements data to formData
-          formData.append('achievements', JSON.stringify(achievements));
+          
+          // Prepare achievements data with certificate files
+          const achievementsData = achievements.map((ach, achIndex) => {
+            const achData = {
+              tournamentName: ach.tournamentName,
+              address: ach.address,
+              date: ach.date,
+              type: ach.type,
+              prize: ach.prize,
+              typePrices: ach.typePrices.map((tp, tpIndex) => ({
+                type: tp.type,
+                price: tp.price,
+                certificateCode: tp.certificateCode,
+                certificateFile: tp.certificateFile instanceof File ? `certificate_${achIndex}_${tpIndex}` : tp.certificateFile
+              }))
+            };
+            
+            // Append certificate files to FormData
+            ach.typePrices.forEach((tp, tpIndex) => {
+              if (tp.certificateFile instanceof File) {
+                formData.append(`certificate_${achIndex}_${tpIndex}`, tp.certificateFile);
+              }
+            });
+            
+            return achData;
+          });
+          
+          formData.append('achievements', JSON.stringify(achievementsData));
           onSubmit(formData);
         }} className="space-y-6">
           
@@ -199,7 +225,8 @@ export const StudentFormModal = ({
                   name="fullName"
                   defaultValue={student?.fullName}
                   placeholder="Enter student name"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent uppercase"
+                  style={{ textTransform: 'uppercase' }}
                   required
                 />
               </div>
@@ -458,7 +485,25 @@ export const StudentFormModal = ({
           {/* Student Achievements */}
           <div className="bg-slate-50 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-slate-800">Student Achievements (Optional)</h3>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800">Student Achievements (Optional)</h3>
+                <div className="flex gap-4 mt-2">
+                  <span className="text-sm font-medium text-slate-600">
+                    No. of Events: <span className="text-blue-600 font-bold">
+                      {achievements.reduce((total, ach) => {
+                        return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
+                      }, 0)}
+                    </span>
+                  </span>
+                  <span className="text-sm font-medium text-slate-600">
+                    No. of Medals: <span className="text-blue-600 font-bold">
+                      {achievements.reduce((total, ach) => {
+                        return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
+                      }, 0)}
+                    </span>
+                  </span>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={handleAddAchievement}
@@ -517,23 +562,23 @@ export const StudentFormModal = ({
                   </div>
                 </div>
 
-                {/* Type-Price Pairs Section */}
+                {/* Event-Medal Pairs Section */}
                 <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
                   <div className="flex justify-between items-center mb-3">
-                    <label className="block text-sm font-semibold text-slate-700">Achievement Types & Prices</label>
+                    <label className="block text-sm font-semibold text-slate-700">Achievement Events & Medals</label>
                     <button
                       type="button"
                       onClick={() => handleAddTypePrice(index)}
                       className="px-3 py-1 text-white rounded-md hover:opacity-90 transition-colors font-medium text-xs"
                       style={{ backgroundColor: '#006CB5' }}
                     >
-                      + Add Type-Price
+                      + Add Event-Medal
                     </button>
                   </div>
                   {achievement.typePrices && achievement.typePrices.map((typePrice, tpIndex) => (
                     <div key={tpIndex} className="mb-3 p-3 bg-white rounded-md border border-slate-200">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-semibold text-slate-600">Type-Price {tpIndex + 1}</span>
+                        <span className="text-xs font-semibold text-slate-600">Event-Medal {tpIndex + 1}</span>
                         {achievement.typePrices.length > 1 && (
                           <button
                             type="button"
@@ -546,14 +591,14 @@ export const StudentFormModal = ({
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-semibold text-slate-600 mb-1">Type</label>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Event</label>
                           <select
                             name={`achievement_${index}_typePrice_${tpIndex}_type`}
                             value={typePrice.type || ''}
                             onChange={(e) => handleTypePriceChange(index, tpIndex, 'type', e.target.value)}
                             className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                           >
-                            <option value="">Select Type (optional)</option>
+                            <option value="">Select Event (optional)</option>
                             <option value="Individual Sparring">Individual Sparring</option>
                             <option value="Group Sparring">Group Sparring</option>
                             <option value="Individual Tuls">Individual Tuls</option>
@@ -563,15 +608,43 @@ export const StudentFormModal = ({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-slate-600 mb-1">Price</label>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Medal</label>
                           <input
                             type="text"
                             name={`achievement_${index}_typePrice_${tpIndex}_price`}
                             value={typePrice.price || ''}
                             onChange={(e) => handleTypePriceChange(index, tpIndex, 'price', e.target.value)}
-                            placeholder="Enter price (optional)"
+                            placeholder="Enter medal (optional)"
                             className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                           />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                          <input
+                            type="text"
+                            name={`achievement_${index}_typePrice_${tpIndex}_certificateCode`}
+                            value={typePrice.certificateCode || ''}
+                            onChange={(e) => handleTypePriceChange(index, tpIndex, 'certificateCode', e.target.value)}
+                            placeholder="Enter certificate code (optional)"
+                            className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Upload</label>
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                handleTypePriceChange(index, tpIndex, 'certificateFile', file);
+                              }
+                            }}
+                            className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          />
+                          {typePrice.certificateFile && typeof typePrice.certificateFile === 'string' && (
+                            <p className="text-xs text-green-600 mt-1">Certificate uploaded</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -832,7 +905,7 @@ export const StudentFormModal = ({
                 setFormAge(null);
                 setPhotoPreview(null);
                 setPhotoFile(null);
-                setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '' }], type: '', prize: '' }]);
+                setAchievements([{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]);
               }}
               className="px-6 py-3 rounded-xl font-semibold transition-colors"
               style={{ backgroundColor: '#e5e7eb', color: '#374151' }}

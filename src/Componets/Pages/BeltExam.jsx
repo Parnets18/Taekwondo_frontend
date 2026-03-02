@@ -116,7 +116,8 @@ function BeltExam() {
         }
       });
 
-      const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/belt-exams', {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+      const response = await fetch(`${API_BASE_URL}/belt-exams`, {
         method: 'POST',
         body: formDataToSend
       });

@@ -16,15 +16,17 @@ function Navbar() {
       name: 'Members', 
       href: '#',
       dropdown: [
-        { name: 'Our Students', href: '/membership' },
+       
         { name: 'Our Community', href: '/community' },
-        { name: 'Black Belt', href: '/black-belt' }
+        { name: 'Black Belt', href: '/black-belt' },
+         { name: 'Our Students', href: '/membership' },
       ]
     },
     { name: 'Gallery', href: '/gallery' },
     { name: 'Admission', href: '/admission' },
     { name: 'Belt Exam', href: '/belt-exam' },
     { name: 'Contact', href: '/contact' },
+    { name: 'Verify Certificate', href: '/verify-certificate' },
   ];
 
   return (
@@ -71,7 +73,7 @@ function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-10">
+            <div className="hidden md:flex items-center space-x-6 flex-1 justify-center mx-4">
               {navigation.map((item) => (
                 item.dropdown ? (
                   <div 
@@ -81,7 +83,7 @@ function Navbar() {
                     onMouseLeave={() => setMembersDropdownOpen(false)}
                   >
                     <button
-                      className="text-lg font-semibold transition-colors duration-200 flex items-center gap-1"
+                      className="text-base font-semibold transition-colors duration-200 flex items-center gap-1 whitespace-nowrap"
                       style={{ color: '#006CB5' }}
                     >
                       {item.name}
@@ -89,13 +91,16 @@ function Navbar() {
                     </button>
                     
                     {membersDropdownOpen && (
-                      <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2 z-50">
+                      <div className="absolute top-full left-0 mt-1 w-56 bg-white shadow-xl rounded-lg py-2 border border-gray-200 z-[100]">
                         {item.dropdown.map((subItem) => (
                           <Link
                             key={subItem.name}
                             to={subItem.href}
-                            onClick={scrollToTop}
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                            onClick={() => {
+                              setMembersDropdownOpen(false);
+                              scrollToTop();
+                            }}
+                            className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-[#006CB5] transition-colors font-medium"
                           >
                             {subItem.name}
                           </Link>
@@ -108,7 +113,7 @@ function Navbar() {
                     key={item.name}
                     to={item.href}
                     onClick={scrollToTop}
-                    className="text-lg font-semibold transition-colors duration-200"
+                    className="text-base font-semibold transition-colors duration-200 whitespace-nowrap"
                     style={{ color: '#006CB5' }}
                   >
                     {item.name}
@@ -118,16 +123,16 @@ function Navbar() {
             </div>
 
             {/* Right Logos */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-3 flex-shrink-0">
               <img 
                 src="/logo img 2.png" 
                 alt="ITF Logo" 
-                className="h-18 w-18 object-contain"
+                className="h-16 w-16 object-contain"
               />
               <img 
                 src="/logo img 3.png" 
                 alt="Organization Logo" 
-                className="h-18 w-18 object-contain"
+                className="h-16 w-16 object-contain"
               />
             </div>
 

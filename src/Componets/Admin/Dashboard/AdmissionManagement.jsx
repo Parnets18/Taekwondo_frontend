@@ -23,7 +23,8 @@ function AdmissionManagement() {
         // Get auth token from localStorage
         const token = localStorage.getItem('token');
         
-        const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/admin/admissions', {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+        const response = await fetch(`${API_BASE_URL}/admin/admissions`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -83,7 +84,8 @@ function AdmissionManagement() {
       // Get auth token from localStorage
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`https://taekwondo-backend-j8w4.onrender.com/api/admin/admissions/${admissionId}/status`, {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+      const response = await fetch(`${API_BASE_URL}/admin/admissions/${admissionId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -154,7 +156,8 @@ function AdmissionManagement() {
         // Get auth token from localStorage
         const token = localStorage.getItem('token');
         
-        const response = await fetch(`https://taekwondo-backend-j8w4.onrender.com/api/admin/admissions/${admissionId}`, {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+        const response = await fetch(`${API_BASE_URL}/admin/admissions/${admissionId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,

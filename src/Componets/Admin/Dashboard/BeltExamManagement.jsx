@@ -22,7 +22,8 @@ function BeltExamManagement() {
       try {
         const token = localStorage.getItem('token');
         
-        const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/admin/belt-exams', {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+        const response = await fetch(`${API_BASE_URL}/admin/belt-exams`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -80,7 +81,8 @@ function BeltExamManagement() {
       try {
         const token = localStorage.getItem('token');
         
-        const response = await fetch(`https://taekwondo-backend-j8w4.onrender.com/api/admin/belt-exams/${examId}`, {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+        const response = await fetch(`${API_BASE_URL}/admin/belt-exams/${examId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,

@@ -25,12 +25,24 @@ import './About.css';
 function About() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dojangStory, setDojangStory] = useState(null);
+  const [loadingStory, setLoadingStory] = useState(true);
+  const [mentors, setMentors] = useState([]);
+  const [loadingMentors, setLoadingMentors] = useState(true);
+  const [leadership, setLeadership] = useState([]);
+  const [loadingLeadership, setLoadingLeadership] = useState(true);
+  const [instructorAchievements, setInstructorAchievements] = useState([]);
+  const [studentAchievements, setStudentAchievements] = useState([]);
+  const [loadingAchievements, setLoadingAchievements] = useState(true);
+
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
   useEffect(() => {
     // Fetch locations from API
     const fetchLocations = async () => {
       try {
-        const response = await fetch('https://taekwondo-backend-j8w4.onrender.com/api/locations');
+        const response = await fetch(`${API_BASE_URL}/locations`);
         const data = await response.json();
         setLocations(data);
         setLoading(false);
@@ -41,6 +53,92 @@ function About() {
     };
 
     fetchLocations();
+  }, []);
+
+  useEffect(() => {
+    // Fetch dojang story from API
+    const fetchDojangStory = async () => {
+      try {
+        setLoadingStory(true);
+        const response = await fetch(`${API_BASE_URL}/about-dojang-story`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setDojangStory(data.data.story);
+        }
+      } catch (error) {
+        console.error('Error fetching dojang story:', error);
+      } finally {
+        setLoadingStory(false);
+      }
+    };
+
+    fetchDojangStory();
+  }, []);
+
+  useEffect(() => {
+    // Fetch mentors from API
+    const fetchMentors = async () => {
+      try {
+        setLoadingMentors(true);
+        const response = await fetch(`${API_BASE_URL}/mentors`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setMentors(data.data.mentors);
+        }
+      } catch (error) {
+        console.error('Error fetching mentors:', error);
+      } finally {
+        setLoadingMentors(false);
+      }
+    };
+
+    fetchMentors();
+  }, []);
+
+  useEffect(() => {
+    // Fetch leadership from API
+    const fetchLeadership = async () => {
+      try {
+        setLoadingLeadership(true);
+        const response = await fetch(`${API_BASE_URL}/leadership`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setLeadership(data.data.leadership);
+        }
+      } catch (error) {
+        console.error('Error fetching leadership:', error);
+      } finally {
+        setLoadingLeadership(false);
+      }
+    };
+
+    fetchLeadership();
+  }, []);
+
+  useEffect(() => {
+    // Fetch achievements from API
+    const fetchAchievements = async () => {
+      try {
+        setLoadingAchievements(true);
+        const response = await fetch(`${API_BASE_URL}/achievements`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          const achievements = data.data.achievements;
+          setInstructorAchievements(achievements.filter(a => a.type === 'instructor'));
+          setStudentAchievements(achievements.filter(a => a.type === 'student'));
+        }
+      } catch (error) {
+        console.error('Error fetching achievements:', error);
+      } finally {
+        setLoadingAchievements(false);
+      }
+    };
+
+    fetchAchievements();
   }, []);
   
   useEffect(() => {
@@ -167,41 +265,46 @@ function About() {
       {/* Our Story Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <h2 className="text-4xl font-bold mb-4 sm:mb-6 flex items-center flex-wrap" style={{ color: '#000000' }}>
-                <FaFlag className="mr-2 sm:mr-3" style={{ color: '#DC2626' }} />
-                 <span style={{ color: '#DC2626' }}>Our</span>
-                 <span className="mx-2"></span>
-                <span style={{ color: '#000000' }}>Dojang</span>
-                <span className="mx-2"></span>
-                <span style={{ color: '#CA8A04' }}>Story</span>
-              </h2>
-              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base" style={{ color: '#374151' }}>
-                <p className="leading-relaxed">
-                  Established in 2010, Combat Warrior Taekwon-Do Association of Karnataka was founded with the vision of bringing authentic International Taekwon-Do Federation (ITF) training to Karnataka. Our dojang follows the original teachings of General Choi Hong Hi, the founder of Taekwon-Do.
-                </p>
-                <p className="leading-relaxed">
-                  Starting with just 8 dedicated students in a small training hall in Bangalore, we have grown to serve over 300 active practitioners across Karnataka. Our commitment to traditional ITF curriculum includes all 24 patterns (Tul), fundamental movements, sparring, and breaking techniques.
-                </p>
-                <p className="leading-relaxed">
-                  We are affiliated with ITF India and regularly participate in national and international seminars, gradings, and tournaments. Our students have successfully graded up to 3rd Dan Black Belt under certified ITF masters and international instructors.
-                </p>
+          {loadingStory ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600"></div>
+            </div>
+          ) : dojangStory ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="order-2 lg:order-1">
+                <h2 className="text-4xl font-bold mb-4 sm:mb-6 flex items-center flex-wrap" style={{ color: '#000000' }}>
+                  <FaFlag className="mr-2 sm:mr-3" style={{ color: '#DC2626' }} />
+                  <span style={{ color: '#DC2626' }}>Our</span>
+                  <span className="mx-2"></span>
+                  <span style={{ color: '#000000' }}>Dojang</span>
+                  <span className="mx-2"></span>
+                  <span style={{ color: '#CA8A04' }}>Story</span>
+                </h2>
+                <div className="space-y-3 sm:space-y-4 text-sm sm:text-base" style={{ color: '#374151' }}>
+                  <p className="leading-relaxed whitespace-pre-wrap">
+                    {dojangStory.description}
+                  </p>
+                </div>
+              </div>
+              <div className="relative order-1 lg:order-2">
+                <div className="rounded-2xl overflow-hidden shadow-xl" style={{ border: '4px solid #F97316' }}>
+                  <img 
+                    src={`${BASE_URL}/${dojangStory.photo}`}
+                    alt={dojangStory.title}
+                    className="w-full h-64 sm:h-80 lg:h-96 object-cover"
+                  />
+                </div>
+                {/* Decorative circles */}
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400 rounded-full"></div>
+                <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-red-400 rounded-full"></div>
               </div>
             </div>
-            <div className="relative order-1 lg:order-2">
-              <div className="rounded-2xl overflow-hidden shadow-xl" style={{ border: '4px solid #F97316' }}>
-                <img 
-                  src={p1} 
-                  alt="Combat Warrior Dojang Training Story" 
-                  className="w-full h-64 sm:h-80 lg:h-96 object-cover"
-                />
-              </div>
-              {/* Decorative circles */}
-              <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400 rounded-full"></div>
-              <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-red-400 rounded-full"></div>
+          ) : (
+            <div className="text-center py-20">
+              <h3 className="text-2xl font-semibold text-gray-700 mb-2">Story Not Available</h3>
+              <p className="text-gray-500">Please contact the administrator</p>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -404,35 +507,35 @@ function About() {
                 title: 'Courtesy', 
                 description: 'Refers to showing courtesy to all others inside and outside of the training academy.', 
                 icon: FaHandshake,
-                bgColor: '#FEF3C7',
+                bgColor: '#FFFFFF',
                 iconColor: '#CA8A04'
               },
               { 
                 title: 'Integrity', 
                 description: 'Students are expected to be honest and be willing to exhibit strong moral principles that will help them distinguish between right and wrong.', 
                 icon: FaBalanceScale,
-                bgColor: '#FECACA',
+                bgColor: '#FFFFFF',
                 iconColor: '#DC2626'
               },
               { 
                 title: 'Perseverance', 
                 description: 'Perseverance simply refers to the willingness of the Taekwon-Do student to continue his/her training and struggle against all odds in order to reach the goal.', 
                 icon: FaWalking,
-                bgColor: '#FEF3C7',
+                bgColor: '#FFFFFF',
                 iconColor: '#CA8A04'
               },
               { 
                 title: 'Self-control', 
                 description: 'Students are expected to have control over your thoughts, emotions as well as your actions.', 
                 icon: FaUserAlt,
-                bgColor: '#FECACA',
+                bgColor: '#FFFFFF',
                 iconColor: '#DC2626'
               },
               { 
                 title: 'Indomitable Spirit', 
                 description: 'Students will consistently exhibit a full 100% effort in all they do and must show courage to stand up for your principles and beliefs and to stay standing strong no matter who you go against and what hindrances are ahead of you.', 
                 icon: FaDumbbell,
-                bgColor: '#FEF3C7',
+                bgColor: '#FFFFFF',
                 iconColor: '#CA8A04'
               }
             ].map((tenet, index) => (
@@ -469,55 +572,49 @@ function About() {
             <p className="text-lg sm:text-xl" style={{ color: '#374151' }}>In 2008, Yeshwanth B R began training under</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {/* Mentor 1 */}
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #EAB308' }}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
-                <FaUser style={{ color: '#CA8A04', fontSize: '2rem' }} />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#000000' }}>Mr. Subbaray</h3>
-              <p className="font-bold mb-1 text-sm sm:text-base" style={{ color: '#DC2626' }}>5th DAN Black Belt</p>
-              <p className="text-xs sm:text-sm mb-2" style={{ color: '#374151' }}>President of Amateur Taekwon-Do Association of Karnataka</p>
-              <p className="font-semibold text-xs sm:text-sm" style={{ color: '#CA8A04' }}>A passionate trainer and an amazing personality</p>
+          {loadingMentors ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600"></div>
             </div>
-
-            {/* Mentor 2 */}
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #EAB308' }}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
-                <FaUser style={{ color: '#CA8A04', fontSize: '2rem' }} />
+          ) : mentors.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                {mentors.map((mentor) => (
+                  <div key={mentor._id} className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #EAB308' }}>
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
+                      {mentor.photo ? (
+                        <img
+                          src={`${BASE_URL}/${mentor.photo}`}
+                          alt={mentor.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FaUser style={{ color: '#CA8A04', fontSize: '2rem' }} />
+                      )}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#000000' }}>{mentor.name}</h3>
+                    <p className="font-bold mb-1 text-sm sm:text-base" style={{ color: '#DC2626' }}>{mentor.rank}</p>
+                    <p className="text-xs sm:text-sm mb-2" style={{ color: '#374151' }}>{mentor.position}</p>
+                    {mentor.description && (
+                      <p className="font-semibold text-xs sm:text-sm" style={{ color: '#CA8A04' }}>{mentor.description}</p>
+                    )}
+                  </div>
+                ))}
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#000000' }}>Mr. Lokesh Anjanappa</h3>
-              <p className="font-bold mb-1 text-sm sm:text-base" style={{ color: '#DC2626' }}>5th DAN Black Belt</p>
-              <p className="text-xs sm:text-sm" style={{ color: '#374151' }}>Technical Director ATAK</p>
-            </div>
 
-            {/* Mentor 3 */}
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #EAB308' }}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
-                <FaUser style={{ color: '#CA8A04', fontSize: '2rem' }} />
+              {/* Closing Statement */}
+              <div className="text-center mt-8">
+                <p className="text-lg sm:text-xl font-semibold" style={{ color: '#374151' }}>
+                  Yeshwanth B.R feels Grateful to be Trained Under Fabulous Mentors.
+                </p>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#000000' }}>Mr. Vijay Kumar</h3>
-              <p className="font-bold mb-1 text-sm sm:text-base" style={{ color: '#DC2626' }}>Chief Mentor</p>
-              <p className="text-xs sm:text-sm" style={{ color: '#374151' }}>ATAK & Pioneer of ITF in INDIA</p>
+            </>
+          ) : (
+            <div className="text-center py-20">
+              <h3 className="text-2xl font-semibold text-gray-700 mb-2">No Mentors Available</h3>
+              <p className="text-gray-500">Please contact the administrator</p>
             </div>
-
-            {/* Mentor 4 */}
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #EAB308' }}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
-                <FaUser style={{ color: '#CA8A04', fontSize: '2rem' }} />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#000000' }}>Mr. V. Maruthi Prasad</h3>
-              <p className="font-bold mb-1 text-sm sm:text-base" style={{ color: '#DC2626' }}>8th DAN Black Belt</p>
-              <p className="text-xs sm:text-sm" style={{ color: '#374151' }}>International Mater and Examiner</p>
-            </div>
-          </div>
-
-          {/* Closing Statement */}
-          <div className="text-center mt-8">
-            <p className="text-lg sm:text-xl font-semibold" style={{ color: '#374151' }}>
-              Yeshwanth B.R feels Grateful to be Trained Under Fabulous Mentors.
-            </p>
-          </div>
+          )}
         </div>
       </section>
 
@@ -534,41 +631,44 @@ function About() {
             <p className="text-lg sm:text-xl" style={{ color: '#374151' }}>Combat Warrior Taekwon-Do Association of Karnataka</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* President */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2" style={{ borderTop: '4px solid #EAB308' }}>
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg" style={{ border: '3px solid #DC2626' }}>
-                <FaUser style={{ fontSize: '2rem', color: '#DC2626' }} />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: '#000000' }}>Yeshwanth B R</h3>
-              <div className="mb-3">
-                <p className="font-bold text-base sm:text-lg" style={{ color: '#DC2626' }}>3rd DAN Black Belt</p>
-                <p className="font-semibold text-sm sm:text-base" style={{ color: '#374151' }}>President, CWTAK</p>
-              </div>
-              <div className="bg-white rounded-lg p-4 mt-4">
-                <p className="text-sm leading-relaxed" style={{ color: '#4B5563' }}>
-                  Leading Combat Warrior Taekwon-Do Association with dedication to authentic ITF training and student development.
-                </p>
-              </div>
+          {loadingLeadership ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600"></div>
             </div>
-
-            {/* Vice President */}
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2" style={{ borderTop: '4px solid #DC2626' }}>
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg" style={{ border: '3px solid #DC2626' }}>
-                <FaUser style={{ fontSize: '2rem', color: '#DC2626' }} />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: '#000000' }}>Manjunath</h3>
-              <div className="mb-3">
-                <p className="font-bold text-base sm:text-lg" style={{ color: '#DC2626' }}>2nd DAN Black Belt</p>
-                <p className="font-semibold text-sm sm:text-base" style={{ color: '#374151' }}>Vice-President, CWTAK</p>
-              </div>
-              <div className="bg-white rounded-lg p-4 mt-4">
-                <p className="text-sm leading-relaxed" style={{ color: '#4B5563' }}>
-                  Supporting the mission of CWTAK with commitment to excellence in martial arts training and student success.
-                </p>
-              </div>
+          ) : leadership.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {leadership.map((leader) => (
+                <div key={leader._id} className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2" style={{ borderTop: '4px solid #EAB308' }}>
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg overflow-hidden" style={{ border: '3px solid #DC2626' }}>
+                    {leader.photo ? (
+                      <img
+                        src={`${BASE_URL}/${leader.photo}`}
+                        alt={leader.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <FaUser style={{ fontSize: '2rem', color: '#DC2626' }} />
+                    )}
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: '#000000' }}>{leader.name}</h3>
+                  <div className="mb-3">
+                    <p className="font-bold text-base sm:text-lg" style={{ color: '#DC2626' }}>{leader.rank}</p>
+                    <p className="font-semibold text-sm sm:text-base" style={{ color: '#374151' }}>{leader.position}</p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 mt-4">
+                    <p className="text-sm leading-relaxed" style={{ color: '#4B5563' }}>
+                      {leader.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-20">
+              <h3 className="text-2xl font-semibold text-gray-700 mb-2">No Leadership Information Available</h3>
+              <p className="text-gray-500">Please contact the administrator</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -583,103 +683,67 @@ function About() {
             <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#DC2626' }}></div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Instructor Achievements */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #DC2626' }}>
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4" style={{ border: '3px solid #DC2626' }}>
-                  <FaMedal style={{ color: '#DC2626', fontSize: '1.5rem' }} />
-                </div>
-                <h3 className="text-2xl font-bold" style={{ color: '#000000' }}>
-                  <span style={{ color: '#000000' }}>Instructor</span>{' '}
-                  <span style={{ color: '#000000' }}>Achievements</span>
-                </h3>
-              </div>
-              <ul className="space-y-4">
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Asian games Umpire June 2019.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Won Gold medal in 3rd International Taekwon-Do Championship- 2013.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Won Bronze in South Asian Taekwon-Do Championship.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>National level 23 Gold, 15 Silver, 36 Bronze and Umpire Certification.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Won several medals as Taekwon-Do Student. (Club, State and National level).</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>There are 10 Black Belt students who have Trained Under him.</span>
-                </li>
-              </ul>
+          {loadingAchievements ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600"></div>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Instructor Achievements */}
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #DC2626' }}>
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4" style={{ border: '3px solid #DC2626' }}>
+                    <FaMedal style={{ color: '#DC2626', fontSize: '1.5rem' }} />
+                  </div>
+                  <h3 className="text-2xl font-bold" style={{ color: '#000000' }}>
+                    <span style={{ color: '#000000' }}>Instructor</span>{' '}
+                    <span style={{ color: '#000000' }}>Achievements</span>
+                  </h3>
+                </div>
+                {instructorAchievements.length > 0 ? (
+                  <ul className="space-y-4">
+                    {instructorAchievements.map((achievement) => (
+                      <li key={achievement._id} className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
+                          <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
+                        </div>
+                        <span className="leading-relaxed" style={{ color: '#374151' }}>{achievement.description}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-center py-8 text-gray-500">No instructor achievements available</p>
+                )}
+              </div>
 
-            {/* Students Achievement */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #DC2626' }}>
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4" style={{ border: '3px solid #DC2626' }}>
-                  <FaAward style={{ color: '#DC2626', fontSize: '1.5rem' }} />
+              {/* Students Achievement */}
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300" style={{ borderTop: '4px solid #DC2626' }}>
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4" style={{ border: '3px solid #DC2626' }}>
+                    <FaAward style={{ color: '#DC2626', fontSize: '1.5rem' }} />
+                  </div>
+                  <h3 className="text-2xl font-bold" style={{ color: '#000000' }}>
+                    <span style={{ color: '#000000' }}>Students</span>{' '}
+                    <span style={{ color: '#000000' }}>Achievement</span>
+                  </h3>
                 </div>
-                <h3 className="text-2xl font-bold" style={{ color: '#000000' }}>
-                  <span style={{ color: '#000000' }}>Students</span>{' '}
-                  <span style={{ color: '#000000' }}>Achievement</span>
-                </h3>
+                {studentAchievements.length > 0 ? (
+                  <ul className="space-y-4">
+                    {studentAchievements.map((achievement) => (
+                      <li key={achievement._id} className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
+                          <FaAward style={{ color: '#DC2626', fontSize: '0.875rem' }} />
+                        </div>
+                        <span className="leading-relaxed" style={{ color: '#374151' }}>{achievement.description}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-center py-8 text-gray-500">No student achievements available</p>
+                )}
               </div>
-              <ul className="space-y-4">
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaAward style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Won 1 Silver and 2 Bronze in Asian Games.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaAward style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Several Gold and Silver in 8 National matches.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaAward style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Several Gold, Silver and Bronze at State level, District level and Club level.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaAward style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>Gold at Hyderabad Nationals.</span>
-                </li>
-                <li className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
-                    <FaAward style={{ color: '#DC2626', fontSize: '0.875rem' }} />
-                  </div>
-                  <span className="leading-relaxed" style={{ color: '#374151' }}>80 Gold, 50 Silver and 5 Bronze at I Tiger Dojong State level and South Zone Vifa.</span>
-                </li>
-              </ul>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -791,9 +855,40 @@ function About() {
               alt="CWTAK - Courage First, Power Second, Technique Third" 
               className="w-full h-auto object-contain mx-auto"
               style={{ 
-                maxHeight: '200px'
+                maxHeight: '100px'
               }}
             />
+            
+        {/* CWTAK Banner */}
+<div className="text-center py-6">
+  <img
+    src={cwtakBanner}
+    alt="CWTAK Banner"
+    className="mx-auto object-contain"
+    style={{ maxHeight: "100px" }}
+  />
+
+  {/* Slogan Text */}
+  <h2
+    className="
+      mt-3
+      uppercase
+      font-bold
+      tracking-[3px]
+      text-sm sm:text-lg md:text-xl
+      bg-gradient-to-r
+      from-yellow-300
+      via-yellow-500
+      to-yellow-300
+      bg-clip-text
+      text-transparent
+      drop-shadow-[2px_2px_3px_rgba(0,0,0,0.8)]
+    "
+    style={{ fontFamily: "'Cinzel', serif" }}
+  >
+    Courage First, Power Second, Technique Third
+  </h2>
+</div>
           </div>
         </div>
       </section>

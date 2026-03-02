@@ -1,30 +1,31 @@
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 
-function GalleryManagement() {
-  const [photos, setPhotos] = useState([]);
+function AboutSectionManagement() {
+  const [aboutSections, setAboutSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [formData, setFormData] = useState({
-    category: ''
+    title: 'About Combat Warrior Dojang',
+    description: ''
   });
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
   const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
   useEffect(() => {
-    fetchPhotos();
+    fetchAboutSections();
   }, []);
 
-  const fetchPhotos = async () => {
+  const fetchAboutSections = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/gallery`, {
+      const response = await fetch(`${API_BASE_URL}/about-section/all`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -32,10 +33,10 @@ function GalleryManagement() {
       const data = await response.json();
       
       if (data.status === 'success') {
-        setPhotos(data.data.photos || []);
+        setAboutSections(data.data.aboutSections || []);
       }
     } catch (error) {
-      console.error('Error fetching photos:', error);
+      console.error('Error fetching about sections:', error);
     } finally {
       setLoading(false);
     }
@@ -60,8 +61,13 @@ function GalleryManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!photoFile && !selectedPhoto) {
+    if (!photoFile && !selectedSection) {
       alert('Please select a photo');
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      alert('Please enter a description');
       return;
     }
 
@@ -73,14 +79,14 @@ function GalleryManagement() {
         formDataToSend.append('photo', photoFile);
       }
       
-      // Add category
-      formDataToSend.append('category', formData.category);
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
 
-      const url = selectedPhoto
-        ? `${API_BASE_URL}/gallery/${selectedPhoto._id}`
-        : `${API_BASE_URL}/gallery`;
+      const url = selectedSection
+        ? `${API_BASE_URL}/about-section/${selectedSection._id}`
+        : `${API_BASE_URL}/about-section`;
       
-      const method = selectedPhoto ? 'PUT' : 'POST';
+      const method = selectedSection ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -93,27 +99,27 @@ function GalleryManagement() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        alert(selectedPhoto ? 'Photo updated successfully!' : 'Photo uploaded successfully!');
+        alert(selectedSection ? 'About section updated successfully!' : 'About section created successfully!');
         setShowModal(false);
         resetForm();
-        fetchPhotos();
+        fetchAboutSections();
       } else {
-        alert(data.message || 'Error saving photo');
+        alert(data.message || 'Error saving about section');
       }
     } catch (error) {
-      console.error('Error saving photo:', error);
-      alert('Error saving photo');
+      console.error('Error saving about section:', error);
+      alert('Error saving about section');
     }
   };
 
-  const handleDelete = async (photoId) => {
-    if (!window.confirm('Are you sure you want to delete this photo?')) {
+  const handleDelete = async (sectionId) => {
+    if (!window.confirm('Are you sure you want to delete this about section?')) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/gallery/${photoId}`, {
+      const response = await fetch(`${API_BASE_URL}/about-section/${sectionId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -123,14 +129,14 @@ function GalleryManagement() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        alert('Photo deleted successfully!');
-        fetchPhotos();
+        alert('About section deleted successfully!');
+        fetchAboutSections();
       } else {
-        alert(data.message || 'Error deleting photo');
+        alert(data.message || 'Error deleting about section');
       }
     } catch (error) {
-      console.error('Error deleting photo:', error);
-      alert('Error deleting photo');
+      console.error('Error deleting about section:', error);
+      alert('Error deleting about section');
     }
   };
 
@@ -139,21 +145,23 @@ function GalleryManagement() {
     setShowModal(true);
   };
 
-  const openEditModal = (photo) => {
-    setSelectedPhoto(photo);
-    setPhotoPreview(`${BASE_URL}/${photo.photo}`);
+  const openEditModal = (section) => {
+    setSelectedSection(section);
+    setPhotoPreview(`${BASE_URL}/${section.photo}`);
     setFormData({
-      category: photo.category || 'All'
+      title: section.title,
+      description: section.description
     });
     setShowModal(true);
   };
 
   const resetForm = () => {
-    setSelectedPhoto(null);
+    setSelectedSection(null);
     setPhotoFile(null);
     setPhotoPreview(null);
     setFormData({
-      category: ''
+      title: 'About Combat Warrior Dojang',
+      description: ''
     });
   };
 
@@ -169,42 +177,42 @@ function GalleryManagement() {
     <div className="p-8 bg-white min-h-screen">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gallery Management</h1>
-          <p className="text-gray-600">Manage gallery photos</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">About Section Management</h1>
+          <p className="text-gray-600">Manage the About Combat Warrior Dojang section on homepage</p>
         </div>
         <button
           onClick={openAddModal}
           className="px-6 py-3 text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center gap-2"
           style={{ backgroundColor: '#006CB5' }}
         >
-          <FaPlus /> Add Photo
+          <FaPlus /> Add About Section
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
-          <p className="text-sm font-medium text-gray-600">Total Photos</p>
-          <p className="text-2xl font-bold text-gray-900">{photos.length}</p>
+          <p className="text-sm font-medium text-gray-600">Total Sections</p>
+          <p className="text-2xl font-bold text-gray-900">{aboutSections.length}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-600">
-          <p className="text-sm font-medium text-gray-600">Active Photos</p>
-          <p className="text-2xl font-bold text-gray-900">{photos.filter(p => p.isActive).length}</p>
+          <p className="text-sm font-medium text-gray-600">Active Section</p>
+          <p className="text-2xl font-bold text-gray-900">{aboutSections.filter(s => s.isActive).length}</p>
         </div>
       </div>
 
-      {/* Photos Table */}
+      {/* Sections Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {photos.length === 0 ? (
+        {aboutSections.length === 0 ? (
           <div className="text-center py-20 bg-white">
-            <h3 className="text-2xl font-semibold text-gray-700 mb-2">No Photos Yet</h3>
-            <p className="text-gray-500 mb-6">Start by adding your first photo</p>
+            <h3 className="text-2xl font-semibold text-gray-700 mb-2">No About Section Yet</h3>
+            <p className="text-gray-500 mb-6">Start by adding your first about section</p>
             <button
               onClick={openAddModal}
               className="px-6 py-3 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
               style={{ backgroundColor: '#006CB5' }}
             >
-              Add First Photo
+              Add First Section
             </button>
           </div>
         ) : (
@@ -216,10 +224,10 @@ function GalleryManagement() {
                     Photo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
+                    Title
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Upload Date
+                    Description
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -230,47 +238,42 @@ function GalleryManagement() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {photos.map((photo) => (
-                  <tr key={photo._id} className="hover:bg-gray-50">
+                {aboutSections.map((section) => (
+                  <tr key={section._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-20 w-20">
                           <img
-                            src={`${BASE_URL}/${photo.photo}`}
-                            alt="Gallery photo"
+                            src={`${BASE_URL}/${section.photo}`}
+                            alt="About section"
                             className="h-20 w-20 rounded-lg object-cover border-2 border-gray-200"
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {photo.category || 'All'}
-                      </span>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">{section.title}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(photo.createdAt).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(photo.createdAt).toLocaleTimeString()}
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-md truncate">
+                        {section.description}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        photo.isActive 
+                        section.isActive 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {photo.isActive ? 'Active' : 'Inactive'}
+                        {section.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            setSelectedPhoto(photo);
-                            setPhotoPreview(`${BASE_URL}/${photo.photo}`);
+                            setSelectedSection(section);
+                            setPhotoPreview(`${BASE_URL}/${section.photo}`);
                             setShowViewModal(true);
                           }}
                           className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center border border-gray-300"
@@ -279,14 +282,14 @@ function GalleryManagement() {
                           <FaEye className="w-4 h-4" style={{ color: '#006CB5' }} />
                         </button>
                         <button
-                          onClick={() => openEditModal(photo)}
+                          onClick={() => openEditModal(section)}
                           className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center border border-gray-300"
                           title="Edit"
                         >
                           <FaEdit className="w-4 h-4" style={{ color: '#006CB5' }} />
                         </button>
                         <button
-                          onClick={() => handleDelete(photo._id)}
+                          onClick={() => handleDelete(section._id)}
                           className="p-2 bg-white rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center border border-gray-300"
                           title="Delete"
                         >
@@ -308,7 +311,7 @@ function GalleryManagement() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {selectedPhoto ? 'Edit Photo' : 'Add New Photo'}
+                {selectedSection ? 'Edit About Section' : 'Add New About Section'}
               </h2>
               <button
                 onClick={() => {
@@ -322,25 +325,32 @@ function GalleryManagement() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white">
-              {/* Category */}
+              {/* Title */}
               <div className="bg-white">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category *
+                  Title *
                 </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
-                >
-                  <option value="">Select Category</option>
-                  <option value="Seminars">Seminars</option>
-                  <option value="Stunts">Stunts</option>
-                  <option value="Our Memories">Our Memories</option>
-                  <option value="Video">Video</option>
-                  <option value="Competitions">Competitions</option>
-                  <option value="Belt Ceremonies">Belt Ceremonies</option>
-                </select>
+                />
+              </div>
+
+              {/* Description */}
+              <div className="bg-white">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows="6"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
               </div>
 
               {/* Photo Upload */}
@@ -365,7 +375,7 @@ function GalleryManagement() {
                       accept="image/*"
                       onChange={handlePhotoChange}
                       className="hidden"
-                      required={!selectedPhoto}
+                      required={!selectedSection}
                     />
                     <label
                       htmlFor="photo"
@@ -396,7 +406,7 @@ function GalleryManagement() {
                   className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"
                   style={{ backgroundColor: '#006CB5' }}
                 >
-                  {selectedPhoto ? 'Update Photo' : 'Upload Photo'}
+                  {selectedSection ? 'Update Section' : 'Create Section'}
                 </button>
               </div>
             </form>
@@ -405,15 +415,15 @@ function GalleryManagement() {
       )}
 
       {/* View Modal */}
-      {showViewModal && selectedPhoto && (
+      {showViewModal && selectedSection && (
         <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">View Photo</h2>
+              <h2 className="text-2xl font-bold text-gray-900">View About Section</h2>
               <button
                 onClick={() => {
                   setShowViewModal(false);
-                  setSelectedPhoto(null);
+                  setSelectedSection(null);
                   setPhotoPreview(null);
                 }}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -428,41 +438,31 @@ function GalleryManagement() {
                 <div className="flex justify-center">
                   <img
                     src={photoPreview}
-                    alt="Gallery photo"
-                    className="max-w-full max-h-[70vh] object-contain rounded-lg border-2 border-gray-300"
+                    alt="About section"
+                    className="max-w-full max-h-[50vh] object-contain rounded-lg border-2 border-gray-300"
                   />
                 </div>
               </div>
 
-              {/* Photo Details */}
-              <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-lg border border-gray-200">
+              {/* Section Details */}
+              <div className="space-y-4 bg-white p-4 rounded-lg border border-gray-200">
                 <div>
-                  <p className="text-sm font-semibold text-gray-600">Upload Date</p>
-                  <p className="text-base text-gray-900">
-                    {new Date(selectedPhoto.createdAt).toLocaleDateString()}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-600">Title</p>
+                  <p className="text-base text-gray-900">{selectedSection.title}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-600">Upload Time</p>
-                  <p className="text-base text-gray-900">
-                    {new Date(selectedPhoto.createdAt).toLocaleTimeString()}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-600">Description</p>
+                  <p className="text-base text-gray-900 whitespace-pre-wrap">{selectedSection.description}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-600">Status</p>
                   <span className={`inline-flex px-3 py-1 text-xs leading-5 font-semibold rounded-full ${
-                    selectedPhoto.isActive 
+                    selectedSection.isActive 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {selectedPhoto.isActive ? 'Active' : 'Inactive'}
+                    {selectedSection.isActive ? 'Active' : 'Inactive'}
                   </span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-600">Photo ID</p>
-                  <p className="text-base text-gray-900 font-mono text-xs">
-                    {selectedPhoto._id}
-                  </p>
                 </div>
               </div>
 
@@ -472,7 +472,7 @@ function GalleryManagement() {
                   type="button"
                   onClick={() => {
                     setShowViewModal(false);
-                    setSelectedPhoto(null);
+                    setSelectedSection(null);
                     setPhotoPreview(null);
                   }}
                   className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
@@ -488,4 +488,4 @@ function GalleryManagement() {
   );
 }
 
-export default GalleryManagement;
+export default AboutSectionManagement;

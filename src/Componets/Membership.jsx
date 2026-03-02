@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { FaMedal } from 'react-icons/fa';
 import memberImage from '../assets/member.png';
 
 function Membership() {
@@ -139,7 +138,16 @@ function Membership() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredStudents.map((student) => (
+            {filteredStudents.map((student) => {
+              const numEvents = student.achievements?.reduce((total, ach) => {
+                return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
+              }, 0) || 0;
+              
+              const numMedals = student.achievements?.reduce((total, ach) => {
+                return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
+              }, 0) || 0;
+              
+              return (
               <div
                 key={student.id || student._id}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
@@ -148,8 +156,8 @@ function Membership() {
                   setShowModal(true);
                 }}
               >
-                {/* Photo Section */}
-                <div className="relative h-64 bg-gradient-to-br from-blue-500 to-blue-700">
+                {/* Photo Section with Belt Badge */}
+                <div className="relative h-64 bg-gradient-to-br from-blue-500 to-blue-700 overflow-hidden">
                   {student.photo ? (
                     <img
                       src={`${BASE_URL}/${student.photo}`}
@@ -157,45 +165,66 @@ function Membership() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.onerror = null;
+                        e.target.src = '';
                         e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = `
-                          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
-                            <svg class="w-32 h-32 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                            </svg>
-                          </div>
-                        `;
                       }}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                  ) : null}
+                  
+                  {/* Fallback icon if no photo */}
+                  {!student.photo && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
                       <svg className="w-32 h-32 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
                       </svg>
                     </div>
                   )}
+                  
+                  {/* Belt Badge Overlay - Top Right Corner - Always on top */}
+                  <div className="absolute top-1 right-1 z-20">
+                    <div 
+                      className="px-3 py-1.5 rounded-full font-bold text-xs shadow-xl border-2 border-white flex items-center gap-1.5 backdrop-blur-sm"
+                      style={{
+                        ...getBeltColorStyle(student.currentBeltLevel),
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                      }}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                      <span className="text-xs font-bold">{student.currentBeltLevel || 'N/A'}</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Info Section */}
                 <div className="p-6">
                   {/* Name */}
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 truncate">
+                  <h3 className="text-xl font-bold text-gray-800 mb-3 text-center uppercase">
                     {student.fullName}
                   </h3>
                   
-                  {/* Belt Level */}
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 mb-2">Current Belt</p>
-                    <div 
-                      className="px-4 py-2 rounded-lg font-bold text-sm inline-block"
-                      style={getBeltColorStyle(student.currentBeltLevel)}
-                    >
-                      {student.currentBeltLevel || 'N/A'}
+                  {/* ID Number */}
+                  <div className="text-center mb-4">
+                    <p className="text-xs text-gray-500">ID Number</p>
+                    <p className="text-sm font-semibold text-gray-700">{student.idNumber || student.admissionNumber || 'N/A'}</p>
+                  </div>
+                  
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="bg-blue-50 p-3 rounded-lg text-center">
+                      <p className="text-xs text-gray-600 mb-1">Events</p>
+                      <p className="text-2xl font-bold text-blue-600">{numEvents}</p>
+                    </div>
+                    <div className="bg-yellow-50 p-3 rounded-lg text-center">
+                      <p className="text-xs text-gray-600 mb-1">Medals</p>
+                      <p className="text-2xl font-bold text-yellow-600">{numMedals}</p>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -203,144 +232,114 @@ function Membership() {
       {/* Student Details Modal */}
       {showModal && selectedStudent && (
         <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-xl max-h-[80vh] overflow-y-auto shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Student Details</h2>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Student Information</h2>
               <button
                 onClick={() => {
                   setShowModal(false);
                   setSelectedStudent(null);
                 }}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-6">
-              {/* Photo and Basic Info */}
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Photo */}
-                <div className="flex-shrink-0">
-                  <div className="w-48 h-48 rounded-lg overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600">
-                    {selectedStudent.photo ? (
-                      <img
-                        src={`${BASE_URL}/${selectedStudent.photo}`}
-                        alt={selectedStudent.fullName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Basic Info */}
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">{selectedStudent.fullName}</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-600">Current Belt</p>
-                      <div 
-                        className="px-3 py-1 rounded-lg font-bold text-sm inline-block mt-1"
-                        style={getBeltColorStyle(selectedStudent.currentBeltLevel)}
-                      >
-                        {selectedStudent.currentBeltLevel || 'N/A'}
-                      </div>
+            <div className="space-y-4">
+              {/* Photo */}
+              <div className="flex justify-center mb-4">
+                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600 border-4 border-gray-800 shadow-lg">
+                  {selectedStudent.photo ? (
+                    <img
+                      src={`${BASE_URL}/${selectedStudent.photo}`}
+                      alt={selectedStudent.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                      </svg>
                     </div>
-                    
-                    {selectedStudent.joiningDate && (
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600">Joining Date</p>
-                        <p className="text-base text-gray-900 mt-1">
-                          {new Date(selectedStudent.joiningDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                    )}
-                    
-                    {selectedStudent.age && (
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600">Age</p>
-                        <p className="text-base text-gray-900 mt-1">{selectedStudent.age} years</p>
-                      </div>
-                    )}
-                    
-                    {selectedStudent.gender && (
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600">Gender</p>
-                        <p className="text-base text-gray-900 mt-1 capitalize">{selectedStudent.gender}</p>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
 
-              {/* Student Achievements */}
-              <div className="border-t border-gray-200 pt-6">
-                <h4 className="text-xl font-bold text-gray-800 mb-4">Student Achievements</h4>
-                {selectedStudent.achievements && selectedStudent.achievements.length > 0 ? (
-                  <div className="space-y-4">
-                    {selectedStudent.achievements.map((achievement, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        {achievement.tournamentName && (
-                          <div className="flex items-start gap-2 mb-3">
-                            <FaMedal className="text-yellow-500 text-xl mt-0.5" />
-                            <h5 className="font-bold text-gray-800 text-lg">{achievement.tournamentName}</h5>
-                          </div>
-                        )}
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 ml-7">
-                          {achievement.address && (
-                            <div>
-                              <p className="text-sm font-semibold text-gray-600">Address</p>
-                              <p className="text-sm text-gray-900">{achievement.address}</p>
-                            </div>
-                          )}
-                          
-                          {achievement.type && (
-                            <div>
-                              <p className="text-sm font-semibold text-gray-600">Type</p>
-                              <p className="text-sm text-gray-900">{achievement.type}</p>
-                            </div>
-                          )}
-                          
-                          {achievement.date && (
-                            <div>
-                              <p className="text-sm font-semibold text-gray-600">Date</p>
-                              <p className="text-sm text-gray-900">
-                                {new Date(achievement.date).toLocaleDateString()}
-                              </p>
-                            </div>
-                          )}
-                          
-                          {achievement.prize && (
-                            <div>
-                              <p className="text-sm font-semibold text-gray-600">Prize</p>
-                              <p className="text-sm text-gray-900 font-semibold">{achievement.prize}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+              {/* Student Information Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. Name */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">1. Name</p>
+                  <p className="text-base font-bold text-gray-900 uppercase">{selectedStudent.fullName}</p>
+                </div>
+
+                {/* 2. ID Number */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">2. ID Number</p>
+                  <p className="text-base font-bold text-gray-900">{selectedStudent.idNumber || selectedStudent.admissionNumber || 'N/A'}</p>
+                </div>
+
+                {/* 3. Age */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">3. Age</p>
+                  <p className="text-base font-bold text-gray-900">{selectedStudent.age || 'N/A'} years</p>
+                </div>
+
+                {/* 4. Gender */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">4. Gender</p>
+                  <p className="text-base font-bold text-gray-900 capitalize">{selectedStudent.gender || 'N/A'}</p>
+                </div>
+
+                {/* 5. Joining Date */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">5. Joining Date</p>
+                  <p className="text-base font-bold text-gray-900">
+                    {selectedStudent.joiningDate ? new Date(selectedStudent.joiningDate).toLocaleDateString() : 'N/A'}
+                  </p>
+                </div>
+
+                {/* 6. Number of Events */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">6. Number of Events</p>
+                  <p className="text-base font-bold text-gray-900">
+                    {selectedStudent.achievements?.reduce((total, ach) => {
+                      return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
+                    }, 0) || 0}
+                  </p>
+                </div>
+
+                {/* 7. Number of Medals */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">7. Number of Medals</p>
+                  <p className="text-base font-bold text-gray-900">
+                    {selectedStudent.achievements?.reduce((total, ach) => {
+                      return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
+                    }, 0) || 0}
+                  </p>
+                </div>
+
+                {/* 8. Present Belt */}
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">8. Present Belt</p>
+                  <div 
+                    className="px-3 py-1.5 rounded-lg font-bold text-xs inline-block mt-1"
+                    style={getBeltColorStyle(selectedStudent.currentBeltLevel)}
+                  >
+                    {selectedStudent.currentBeltLevel || 'N/A'}
                   </div>
-                ) : (
-                  <p className="text-gray-500 italic text-center py-8">No achievements yet</p>
-                )}
+                </div>
               </div>
 
               {/* Close Button */}
-              <div className="flex justify-end pt-4 border-t border-gray-200">
+              <div className="flex justify-center pt-4">
                 <button
                   onClick={() => {
                     setShowModal(false);
                     setSelectedStudent(null);
                   }}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
                 >
                   Close
                 </button>

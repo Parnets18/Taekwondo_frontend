@@ -30,8 +30,8 @@ function StudentManagement() {
   const [formAge, setFormAge] = useState(null);
 
   // API base URL
-  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com'; // For static files like images
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com'; // For static files like images
 
   // Helper function to calculate age
   const calculateAge = (dateOfBirth) => {
@@ -137,7 +137,7 @@ function StudentManagement() {
         console.log('📸 Student photos:', data.data.students.map(s => ({ 
           name: s.fullName, 
           photo: s.photo,
-          photoUrl: s.photo ? `${BASE_URL}/${s.photo}` : 'No photo'
+          photoUrl: s.photo ? (s.photo.startsWith('http') ? s.photo : `${BASE_URL}/${s.photo}`) : 'No photo'
         })));
       }
     } catch (error) {
@@ -651,12 +651,10 @@ function StudentManagement() {
                       {student.photo ? (
                         <img 
                           className="h-10 w-10 rounded-full object-cover border-2 border-gray-300" 
-                          src={`${BASE_URL}/${student.photo}`} 
+                          src={student.photo.startsWith('http') ? student.photo : `${BASE_URL}/${student.photo}`}
                           alt={student.fullName}
                           onError={(e) => {
-                            console.error('Image failed to load:', `${BASE_URL}/${student.photo}`);
                             e.target.onerror = null;
-                            // Show placeholder on error
                             e.target.style.display = 'none';
                             e.target.parentElement.innerHTML = `
                               <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-2 border-blue-300">
@@ -683,7 +681,7 @@ function StudentManagement() {
                           setSelectedStudent(student);
                           setShowViewModal(true);
                         }}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+                        className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left uppercase"
                       >
                         {student.fullName}
                       </button>
@@ -1095,7 +1093,7 @@ function StudentManagement() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-600">Full Name</label>
-                    <p className="text-slate-900">{selectedStudent.fullName}</p>
+                    <p className="text-slate-900 uppercase">{selectedStudent.fullName}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-600">Date of Birth</label>
@@ -1204,10 +1202,28 @@ function StudentManagement() {
               {/* Achievements */}
               {selectedStudent.achievements && selectedStudent.achievements.length > 0 && (
                 <div className="bg-slate-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Achievements</h3>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Achievements</h3>
+                    <div className="flex gap-4">
+                      <span className="text-sm font-medium text-slate-600">
+                        No. of Events: <span className="text-blue-600 font-bold">
+                          {selectedStudent.achievements.reduce((total, ach) => {
+                            return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
+                          }, 0)}
+                        </span>
+                      </span>
+                      <span className="text-sm font-medium text-slate-600">
+                        No. of Medals: <span className="text-blue-600 font-bold">
+                          {selectedStudent.achievements.reduce((total, ach) => {
+                            return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
+                          }, 0)}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
                   {selectedStudent.achievements.map((achievement, index) => (
-                    <div key={index} className="mb-3 p-3 bg-white rounded-lg border border-slate-200">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div key={index} className="mb-4 p-4 bg-white rounded-lg border border-slate-200">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                         <div>
                           <label className="text-xs font-medium text-slate-600">Tournament</label>
                           <p className="text-sm text-slate-900">{achievement.tournamentName || 'N/A'}</p>
@@ -1220,15 +1236,57 @@ function StudentManagement() {
                           <label className="text-xs font-medium text-slate-600">Date</label>
                           <p className="text-sm text-slate-900">{achievement.date ? new Date(achievement.date).toLocaleDateString() : 'N/A'}</p>
                         </div>
-                        <div>
-                          <label className="text-xs font-medium text-slate-600">Type</label>
-                          <p className="text-sm text-slate-900">{achievement.type || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-slate-600">Prize</label>
-                          <p className="text-sm text-slate-900">{achievement.prize || 'N/A'}</p>
-                        </div>
                       </div>
+                      
+                      {/* Events & Medals */}
+                      {achievement.typePrices && achievement.typePrices.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-slate-200">
+                          <label className="text-xs font-semibold text-slate-700 mb-2 block">Events & Medals</label>
+                          {achievement.typePrices.map((tp, tpIndex) => (
+                            <div key={tpIndex} className="mb-2 p-2 bg-slate-50 rounded border border-slate-200">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                <div>
+                                  <label className="text-xs font-medium text-slate-600">Event</label>
+                                  <p className="text-sm text-slate-900">{tp.type || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-slate-600">Medal</label>
+                                  <p className="text-sm text-slate-900">{tp.price || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-slate-600">Certificate Code</label>
+                                  <p className="text-sm text-slate-900">{tp.certificateCode || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-slate-600 mb-1 block">Certificate</label>
+                                  {tp.certificateFile ? (
+                                    <button
+                                      onClick={() => {
+                                        const filename = tp.certificateFile.split('/').pop();
+                                        const link = document.createElement('a');
+                                        link.href = `${BASE_URL}/api/students/certificate/download/${filename}`;
+                                        link.download = filename;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                      }}
+                                      className="inline-flex items-center gap-1 text-xs text-white px-3 py-1.5 rounded hover:opacity-90 w-full justify-center"
+                                      style={{ backgroundColor: '#006CB5' }}
+                                    >
+                                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                      </svg>
+                                      Download
+                                    </button>
+                                  ) : (
+                                    <p className="text-xs text-slate-500">No certificate</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

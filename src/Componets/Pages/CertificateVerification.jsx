@@ -9,8 +9,8 @@ const CertificateVerification = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // API base URL for production
-  const API_BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com/api';
+  // API base URL
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   useEffect(() => {
     if (urlCode) {
@@ -29,26 +29,14 @@ const CertificateVerification = () => {
       setError('');
       setVerificationResult(null);
 
-      const response = await axios.post(`${API_BASE_URL}/certificates/verify`, {
+      const response = await axios.post(`${API_BASE_URL}/certificate-verification/verify`, {
         verificationCode: code.trim().toUpperCase()
       });
 
-      // Extract the data from the response
-      // Backend returns { status: 'success', data: { isValid: true, certificate: {...} } }
       setVerificationResult(response.data.data);
     } catch (error) {
       console.error('Verification failed:', error);
-      
-      // Provide user-friendly error messages
-      if (error.response?.status === 404) {
-        setError('Please enter a valid verification code. The code you entered was not found in our system.');
-      } else if (error.response?.status === 400) {
-        setError('Invalid verification code format. Please check and try again.');
-      } else if (error.code === 'ERR_NETWORK' || !error.response) {
-        setError('Unable to connect to verification service. Please check your internet connection and try again.');
-      } else {
-        setError(error.response?.data?.message || 'Verification failed. Please check the code and try again.');
-      }
+      setError(error.response?.data?.message || 'Verification failed. Please check the code and try again.');
     } finally {
       setLoading(false);
     }
@@ -76,24 +64,28 @@ const CertificateVerification = () => {
     return typeMap[type] || type;
   };
 
-  const handleViewCertificate = async (certificateId) => {
+  const handleViewCertificate = async (certificateId, certificateType, achievementId, certificateIndex) => {
     try {
-      console.log('Viewing certificate ID:', certificateId);
+      const params = new URLSearchParams({
+        type: certificateType
+      });
       
-      // Public route - no authentication needed
-      const response = await axios.get(`${API_BASE_URL}/certificates/${certificateId}`);
+      if (achievementId) params.append('achievementId', achievementId);
+      if (certificateIndex !== undefined) params.append('certificateIndex', certificateIndex);
       
+      const viewUrl = `${API_BASE_URL}/certificate-verification/${certificateId}?${params.toString()}`;
+      console.log('Viewing certificate from URL:', viewUrl);
+      console.log('View params:', { certificateId, certificateType, achievementId, certificateIndex });
+      
+      const response = await axios.get(viewUrl);
       console.log('Certificate data received:', response.data);
-      
+
       if (response.data.status === 'success' && response.data.data.certificate.imageUrl) {
-        // Open certificate image in a new window using the backend URL
         const imageUrl = `${API_BASE_URL.replace('/api', '')}${response.data.data.certificate.imageUrl}`;
         console.log('Opening image URL:', imageUrl);
-        
         const newWindow = window.open(imageUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
         
         if (!newWindow) {
-          // If popup was blocked, show alternative
           setError('Popup blocked. Please allow popups for this site or try the download option.');
         } else {
           setError('');
@@ -107,31 +99,37 @@ const CertificateVerification = () => {
     }
   };
 
-  const handleDownloadCertificate = async (certificateId) => {
+  const handleDownloadCertificate = async (certificateId, certificateType, achievementId, certificateIndex) => {
     try {
-      console.log('Starting certificate download for ID:', certificateId);
+      const params = new URLSearchParams({
+        type: certificateType
+      });
       
-      // Public route - no authentication needed
-      const response = await axios.get(`${API_BASE_URL}/certificates/${certificateId}/download`, {
+      if (achievementId) params.append('achievementId', achievementId);
+      if (certificateIndex !== undefined) params.append('certificateIndex', certificateIndex);
+      
+      const downloadUrl = `${API_BASE_URL}/certificate-verification/${certificateId}/download?${params.toString()}`;
+      console.log('Starting certificate download from URL:', downloadUrl);
+      console.log('Download params:', { certificateId, certificateType, achievementId, certificateIndex });
+      
+      const response = await axios.get(downloadUrl, {
         responseType: 'blob',
         headers: {
           'Accept': 'application/octet-stream, image/*, application/pdf'
         }
       });
-      
+
       console.log('Download response received:', {
         status: response.status,
         contentType: response.headers['content-type'],
         contentLength: response.headers['content-length'],
         contentDisposition: response.headers['content-disposition']
       });
-      
-      // Create blob link to download
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      
-      // Get filename from response headers or use default
+
       const contentDisposition = response.headers['content-disposition'];
       let filename = `certificate_${certificateId}.jpg`;
       if (contentDisposition) {
@@ -140,22 +138,18 @@ const CertificateVerification = () => {
           filename = filenameMatch[1];
         }
       }
-      
+
       console.log('Downloading file as:', filename);
-      
       link.setAttribute('download', filename);
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       console.log('Download initiated successfully');
-      
-      // Show success message instead of resetting immediately
       setError('');
       alert('Certificate download started! Check your downloads folder.');
-      
     } catch (error) {
       console.error('Error downloading certificate:', error);
       console.error('Error response:', error.response);
@@ -175,7 +169,7 @@ const CertificateVerification = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4" style={{ color: '#006CB5' }}>Certificate Verification</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Certificate Verification</h1>
           <p className="text-lg text-gray-600">
             Verify the authenticity of certificates issued by Combat Warrior Taekwon-Do Institute
           </p>
@@ -195,7 +189,7 @@ const CertificateVerification = () => {
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.toUpperCase())}
                   placeholder="Enter the verification code from the certificate"
-                  className="flex-1 border border-gray-300 rounded-md px-4 py-3 text-center font-mono text-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
+                  className="flex-1 border border-gray-300 rounded-md px-4 py-3 text-center font-mono text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   maxLength={32}
                 />
                 <button
@@ -217,16 +211,16 @@ const CertificateVerification = () => {
           </form>
 
           {error && (
-            <div className="mt-4 p-4 bg-white border-2 border-red-500 rounded-md">
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-600">Verification Failed</h3>
-                  <p className="mt-1 text-sm text-gray-700">{error}</p>
+                  <h3 className="text-sm font-medium text-red-800">Verification Failed</h3>
+                  <p className="mt-1 text-sm text-red-700">{error}</p>
                 </div>
               </div>
             </div>
@@ -305,9 +299,7 @@ const CertificateVerification = () => {
 
                       <div>
                         <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Verification Code</h4>
-                        <p className="mt-1 text-sm font-mono text-gray-600 bg-gray-100 px-3 py-2 rounded">
-                          {verificationResult.certificate.verificationCode}
-                        </p>
+                        <p className="mt-1 text-sm font-mono text-gray-600 bg-gray-100 px-3 py-2 rounded">{verificationResult.certificate.verificationCode}</p>
                       </div>
 
                       <div>
@@ -325,7 +317,12 @@ const CertificateVerification = () => {
                       <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Certificate Actions</h4>
                       <div className="flex flex-wrap gap-3">
                         <button
-                          onClick={() => handleViewCertificate(verificationResult.certificate.id)}
+                          onClick={() => handleViewCertificate(
+                            verificationResult.certificate.id,
+                            verificationResult.certificate.type,
+                            verificationResult.certificate.achievementId,
+                            verificationResult.certificate.certificateIndex
+                          )}
                           className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -334,8 +331,14 @@ const CertificateVerification = () => {
                           </svg>
                           View Certificate
                         </button>
+
                         <button
-                          onClick={() => handleDownloadCertificate(verificationResult.certificate.id)}
+                          onClick={() => handleDownloadCertificate(
+                            verificationResult.certificate.id,
+                            verificationResult.certificate.type,
+                            verificationResult.certificate.achievementId,
+                            verificationResult.certificate.certificateIndex
+                          )}
                           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,9 +359,7 @@ const CertificateVerification = () => {
                       <p className="text-sm text-gray-600">Combat Warrior Taekwon-Do Institute</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-500">
-                        Verified on {new Date().toLocaleDateString()}
-                      </p>
+                      <p className="text-xs text-gray-500">Verified on {new Date().toLocaleDateString()}</p>
                     </div>
                   </div>
                 </div>
@@ -384,24 +385,21 @@ const CertificateVerification = () => {
         )}
 
         {/* Information Section */}
-        <div className="mt-12 bg-white border border-gray-200 rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">About Certificate Verification</h2>
-          <div className="space-y-3 text-sm text-gray-700">
+        <div className="mt-12 bg-blue-50 rounded-lg p-6">
+          <h2 className="text-lg font-medium text-blue-900 mb-4">About Certificate Verification</h2>
+          <div className="space-y-3 text-sm text-blue-800">
             <p>
-              <strong>Secure Verification:</strong> Each certificate issued by Combat Warrior Taekwon-Do Institute 
-              contains a unique verification code that can be used to confirm its authenticity.
+              <strong>Secure Verification:</strong> Each certificate issued by Combat Warrior Taekwon-Do Institute contains a unique verification code that can be used to confirm its authenticity.
             </p>
             <p>
-              <strong>Real-time Validation:</strong> Our verification system checks certificates against our 
-              secure database in real-time to ensure accuracy and prevent fraud.
+              <strong>Real-time Validation:</strong> Our verification system checks certificates against our secure database in real-time to ensure accuracy and prevent fraud.
             </p>
             <p>
-              <strong>Privacy Protection:</strong> Only information that appears on the original certificate 
-              is displayed during verification. Personal student information remains protected.
+              <strong>Privacy Protection:</strong> Only information that appears on the original certificate is displayed during verification. Personal student information remains protected.
             </p>
             <p>
-              <strong>Questions?</strong> If you have questions about a certificate or the verification process, 
-              please contact us at <a href="mailto:info@combatwarrior.com" className="underline text-blue-600">info@combatwarrior.com</a>
+              <strong>Questions?</strong> If you have questions about a certificate or the verification process, please contact us at{' '}
+              <a href="mailto:info@combatwarrior.com" className="underline">info@combatwarrior.com</a>
             </p>
           </div>
         </div>
