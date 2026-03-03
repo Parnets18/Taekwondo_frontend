@@ -20,6 +20,7 @@ import {
 import photo1 from '../../assets/photo1.jpg';
 import p1 from '../../assets/p1.jpg';
 import cwtakBanner from '../../assets/image 11.png';
+import textImage from '../../assets/text.png';
 import './About.css';
 
 function About() {
@@ -179,15 +180,15 @@ function About() {
       }
       
       /* Preserve yellow text */
-      .about-page [style*="color: #CA8A04"],
-      .about-page [style*="color: #CA8A04"] *,
-      .about-page [style*="color:#CA8A04"],
-      .about-page [style*="color:#CA8A04"] *,
-      .about-page [style*="color: #EAB308"],
-      .about-page [style*="color: #EAB308"] *,
-      .about-page [style*="color:#EAB308"],
-      .about-page [style*="color:#EAB308"] * {
-        color: #CA8A04 !important;
+      .about-page [style*="color: #FFDE21"],
+      .about-page [style*="color: #FFDE21"] *,
+      .about-page [style*="color:#FFDE21"],
+      .about-page [style*="color:#FFDE21"] *,
+      .about-page [style*="color: #FFDE21"],
+      .about-page [style*="color: #FFDE21"] *,
+      .about-page [style*="color:#FFDE21"],
+      .about-page [style*="color:#FFDE21"] * {
+        color: #FFDE21 !important;
       }
       
       /* Preserve gray text */
@@ -278,7 +279,7 @@ function About() {
                   <span className="mx-2"></span>
                   <span style={{ color: '#000000' }}>Dojang</span>
                   <span className="mx-2"></span>
-                  <span style={{ color: '#CA8A04' }}>Story</span>
+                  <span style={{ color: '#FFDE21' }}>Story</span>
                 </h2>
                 <div className="space-y-3 sm:space-y-4 text-sm sm:text-base" style={{ color: '#374151' }}>
                   <p className="leading-relaxed whitespace-pre-wrap">
@@ -295,7 +296,7 @@ function About() {
                   />
                 </div>
                 {/* Decorative circles */}
-                <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400 rounded-full"></div>
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-[#FFDE21] rounded-full"></div>
                 <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-red-400 rounded-full"></div>
               </div>
             </div>
@@ -315,15 +316,15 @@ function About() {
             <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#000000' }}>
               <FaFlag className="mr-2 sm:mr-3" style={{ color: '#DC2626' }} />
               <span style={{ color: '#DC2626' }}>CW</span>
-              <span style={{ color: '#CA8A04' }}>TAK</span>
+              <span style={{ color: '#FFDE21' }}>TAK</span>
               <span className="mx-2"></span>
               <span style={{ color: '#000000' }}>History</span>
             </h2>
-            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#CA8A04' }}></div>
+            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#FFDE21' }}></div>
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-gray-50 to-yellow-50 rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10" style={{ borderLeft: '4px solid #DC2626' }}>
+            <div className="bg-gradient-to-br from-gray-50 to-[#FFF9E6] rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10" style={{ borderLeft: '4px solid #DC2626' }}>
               <div className="space-y-4 sm:space-y-5 text-sm sm:text-base leading-relaxed" style={{ color: '#374151' }}>
                 <p className="text-base sm:text-lg font-semibold" style={{ color: '#000000' }}>
                   Combat Warrior Taekwon-Do Association of Karnataka (CWTAK) was formed in 2017. It is affiliated to All India Taekwon-Do Association and International Taekwon-DO Federation, UK.
@@ -360,7 +361,7 @@ function About() {
       </section>
 
       {/* Class Process In CWTAK Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-yellow-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-[#FFF9E6]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-4xl font-bold mb-3 sm:mb-4" style={{ color: '#000000' }}>
@@ -368,9 +369,9 @@ function About() {
                <span className="mx-2"></span>
               <span style={{ color: '#000000' }}>Process In</span>
               <span className="mx-2"></span>
-              <span style={{ color: '#CA8A04' }}>CWTAK</span>
+              <span style={{ color: '#FFDE21' }}>CWTAK</span>
             </h2>
-            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#CA8A04' }}></div>
+            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#FFDE21' }}></div>
           </div>
 
           <div className="max-w-5xl mx-auto">
@@ -378,7 +379,7 @@ function About() {
               {/* Process Item 1 */}
               <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFDE21' }}>
                     <span style={{ color: '#DC2626', fontWeight: 'bold', fontSize: '1.125rem' }}>1</span>
                   </div>
                   <p className="leading-relaxed" style={{ color: '#374151' }}>
@@ -390,7 +391,7 @@ function About() {
               {/* Process Item 2 */}
               <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFDE21' }}>
                     <span style={{ color: '#DC2626', fontWeight: 'bold', fontSize: '1.125rem' }}>2</span>
                   </div>
                   <p className="leading-relaxed" style={{ color: '#374151' }}>
@@ -402,7 +403,7 @@ function About() {
               {/* Process Item 3 */}
               <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFDE21' }}>
                     <span style={{ color: '#DC2626', fontWeight: 'bold', fontSize: '1.125rem' }}>3</span>
                   </div>
                   <p className="leading-relaxed" style={{ color: '#374151' }}>
@@ -414,7 +415,7 @@ function About() {
               {/* Process Item 4 */}
               <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFDE21' }}>
                     <span style={{ color: '#DC2626', fontWeight: 'bold', fontSize: '1.125rem' }}>4</span>
                   </div>
                   <p className="leading-relaxed" style={{ color: '#374151' }}>
@@ -424,9 +425,9 @@ function About() {
               </div>
 
               {/* Process Item 5 - Full Width */}
-              <div className="md:col-span-2 bg-gradient-to-r from-yellow-50 to-red-50 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="md:col-span-2 bg-gradient-to-r from-[#FFF9E6] to-red-50 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFDE21' }}>
                     <span style={{ color: '#DC2626', fontWeight: 'bold', fontSize: '1.125rem' }}>5</span>
                   </div>
                   <p className="leading-relaxed" style={{ color: '#374151' }}>
@@ -455,14 +456,14 @@ function About() {
             
             <div className="transform hover:scale-105 transition-all duration-500 order-2 lg:order-2">
               <h2 className="text-4xl font-bold mb-4 sm:mb-6 flex items-center flex-wrap" style={{ color: '#000000' }}>
-                <FaGraduationCap className="mr-2 sm:mr-3" style={{ color: '#CA8A04', fontSize: '1.5rem' }} />
+                <FaGraduationCap className="mr-2 sm:mr-3" style={{ color: '#FFDE21', fontSize: '1.5rem' }} />
                 <span style={{ color: '#DC2626' }}>General Choi Hong-Hi</span>
                 <span className="mx-2"></span>
                 <span style={{ color: '#000000' }}>Founder of</span>
                 <span className="mx-2"></span>
-                <span style={{ color: '#CA8A04' }}>Taekwon-Do</span>
+                <span style={{ color: '#FFDE21' }}>Taekwon-Do</span>
               </h2>
-              <div className="w-32 h-1 mb-4 rounded-full" style={{ backgroundColor: '#CA8A04' }}></div>
+              <div className="w-32 h-1 mb-4 rounded-full" style={{ backgroundColor: '#FFDE21' }}></div>
               <div className="space-y-3 sm:space-y-4 text-sm sm:text-base" style={{ color: '#374151' }}>
                 <p className="leading-relaxed">
                   <strong style={{ color: '#000000' }}>General Choi Hong-Hi</strong> (November 9, 1918 – June 15, 2002) was a South Korean army general and martial artist who is widely recognized as the founder of Taekwon-Do. He dedicated his life to developing and promoting this martial art around the world.
@@ -490,13 +491,13 @@ function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16 transform hover:scale-105 transition-all duration-500">
             <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#000000' }}>
-              <FaStar className="mr-2 sm:mr-3" style={{ color: '#CA8A04' }} />
+              <FaStar className="mr-2 sm:mr-3" style={{ color: '#FFDE21' }} />
               <span className="mx-2"></span>
               <span style={{ color: '#DC2626' }}>The Five</span>
                 <span className="mx-2"></span>
               <span style={{ color: '#000000' }}>Tenets of</span>
               <span className="mx-2"></span>
-              <span style={{ color: '#CA8A04' }}>Taekwon-Do</span>
+              <span style={{ color: '#FFDE21' }}>Taekwon-Do</span>
             </h2>
             <p className="text-lg sm:text-xl font-semibold" style={{ color: '#374151' }}>The fundamental principles that guide every ITF practitioner</p>
           </div>
@@ -508,7 +509,7 @@ function About() {
                 description: 'Refers to showing courtesy to all others inside and outside of the training academy.', 
                 icon: FaHandshake,
                 bgColor: '#FFFFFF',
-                iconColor: '#CA8A04'
+                iconColor: '#FFDE21'
               },
               { 
                 title: 'Integrity', 
@@ -522,7 +523,7 @@ function About() {
                 description: 'Perseverance simply refers to the willingness of the Taekwon-Do student to continue his/her training and struggle against all odds in order to reach the goal.', 
                 icon: FaWalking,
                 bgColor: '#FFFFFF',
-                iconColor: '#CA8A04'
+                iconColor: '#FFDE21'
               },
               { 
                 title: 'Self-control', 
@@ -536,7 +537,7 @@ function About() {
                 description: 'Students will consistently exhibit a full 100% effort in all they do and must show courage to stand up for your principles and beliefs and to stay standing strong no matter who you go against and what hindrances are ahead of you.', 
                 icon: FaDumbbell,
                 bgColor: '#FFFFFF',
-                iconColor: '#CA8A04'
+                iconColor: '#FFDE21'
               }
             ].map((tenet, index) => (
               <div 
@@ -557,17 +558,17 @@ function About() {
 
 
       {/* Training History Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-red-100 to-yellow-100">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-red-100 to-[#FFF4CC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#000000' }}>
-              <FaGraduationCap className="mr-2 sm:mr-3" style={{ color: '#CA8A04', fontSize: '1.5rem' }} />
+              <FaGraduationCap className="mr-2 sm:mr-3" style={{ color: '#FFDE21', fontSize: '1.5rem' }} />
               <span className="mx-2"></span>
               <span style={{ color: '#DC2626' }}>Our</span>
                 <span className="mx-2"></span>
               <span style={{ color: '#000000' }}>Esteemed</span>
               <span className="mx-2"></span>
-              <span style={{ color: '#CA8A04' }}>Mentors</span>
+              <span style={{ color: '#FFDE21' }}>Mentors</span>
             </h2>
             <p className="text-lg sm:text-xl" style={{ color: '#374151' }}>In 2008, Yeshwanth B R began training under</p>
           </div>
@@ -580,8 +581,8 @@ function About() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 {mentors.map((mentor) => (
-                  <div key={mentor._id} className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #EAB308' }}>
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '2px solid #CA8A04' }}>
+                  <div key={mentor._id} className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #FFDE21' }}>
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFDE21' }}>
                       {mentor.photo ? (
                         <img
                           src={`${BASE_URL}/${mentor.photo}`}
@@ -589,14 +590,14 @@ function About() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <FaUser style={{ color: '#CA8A04', fontSize: '2rem' }} />
+                        <FaUser style={{ color: '#FFDE21', fontSize: '2rem' }} />
                       )}
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#000000' }}>{mentor.name}</h3>
                     <p className="font-bold mb-1 text-sm sm:text-base" style={{ color: '#DC2626' }}>{mentor.rank}</p>
                     <p className="text-xs sm:text-sm mb-2" style={{ color: '#374151' }}>{mentor.position}</p>
                     {mentor.description && (
-                      <p className="font-semibold text-xs sm:text-sm" style={{ color: '#CA8A04' }}>{mentor.description}</p>
+                      <p className="font-semibold text-xs sm:text-sm" style={{ color: '#FFDE21' }}>{mentor.description}</p>
                     )}
                   </div>
                 ))}
@@ -623,7 +624,7 @@ function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <h2 className="text-4xl font-bold mb-3 sm:mb-4 flex items-center justify-center flex-wrap" style={{ color: '#000000' }}>
-              <FaUsers className="mr-2 sm:mr-3" style={{ color: '#CA8A04', fontSize: '1.5rem' }} />
+              <FaUsers className="mr-2 sm:mr-3" style={{ color: '#FFDE21', fontSize: '1.5rem' }} />
               <span style={{ color: '#DC2626' }}>CWTAK</span>
               <span className="mx-2"></span>
               <span style={{ color: '#000000' }}>Leadership</span>
@@ -638,7 +639,7 @@ function About() {
           ) : leadership.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {leadership.map((leader) => (
-                <div key={leader._id} className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2" style={{ borderTop: '4px solid #EAB308' }}>
+                <div key={leader._id} className="bg-gradient-to-br from-[#FFF9E6] to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2" style={{ borderTop: '4px solid #FFDE21' }}>
                   <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg overflow-hidden" style={{ border: '3px solid #DC2626' }}>
                     {leader.photo ? (
                       <img
@@ -678,7 +679,7 @@ function About() {
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <h2 className="text-4xl font-bold mb-3 flex items-center justify-center flex-wrap" style={{ color: '#000000' }}>
               <span style={{ color: '#DC2626' }}>Achieve</span>
-              <span style={{ color: '#CA8A04' }}>ments</span>
+              <span style={{ color: '#FFDE21' }}>ments</span>
             </h2>
             <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#DC2626' }}></div>
           </div>
@@ -704,7 +705,7 @@ function About() {
                   <ul className="space-y-4">
                     {instructorAchievements.map((achievement) => (
                       <li key={achievement._id} className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #FFDE21' }}>
                           <FaMedal style={{ color: '#DC2626', fontSize: '0.875rem' }} />
                         </div>
                         <span className="leading-relaxed" style={{ color: '#374151' }}>{achievement.description}</span>
@@ -731,7 +732,7 @@ function About() {
                   <ul className="space-y-4">
                     {studentAchievements.map((achievement) => (
                       <li key={achievement._id} className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #FFDE21' }}>
                           <FaAward style={{ color: '#DC2626', fontSize: '0.875rem' }} />
                         </div>
                         <span className="leading-relaxed" style={{ color: '#374151' }}>{achievement.description}</span>
@@ -748,7 +749,7 @@ function About() {
       </section>
 
       {/* Locations & School Partnerships Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-yellow-50 to-red-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#FFF9E6] to-red-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16">
             <h2 className="text-4xl font-bold mb-3 flex items-center justify-center flex-wrap" style={{ color: '#000000' }}>
@@ -756,11 +757,11 @@ function About() {
               <span className="mx-2"></span>
               <span style={{ color: '#000000' }}>Locations</span>
               <span className="mx-2"></span>
-              <span style={{ color: '#CA8A04' }}>&</span>
+              <span style={{ color: '#FFDE21' }}>&</span>
               <span className="mx-2"></span>
               <span style={{ color: '#DC2626' }}>School</span>
               <span className="mx-2"></span>
-              <span style={{ color: '#CA8A04' }}>Partnerships</span>
+              <span style={{ color: '#FFDE21' }}>Partnerships</span>
             </h2>
             <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#DC2626' }}></div>
           </div>
@@ -786,7 +787,7 @@ function About() {
                   {locations.filter(loc => loc.type === 'location').length > 0 ? (
                     locations.filter(loc => loc.type === 'location').map((location) => (
                       <li key={location._id} className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #FFDE21' }}>
                           <FaFlag style={{ color: '#DC2626', fontSize: '0.875rem' }} />
                         </div>
                         <div className="flex-1">
@@ -816,7 +817,7 @@ function About() {
                   {locations.filter(loc => loc.type === 'school').length > 0 ? (
                     locations.filter(loc => loc.type === 'school').map((location) => (
                       <li key={location._id} className="flex items-start group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #CA8A04' }}>
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3 flex-shrink-0" style={{ border: '2px solid #FFDE21' }}>
                           <FaGraduationCap style={{ color: '#DC2626', fontSize: '0.875rem' }} />
                         </div>
                         <div className="flex-1">
@@ -837,39 +838,41 @@ function About() {
 
       {/* CWTAK Banner Section */}
       <section className="py-8 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Title */}
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold" style={{ color: '#000000' }}>
-              <span style={{ color: '#DC2626' }}>Our</span>
-              <span className="mx-2"></span>
-              <span style={{ color: '#CA8A04' }}>Motto</span>
-            </h2>
-            <div className="w-24 h-1 mx-auto mt-3 rounded-full" style={{ backgroundColor: '#DC2626' }}></div>
-          </div>
-          
-          {/* Image */}
-          <div className="text-center">
-            <img 
-              src={cwtakBanner} 
-              alt="CWTAK - Courage First, Power Second, Technique Third" 
-              className="w-full h-auto object-contain mx-auto"
-              style={{ 
-                maxHeight: '100px'
-              }}
-            />
-            
-        {/* CWTAK Banner */}
-<div className="text-center py-6">
-  <img
-    src={cwtakBanner}
-    alt="CWTAK Banner"
-    className="mx-auto object-contain"
-    style={{ maxHeight: "100px" }}
-  />
+  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    {/* Title */}
+    <div className="text-center mb-6">
+      <h2 className="text-3xl font-bold" style={{ color: '#000000' }}>
+        <span style={{ color: '#DC2626' }}>Our</span>
+        <span className="mx-2"></span>
+        <span style={{ color: '#FFDE21' }}>Motto</span>
+      </h2>
+      <div
+        className="w-24 h-1 mx-auto mt-3 rounded-full"
+        style={{ backgroundColor: '#DC2626' }}
+      ></div>
+    </div>
 
-  {/* Slogan Text */}
-  <h2
+    {/* CWTAK Banner */}
+    <div className="text-center py-6">
+      <img
+        src={cwtakBanner}
+        alt="CWTAK Banner"
+        className="mx-auto object-contain"
+        style={{ maxHeight: "100px" }}
+      />
+
+        {/* Text Image */}
+      <div className="mt-6">
+        <img
+          src={textImage}
+          alt="Courage First, Power Second, Technique Third"
+          className="mx-auto object-contain"
+          style={{ maxHeight: "50px" }}
+        />
+      </div>
+
+      {/* Slogan Text */}
+      <h2
     className="
       mt-3
       uppercase
@@ -878,7 +881,7 @@ function About() {
       text-sm sm:text-lg md:text-xl
       bg-gradient-to-r
       from-yellow-300
-      via-yellow-500
+      via-[#FFF9E6]0
       to-yellow-300
       bg-clip-text
       text-transparent
@@ -889,9 +892,8 @@ function About() {
     Courage First, Power Second, Technique Third
   </h2>
 </div>
-          </div>
-        </div>
-      </section>
+  </div>
+</section>
 
      
     </div>
@@ -923,15 +925,15 @@ style.textContent = `
   }
   
   /* Preserve yellow text */
-  .about-page [style*="color: #CA8A04"],
-  .about-page [style*="color: #CA8A04"] *,
-  .about-page [style*="color:#CA8A04"],
-  .about-page [style*="color:#CA8A04"] *,
-  .about-page [style*="color: #EAB308"],
-  .about-page [style*="color: #EAB308"] *,
-  .about-page [style*="color:#EAB308"],
-  .about-page [style*="color:#EAB308"] * {
-    color: #CA8A04 !important;
+  .about-page [style*="color: #FFDE21"],
+  .about-page [style*="color: #FFDE21"] *,
+  .about-page [style*="color:#FFDE21"],
+  .about-page [style*="color:#FFDE21"] *,
+  .about-page [style*="color: #FFDE21"],
+  .about-page [style*="color: #FFDE21"] *,
+  .about-page [style*="color:#FFDE21"],
+  .about-page [style*="color:#FFDE21"] * {
+    color: #FFDE21 !important;
   }
   
   /* Preserve gray text */
@@ -983,5 +985,6 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
 
 

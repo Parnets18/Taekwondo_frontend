@@ -46,19 +46,13 @@
 }
 
 /* Preserve explicitly styled yellow text */
-.about-page [style*="color: #CA8A04"],
-.about-page [style*="color: #CA8A04"] *,
-.about-page [style*="color:#CA8A04"],
-.about-page [style*="color:#CA8A04"] *,
-.about-page [style*="color: #EAB308"],
-.about-page [style*="color: #EAB308"] *,
-.about-page [style*="color:#EAB308"],
-.about-page [style*="color:#EAB308"] *,
-.about-page [style*="color: rgb(202, 138, 4)"],
-.about-page [style*="color: rgb(202, 138, 4)"] *,
-.about-page [style*="color: rgb(234, 179, 8)"],
-.about-page [style*="color: rgb(234, 179, 8)"] * {
-  color: #CA8A04 !important;
+.about-page [style*="color: #FFDE21"],
+.about-page [style*="color: #FFDE21"] *,
+.about-page [style*="color:#FFDE21"],
+.about-page [style*="color:#FFDE21"] *,
+.about-page [style*="color: rgb(255, 222, 33)"],
+.about-page [style*="color: rgb(255, 222, 33)"] * {
+  color: #FFDE21 !important;
 }
 
 /* Preserve gray text */
