@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 
-const BASE_URL = 'https://taekwondo-backend-j8w4.onrender.com';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
 function LocationManagement() {
   const [locations, setLocations] = useState([]);
@@ -14,7 +14,11 @@ function LocationManagement() {
   const [formData, setFormData] = useState({
     name: '',
     type: 'location',
-    location: ''
+    location: '',
+    timings: {
+      days: '',
+      time: ''
+    }
   });
 
   useEffect(() => {
@@ -23,8 +27,10 @@ function LocationManagement() {
 
   const fetchLocations = async () => {
     try {
+      console.log('📍 Fetching locations from:', `${BASE_URL}/api/locations`);
       const response = await fetch(`${BASE_URL}/api/locations`);
       const data = await response.json();
+      console.log('📍 Fetched locations:', data);
       setLocations(data);
       setLoading(false);
     } catch (error) {
@@ -36,11 +42,16 @@ function LocationManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('📍 Submitting location data:', formData);
+      
       const url = editingLocation
         ? `${BASE_URL}/api/locations/${editingLocation._id}`
         : `${BASE_URL}/api/locations`;
       
       const method = editingLocation ? 'PUT' : 'POST';
+      
+      console.log('📍 Request URL:', url);
+      console.log('📍 Request method:', method);
       
       const response = await fetch(url, {
         method,
@@ -48,13 +59,19 @@ function LocationManagement() {
         body: JSON.stringify(formData)
       });
 
+      const data = await response.json();
+      console.log('📍 Response:', data);
+
       if (response.ok) {
         fetchLocations();
         handleCloseModal();
         alert(editingLocation ? 'Location updated successfully!' : 'Location added successfully!');
+      } else {
+        console.error('❌ Error response:', data);
+        alert('Error saving location: ' + (data.message || 'Unknown error'));
       }
     } catch (error) {
-      console.error('Error saving location:', error);
+      console.error('❌ Error saving location:', error);
       alert('Error saving location');
     }
   };
@@ -86,7 +103,11 @@ function LocationManagement() {
     setFormData({
       name: location.name || '',
       type: location.type || 'location',
-      location: location.location || ''
+      location: location.location || '',
+      timings: {
+        days: location.timings?.days || '',
+        time: location.timings?.time || ''
+      }
     });
     setShowModal(true);
   };
@@ -97,7 +118,11 @@ function LocationManagement() {
     setFormData({
       name: '',
       type: 'location',
-      location: ''
+      location: '',
+      timings: {
+        days: '',
+        time: ''
+      }
     });
   };
 
@@ -270,6 +295,18 @@ function LocationManagement() {
                 <label className="block text-sm font-medium text-gray-500 mb-1">Location</label>
                 <p className="text-gray-900">{viewingLocation.location}</p>
               </div>
+              {viewingLocation.timings?.days && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Class Days</label>
+                  <p className="text-gray-900">{viewingLocation.timings.days}</p>
+                </div>
+              )}
+              {viewingLocation.timings?.time && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Class Time</label>
+                  <p className="text-gray-900">{viewingLocation.timings.time}</p>
+                </div>
+              )}
             </div>
             <div className="flex justify-end mt-6">
               <button
@@ -337,6 +374,36 @@ function LocationManagement() {
                   onFocus={(e) => e.target.style.borderColor = '#006CB5'}
                   onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                   required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Class Days
+                </label>
+                <input
+                  type="text"
+                  value={formData.timings.days}
+                  onChange={(e) => setFormData({ ...formData, timings: { ...formData.timings, days: e.target.value } })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  placeholder="e.g., Monday to Saturday"
+                  onFocus={(e) => e.target.style.borderColor = '#006CB5'}
+                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Class Time
+                </label>
+                <input
+                  type="text"
+                  value={formData.timings.time}
+                  onChange={(e) => setFormData({ ...formData, timings: { ...formData.timings, time: e.target.value } })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                  placeholder="e.g., 10:00 AM to 12:00 PM"
+                  onFocus={(e) => e.target.style.borderColor = '#006CB5'}
+                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                 />
               </div>
 

@@ -34,7 +34,7 @@ const ContactManagement = () => {
   const handleDeleteContact = async (id) => {
     if (window.confirm('Are you sure you want to permanently delete this contact? This action cannot be undone and will remove the contact from the database forever.')) {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
         const response = await fetch(`${API_BASE_URL}/contact/admin/${id}`, {
           method: 'DELETE',
           headers: {
@@ -60,7 +60,7 @@ const ContactManagement = () => {
   const fetchContactsFromDatabase = async () => {
     try {
       setLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
       const response = await fetch(`${API_BASE_URL}/contact/admin`, {
         method: 'GET',
         headers: {

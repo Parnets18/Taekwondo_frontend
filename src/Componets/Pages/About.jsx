@@ -21,6 +21,7 @@ import photo1 from '../../assets/photo1.jpg';
 import p1 from '../../assets/p1.jpg';
 import cwtakBanner from '../../assets/image 11.png';
 import textImage from '../../assets/text.png';
+import choiJung from '../../assets/Choi Jung.png';
 import './About.css';
 
 function About() {
@@ -35,9 +36,12 @@ function About() {
   const [instructorAchievements, setInstructorAchievements] = useState([]);
   const [studentAchievements, setStudentAchievements] = useState([]);
   const [loadingAchievements, setLoadingAchievements] = useState(true);
+  const [founders, setFounders] = useState([]);
+  const [founderDescription, setFounderDescription] = useState('');
+  const [loadingFounders, setLoadingFounders] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     // Fetch locations from API
@@ -140,6 +144,27 @@ function About() {
     };
 
     fetchAchievements();
+  }, []);
+
+  useEffect(() => {
+    const fetchFounders = async () => {
+      try {
+        setLoadingFounders(true);
+        const response = await fetch(`${API_BASE_URL}/founders`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setFounders(data.data.founders);
+          setFounderDescription(data.data.description || '');
+        }
+      } catch (error) {
+        console.error('Error fetching founders:', error);
+      } finally {
+        setLoadingFounders(false);
+      }
+    };
+
+    fetchFounders();
   }, []);
   
   useEffect(() => {
@@ -443,46 +468,62 @@ function About() {
       {/* General Choi Hong-Hi - Founder Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="relative order-1 lg:order-1">
-              <div className="rounded-2xl overflow-hidden shadow-xl" style={{ border: '4px solid #DC2626' }}>
-                <img 
-                  src="/choi-hong-hi.jpg" 
-                  alt="General Choi Hong-Hi - Founder of Taekwon-Do" 
-                  className="w-full h-80 sm:h-96 lg:h-[500px] object-cover"
-                />
-              </div>
-            </div>
-            
-            <div className="transform hover:scale-105 transition-all duration-500 order-2 lg:order-2">
-              <h2 className="text-4xl font-bold mb-4 sm:mb-6 flex items-center flex-wrap" style={{ color: '#000000' }}>
-                <FaGraduationCap className="mr-2 sm:mr-3" style={{ color: '#FFDE21', fontSize: '1.5rem' }} />
-                <span style={{ color: '#DC2626' }}>General Choi Hong-Hi</span>
-                <span className="mx-2"></span>
-                <span style={{ color: '#000000' }}>Founder of</span>
-                <span className="mx-2"></span>
-                <span style={{ color: '#FFDE21' }}>Taekwon-Do</span>
-              </h2>
-              <div className="w-32 h-1 mb-4 rounded-full" style={{ backgroundColor: '#FFDE21' }}></div>
-              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base" style={{ color: '#374151' }}>
-                <p className="leading-relaxed">
-                  <strong style={{ color: '#000000' }}>General Choi Hong-Hi</strong> (November 9, 1918 – June 15, 2002) was a South Korean army general and martial artist who is widely recognized as the founder of Taekwon-Do. He dedicated his life to developing and promoting this martial art around the world.
-                </p>
-                <p className="leading-relaxed">
-                  Born in what is now North Korea, General Choi began studying Taek Kyon (a traditional Korean martial art) and later Karate during the Japanese occupation. After Korea's liberation, he combined elements of Taek Kyon and Karate with his own innovations to create a new martial art.
-                </p>
-                <p className="leading-relaxed">
-                  On April 11, 1955, the name <strong className="text-red-600">"Taekwon-Do"</strong> was officially adopted. General Choi founded the International Taekwon-Do Federation (ITF) on March 22, 1966, establishing the organizational structure that would spread Taekwon-Do across the globe.
-                </p>
-                <p className="leading-relaxed">
-                  He developed the 24 patterns (Tul) representing 24 hours in a day, the fundamental movements, and the philosophical principles that form the foundation of ITF Taekwon-Do. His vision was not just to create a combat system, but to develop character and promote world peace through martial arts.
-                </p>
-                <p className="leading-relaxed font-semibold" style={{ color: '#000000' }}>
-                  "The ultimate aim of Taekwon-Do lies not in winning or losing, but in the perfection of the character of its participants."
-                </p>
-              </div>
-            </div>
+          {/* Title */}
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4" style={{ color: '#000000' }}>
+              <span style={{ color: '#DC2626' }}>Founder</span>
+              <span className="mx-2">of</span>
+              <span style={{ color: '#FFDE21' }}>Taekwon-Do</span>
+            </h2>
+            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#DC2626' }}></div>
           </div>
+
+          {loadingFounders ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600"></div>
+            </div>
+          ) : founders.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Left Side - Photos Stacked */}
+              <div className="lg:col-span-1 space-y-6">
+                {founders.map((founder, index) => (
+                  <div 
+                    key={founder._id} 
+                    className="bg-white rounded-xl shadow-lg overflow-hidden" 
+                    style={{ border: `3px solid ${index === 0 ? '#DC2626' : '#FFDE21'}` }}
+                  >
+                    <div className="relative">
+                      <img 
+                        src={`${BASE_URL}/${founder.photo}`}
+                        alt={founder.name} 
+                        className="w-full h-64 object-cover"
+                      />
+                    </div>
+                    <div className="p-4 text-center bg-white">
+                      <h3 className="text-lg font-bold mb-1" style={{ color: '#000000' }}>{founder.name}</h3>
+                      <p className="text-sm" style={{ color: '#000000', fontWeight: '600' }}>{founder.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Right Side - Content */}
+              <div className="lg:col-span-3">
+                <div className="space-y-5">
+                  {founderDescription.split('\n\n').map((paragraph, idx) => (
+                    <p key={idx} className="text-base leading-relaxed" style={{ color: '#374151' }}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <h3 className="text-2xl font-semibold text-gray-700 mb-2">No Founder Information Available</h3>
+              <p className="text-gray-500">Please contact the administrator</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -582,7 +623,7 @@ function About() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 {mentors.map((mentor) => (
                   <div key={mentor._id} className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 text-center hover:shadow-xl transition-all duration-500" style={{ borderTop: '4px solid #FFDE21' }}>
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '2px solid #FFDE21' }}>
+                    <div className="w-40 h-40 sm:w-48 sm:h-48 lg:w-56 lg:h-56 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '3px solid #FFDE21' }}>
                       {mentor.photo ? (
                         <img
                           src={`${BASE_URL}/${mentor.photo}`}
@@ -590,14 +631,14 @@ function About() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <FaUser style={{ color: '#FFDE21', fontSize: '2rem' }} />
+                        <FaUser style={{ color: '#FFDE21', fontSize: '3rem' }} />
                       )}
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#000000' }}>{mentor.name}</h3>
                     <p className="font-bold mb-1 text-sm sm:text-base" style={{ color: '#DC2626' }}>{mentor.rank}</p>
                     <p className="text-xs sm:text-sm mb-2" style={{ color: '#374151' }}>{mentor.position}</p>
                     {mentor.description && (
-                      <p className="font-semibold text-xs sm:text-sm" style={{ color: '#FFDE21' }}>{mentor.description}</p>
+                      <p className="font-semibold text-xs sm:text-sm" style={{ color: '#374151' }}>{mentor.description}</p>
                     )}
                   </div>
                 ))}
@@ -640,7 +681,7 @@ function About() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {leadership.map((leader) => (
                 <div key={leader._id} className="bg-gradient-to-br from-[#FFF9E6] to-orange-50 rounded-2xl shadow-xl p-6 sm:p-8 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2" style={{ borderTop: '4px solid #FFDE21' }}>
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg overflow-hidden" style={{ border: '3px solid #DC2626' }}>
+                  <div className="w-48 h-48 sm:w-56 sm:h-56 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg overflow-hidden" style={{ border: '4px solid #DC2626' }}>
                     {leader.photo ? (
                       <img
                         src={`${BASE_URL}/${leader.photo}`}
@@ -648,7 +689,7 @@ function About() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <FaUser style={{ fontSize: '2rem', color: '#DC2626' }} />
+                      <FaUser style={{ fontSize: '3rem', color: '#DC2626' }} />
                     )}
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: '#000000' }}>{leader.name}</h3>
@@ -793,6 +834,11 @@ function About() {
                         <div className="flex-1">
                           <span className="font-semibold leading-relaxed" style={{ color: '#000000' }}>{location.name}</span>
                           <p className="text-sm" style={{ color: '#374151' }}>{location.location}</p>
+                          {location.timings?.days && location.timings?.time && (
+                            <p className="text-xs mt-1" style={{ color: '#000000', fontWeight: '600' }}>
+                              {location.timings.days} • {location.timings.time}
+                            </p>
+                          )}
                         </div>
                       </li>
                     ))
@@ -823,6 +869,11 @@ function About() {
                         <div className="flex-1">
                           <span className="font-semibold leading-relaxed" style={{ color: '#000000' }}>{location.name}</span>
                           <p className="text-sm" style={{ color: '#374151' }}>{location.location}</p>
+                          {location.timings?.days && location.timings?.time && (
+                            <p className="text-xs mt-1" style={{ color: '#000000', fontWeight: '600' }}>
+                              {location.timings.days} • {location.timings.time}
+                            </p>
+                          )}
                         </div>
                       </li>
                     ))
@@ -842,9 +893,9 @@ function About() {
     {/* Title */}
     <div className="text-center mb-6">
       <h2 className="text-3xl font-bold" style={{ color: '#000000' }}>
-        <span style={{ color: '#DC2626' }}>Our</span>
+        <span style={{ color: '#FFDE21' }}>Our</span>
         <span className="mx-2"></span>
-        <span style={{ color: '#FFDE21' }}>Motto</span>
+        <span style={{ color: '#DC2626' }}>Motto</span>
       </h2>
       <div
         className="w-24 h-1 mx-auto mt-3 rounded-full"
@@ -858,16 +909,16 @@ function About() {
         src={cwtakBanner}
         alt="CWTAK Banner"
         className="mx-auto object-contain"
-        style={{ maxHeight: "100px" }}
+        style={{ maxHeight: "140px" }}
       />
 
         {/* Text Image */}
-      <div className="mt-6">
+      <div className="mt-2">
         <img
           src={textImage}
           alt="Courage First, Power Second, Technique Third"
           className="mx-auto object-contain"
-          style={{ maxHeight: "50px" }}
+          style={{ maxHeight: "30px" }}
         />
       </div>
 

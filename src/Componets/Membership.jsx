@@ -6,9 +6,10 @@ function Membership() {
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     fetchStudents();
@@ -99,6 +100,33 @@ function Membership() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Image Modal - Just photo */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="relative bg-white rounded-2xl shadow-2xl p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold hover:bg-red-600 shadow-lg z-10"
+            >
+              ×
+            </button>
+            <img
+              src={selectedImage.url}
+              alt={selectedImage.name}
+              className="max-w-[70vw] max-h-[80vh] object-contain rounded-lg"
+              style={{ maxWidth: '500px', maxHeight: '600px' }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <div 
         className="relative h-96 bg-cover bg-center"
@@ -146,23 +174,45 @@ function Membership() {
               const numMedals = student.achievements?.reduce((total, ach) => {
                 return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
               }, 0) || 0;
+
+              // Count medals by type
+              const medalCounts = { Gold: 0, Silver: 0, Bronze: 0 };
+              student.achievements?.forEach(ach => {
+                ach.typePrices?.forEach(tp => {
+                  if (tp.price) {
+                    const medalType = tp.price.toLowerCase().trim();
+                    console.log('Medal type found:', tp.price, 'normalized:', medalType);
+                    if (medalType.includes('gold')) medalCounts.Gold++;
+                    else if (medalType.includes('silver') || medalType.includes('sliver')) medalCounts.Silver++;
+                    else if (medalType.includes('bronze')) medalCounts.Bronze++;
+                  }
+                });
+              });
+              console.log('Student:', student.fullName, 'Medal counts:', medalCounts);
               
               return (
               <div
                 key={student.id || student._id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
-                onClick={() => {
-                  setSelectedStudent(student);
-                  setShowModal(true);
-                }}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
               >
-                {/* Photo Section with Belt Badge */}
-                <div className="relative h-64 bg-gradient-to-br from-blue-500 to-blue-700 overflow-hidden">
+                {/* Photo Section with Belt Badge - Click to view large image */}
+                <div 
+                  className="relative h-64 bg-gradient-to-br from-blue-500 to-blue-700 overflow-hidden cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (student.photo) {
+                      setSelectedImage({
+                        url: `${BASE_URL}/${student.photo}`,
+                        name: student.fullName
+                      });
+                    }
+                  }}
+                >
                   {student.photo ? (
                     <img
                       src={`${BASE_URL}/${student.photo}`}
                       alt={student.fullName}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = '';
@@ -197,8 +247,14 @@ function Membership() {
                   </div>
                 </div>
 
-                {/* Info Section */}
-                <div className="p-6">
+                {/* Info Section - Click to view full card */}
+                <div 
+                  className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    setSelectedStudent(student);
+                    setShowModal(true);
+                  }}
+                >
                   {/* Name */}
                   <h3 className="text-xl font-bold text-gray-800 mb-3 text-center uppercase">
                     {student.fullName}
@@ -211,14 +267,12 @@ function Membership() {
                   </div>
                   
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3 mt-4">
-                    <div className="bg-blue-50 p-3 rounded-lg text-center">
-                      <p className="text-xs text-gray-600 mb-1">Events</p>
-                      <p className="text-2xl font-bold text-blue-600">{numEvents}</p>
-                    </div>
-                    <div className="bg-yellow-50 p-3 rounded-lg text-center">
-                      <p className="text-xs text-gray-600 mb-1">Medals</p>
-                      <p className="text-2xl font-bold text-yellow-600">{numMedals}</p>
+                  <div className="space-y-2 mt-4">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="text-xs text-gray-700 space-y-1">
+                        <div className="font-bold">Events: {numEvents}  Medals: {numMedals}</div>
+                        <div className="font-bold">Gold: {student.achievements?.reduce((total, ach) => total + (ach.typePrices?.filter(tp => tp.price === 'Gold').length || 0), 0) || 0}, Silver: {student.achievements?.reduce((total, ach) => total + (ach.typePrices?.filter(tp => tp.price === 'Silver').length || 0), 0) || 0}, Bronze: {student.achievements?.reduce((total, ach) => total + (ach.typePrices?.filter(tp => tp.price === 'Bronze').length || 0), 0) || 0}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -231,8 +285,8 @@ function Membership() {
 
       {/* Student Details Modal */}
       {showModal && selectedStudent && (
-        <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+        <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4" style={{ paddingTop: '80px' }}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900">Student Information</h2>
               <button
@@ -249,7 +303,7 @@ function Membership() {
             <div className="space-y-4">
               {/* Photo */}
               <div className="flex justify-center mb-4">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600 border-4 border-gray-800 shadow-lg">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600 border-4 border-gray-800 shadow-lg">
                   {selectedStudent.photo ? (
                     <img
                       src={`${BASE_URL}/${selectedStudent.photo}`}
@@ -258,7 +312,7 @@ function Membership() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
                       </svg>
                     </div>
@@ -318,6 +372,26 @@ function Membership() {
                       return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
                     }, 0) || 0}
                   </p>
+                  {/* Medal Breakdown */}
+                  {(() => {
+                    const medalCounts = { Gold: 0, Silver: 0, Bronze: 0 };
+                    selectedStudent.achievements?.forEach(ach => {
+                      ach.typePrices?.forEach(tp => {
+                        if (tp.price) {
+                          const medalType = tp.price.toLowerCase().trim();
+                          if (medalType.includes('gold')) medalCounts.Gold++;
+                          else if (medalType.includes('silver') || medalType.includes('sliver')) medalCounts.Silver++;
+                          else if (medalType.includes('bronze')) medalCounts.Bronze++;
+                        }
+                      });
+                    });
+                    const total = medalCounts.Gold + medalCounts.Silver + medalCounts.Bronze;
+                    return total > 0 && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver}, Bronze: {medalCounts.Bronze}
+                      </p>
+                    );
+                  })()}
                 </div>
 
                 {/* 8. Present Belt */}

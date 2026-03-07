@@ -8,8 +8,8 @@ function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   const categories = [
     'All', 
@@ -147,33 +147,23 @@ function Gallery() {
       {/* Lightbox Modal */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4 pt-32"
           onClick={closeLightbox}
         >
-          <button
-            onClick={closeLightbox}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
-          >
-            <FaTimes className="text-3xl" />
-          </button>
-          <div className="max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl p-4 w-[50vw] max-w-[600px] max-h-[80vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={closeLightbox}
+                className="text-red-500 hover:text-red-700 text-3xl font-bold"
+              >
+                ×
+              </button>
+            </div>
             <img
               src={`${BASE_URL}/${selectedPhoto.photo}`}
               alt="Gallery photo"
-              className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+              className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
             />
-            <div className="bg-white rounded-b-lg p-6 mt-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
-                    {selectedPhoto.category || 'All'}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {new Date(selectedPhoto.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       )}

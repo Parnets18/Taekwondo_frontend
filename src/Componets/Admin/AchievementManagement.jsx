@@ -10,13 +10,15 @@ function AchievementManagement() {
   const [editingAchievement, setEditingAchievement] = useState(null);
   const [formData, setFormData] = useState({
     type: 'instructor',
-    description: ''
+    description: '',
+    eventName: '',
+    medalType: ''
   });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     fetchAchievements();
@@ -72,6 +74,8 @@ function AchievementManagement() {
       const formDataToSend = new FormData();
       formDataToSend.append('type', formData.type);
       formDataToSend.append('description', formData.description);
+      if (formData.eventName) formDataToSend.append('eventName', formData.eventName);
+      if (formData.medalType) formDataToSend.append('medalType', formData.medalType);
 
       const url = editingAchievement
         ? `${API_BASE_URL}/achievements/${editingAchievement._id}`
@@ -106,7 +110,9 @@ function AchievementManagement() {
     setEditingAchievement(achievement);
     setFormData({
       type: achievement.type,
-      description: achievement.description
+      description: achievement.description,
+      eventName: achievement.eventName || '',
+      medalType: achievement.medalType || ''
     });
     setShowModal(true);
   };
@@ -154,7 +160,9 @@ function AchievementManagement() {
     setEditingAchievement(null);
     setFormData({
       type: 'instructor',
-      description: ''
+      description: '',
+      eventName: '',
+      medalType: ''
     });
     setPhotoFile(null);
     setPhotoPreview(null);
@@ -162,6 +170,24 @@ function AchievementManagement() {
 
   const instructorAchievements = achievements.filter(a => a.type === 'instructor');
   const studentAchievements = achievements.filter(a => a.type === 'student');
+
+  const getMedalCounts = (achievementsList) => {
+    const counts = { Gold: 0, Silver: 0, Bronze: 0, total: 0, events: 0 };
+    const uniqueEvents = new Set();
+    
+    achievementsList.forEach(achievement => {
+      if (achievement.medalType) {
+        counts[achievement.medalType]++;
+        counts.total++;
+      }
+      if (achievement.eventName) {
+        uniqueEvents.add(achievement.eventName);
+      }
+    });
+    
+    counts.events = uniqueEvents.size;
+    return counts;
+  };
 
   if (loading) {
     return (
@@ -186,15 +212,28 @@ function AchievementManagement() {
 
       {/* Instructor Achievements */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <FaMedal style={{ color: '#DC2626' }} /> Instructor Achievements ({instructorAchievements.length})
-        </h2>
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+            <FaMedal style={{ color: '#DC2626' }} /> Instructor Achievements ({instructorAchievements.length})
+          </h2>
+          {(() => {
+            const medalCounts = getMedalCounts(instructorAchievements);
+            return medalCounts.total > 0 && (
+              <div className="text-sm text-gray-700 ml-8">
+                <div>No. of Events: {medalCounts.events}  No. of Medals: {medalCounts.total}</div>
+                <div>Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver}, Bronze: {medalCounts.Bronze}</div>
+              </div>
+            );
+          })()}
+        </div>
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event/Tournament</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medal</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -203,6 +242,22 @@ function AchievementManagement() {
                   <tr key={achievement._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{achievement.description}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{achievement.eventName || '-'}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {achievement.medalType ? (
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          achievement.medalType === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
+                          achievement.medalType === 'Silver' ? 'bg-gray-100 text-gray-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {achievement.medalType}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex justify-center gap-2">
@@ -244,15 +299,28 @@ function AchievementManagement() {
 
       {/* Student Achievements */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <FaAward style={{ color: '#DC2626' }} /> Student Achievements ({studentAchievements.length})
-        </h2>
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+            <FaAward style={{ color: '#DC2626' }} /> Student Achievements ({studentAchievements.length})
+          </h2>
+          {(() => {
+            const medalCounts = getMedalCounts(studentAchievements);
+            return medalCounts.total > 0 && (
+              <div className="text-sm text-gray-700 ml-8">
+                <div>No. of Events: {medalCounts.events}  No. of Medals: {medalCounts.total}</div>
+                <div>Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver}, Bronze: {medalCounts.Bronze}</div>
+              </div>
+            );
+          })()}
+        </div>
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event/Tournament</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medal</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -261,6 +329,22 @@ function AchievementManagement() {
                   <tr key={achievement._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{achievement.description}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{achievement.eventName || '-'}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {achievement.medalType ? (
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          achievement.medalType === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
+                          achievement.medalType === 'Silver' ? 'bg-gray-100 text-gray-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          {achievement.medalType}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex justify-center gap-2">
@@ -344,6 +428,33 @@ function AchievementManagement() {
                 />
               </div>
 
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">Event/Tournament Name</label>
+                <input
+                  type="text"
+                  name="eventName"
+                  value={formData.eventName}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  placeholder="Enter event or tournament name (optional)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">Medal Type</label>
+                <select
+                  name="medalType"
+                  value={formData.medalType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                >
+                  <option value="">No Medal</option>
+                  <option value="Gold">Gold Medal</option>
+                  <option value="Silver">Silver Medal</option>
+                  <option value="Bronze">Bronze Medal</option>
+                </select>
+              </div>
+
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
@@ -392,6 +503,26 @@ function AchievementManagement() {
                   <label className="block text-gray-500 text-sm font-semibold mb-1">Description</label>
                   <p className="text-gray-700 leading-relaxed">{viewingAchievement.description}</p>
                 </div>
+
+                {viewingAchievement.eventName && (
+                  <div>
+                    <label className="block text-gray-500 text-sm font-semibold mb-1">Event/Tournament Name</label>
+                    <p className="text-gray-700 leading-relaxed">{viewingAchievement.eventName}</p>
+                  </div>
+                )}
+
+                {viewingAchievement.medalType && (
+                  <div>
+                    <label className="block text-gray-500 text-sm font-semibold mb-1">Medal Type</label>
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                      viewingAchievement.medalType === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
+                      viewingAchievement.medalType === 'Silver' ? 'bg-gray-100 text-gray-800' :
+                      'bg-orange-100 text-orange-800'
+                    }`}>
+                      {viewingAchievement.medalType} Medal
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="pt-4">

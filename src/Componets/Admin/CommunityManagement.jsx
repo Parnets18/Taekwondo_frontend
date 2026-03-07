@@ -12,11 +12,12 @@ function CommunityManagement() {
   const [formData, setFormData] = useState({
     name: '',
     role: '',
-    belt: ''
+    belt: '',
+    achievements: []
   });
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     fetchMembers();
@@ -82,6 +83,10 @@ function CommunityManagement() {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('role', formData.role);
       formDataToSend.append('belt', formData.belt);
+      
+      if (formData.achievements && formData.achievements.length > 0) {
+        formDataToSend.append('achievements', JSON.stringify(formData.achievements));
+      }
       
       if (photoFile) {
         formDataToSend.append('photo', photoFile);
@@ -155,7 +160,8 @@ function CommunityManagement() {
     setFormData({
       name: member.name,
       role: member.role,
-      belt: member.belt
+      belt: member.belt,
+      achievements: member.achievements || []
     });
     setPhotoPreview(member.photo ? `${BASE_URL}/${member.photo}` : null);
     setShowModal(true);
@@ -166,7 +172,8 @@ function CommunityManagement() {
     setFormData({
       name: '',
       role: '',
-      belt: ''
+      belt: '',
+      achievements: []
     });
     setPhotoFile(null);
     setPhotoPreview(null);

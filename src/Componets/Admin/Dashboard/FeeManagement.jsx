@@ -46,7 +46,7 @@ function FeeManagement() {
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
   // API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   // Check for existing token on component mount
   useEffect(() => {
@@ -442,7 +442,7 @@ function FeeManagement() {
   if (loading && authToken) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -457,7 +457,8 @@ function FeeManagement() {
         </div>
         <button 
           onClick={() => setShowAddFeeModal(true)}
-          className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 flex items-center space-x-2"
+          className="text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all duration-300 flex items-center space-x-2"
+          style={{ backgroundColor: '#006CB5' }}
         >
           <span>Add Fee Record</span>
         </button>
@@ -481,7 +482,7 @@ function FeeManagement() {
         </div>
         
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 text-center">
-          <div className="text-3xl font-black text-amber-600 mb-2">
+          <div className="text-3xl font-black mb-2" style={{ color: '#006CB5' }}>
             {statistics.totalAmount > 0 ? Math.round((statistics.paidAmount / statistics.totalAmount) * 100) : 0}%
           </div>
           <div className="text-slate-600 font-medium">Collection Rate</div>
@@ -497,7 +498,7 @@ function FeeManagement() {
               type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             />
           </div>
           
@@ -506,7 +507,7 @@ function FeeManagement() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="paid">Paid</option>
@@ -553,7 +554,7 @@ function FeeManagement() {
                 </tr>
               ) : (
                 feeRecords.map((record, index) => (
-                  <tr key={record._id} className={`border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-amber-50 transition-colors`}>
+                  <tr key={record._id} className={`border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-blue-50 transition-colors`}>
                     <td className="py-3 px-4">
                       <span className="font-semibold text-slate-800 text-sm">{record.feeId || record._id.slice(-6)}</span>
                     </td>
@@ -713,7 +714,7 @@ function FeeManagement() {
                   value={paymentForm.amount}
                   onChange={(e) => setPaymentForm({...paymentForm, amount: parseFloat(e.target.value) || 0})}
                   placeholder="Enter payment amount"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                   required
                 />
                 <div className="text-xs text-slate-500 mt-1">
@@ -727,7 +728,7 @@ function FeeManagement() {
                   <select 
                     value={paymentForm.paymentMethod}
                     onChange={(e) => setPaymentForm({...paymentForm, paymentMethod: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                     required
                   >
                     <option value="Cash">Cash</option>
@@ -744,7 +745,7 @@ function FeeManagement() {
                     type="date"
                     value={paymentForm.paidDate}
                     onChange={(e) => setPaymentForm({...paymentForm, paidDate: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                     required
                   />
                 </div>
@@ -757,7 +758,7 @@ function FeeManagement() {
                   value={paymentForm.transactionId}
                   onChange={(e) => setPaymentForm({...paymentForm, transactionId: e.target.value})}
                   placeholder="Enter transaction reference number"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all" 
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
                 />
               </div>
 
@@ -774,7 +775,7 @@ function FeeManagement() {
                       lateFee: { ...paymentForm.lateFee, amount: parseFloat(e.target.value) || 0 }
                     })}
                     placeholder="0.00"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all" 
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
                   />
                 </div>
 
@@ -790,7 +791,7 @@ function FeeManagement() {
                       discount: { ...paymentForm.discount, amount: parseFloat(e.target.value) || 0 }
                     })}
                     placeholder="0.00"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all" 
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
                   />
                 </div>
               </div>
@@ -806,7 +807,7 @@ function FeeManagement() {
                       discount: { ...paymentForm.discount, reason: e.target.value }
                     })}
                     placeholder="Enter reason for discount"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all" 
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
                   />
                 </div>
               )}
@@ -818,7 +819,7 @@ function FeeManagement() {
                   onChange={(e) => setPaymentForm({...paymentForm, notes: e.target.value})}
                   placeholder="Add any additional notes about this payment"
                   rows="3"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all resize-none" 
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all resize-none" 
                 />
               </div>
 
@@ -906,7 +907,7 @@ function FeeManagement() {
                         }
                       }}
                       placeholder="Type student name..."
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                       required
                       autoComplete="off"
                     />
@@ -956,7 +957,7 @@ function FeeManagement() {
                       if (newFeeForm.feeType === 'Exam Fee') amount = 300;
                       setNewFeeForm({...newFeeForm, course, amount});
                     }}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                     required
                   >
                     <option value="Beginner">Beginner Course</option>
@@ -986,7 +987,7 @@ function FeeManagement() {
                       
                       setNewFeeForm({...newFeeForm, feeType, amount});
                     }}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                     required
                   >
                     <option value="Monthly Fee">Monthly Fee</option>
@@ -1006,7 +1007,7 @@ function FeeManagement() {
                     value={newFeeForm.amount}
                     onChange={(e) => setNewFeeForm({...newFeeForm, amount: parseFloat(e.target.value) || 0})}
                     placeholder="0.00"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                     required
                   />
                 </div>
@@ -1019,7 +1020,7 @@ function FeeManagement() {
                   value={newFeeForm.dueDate}
                   onChange={(e) => setNewFeeForm({...newFeeForm, dueDate: e.target.value})}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                   required
                 />
               </div>
@@ -1037,7 +1038,7 @@ function FeeManagement() {
                       discount: { ...newFeeForm.discount, amount: parseFloat(e.target.value) || 0 }
                     })}
                     placeholder="0.00"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all" 
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
                   />
                 </div>
 
@@ -1052,7 +1053,7 @@ function FeeManagement() {
                         discount: { ...newFeeForm.discount, reason: e.target.value }
                       })}
                       placeholder="Enter reason for discount"
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all" 
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" 
                     />
                   </div>
                 )}
@@ -1065,12 +1066,12 @@ function FeeManagement() {
                   onChange={(e) => setNewFeeForm({...newFeeForm, notes: e.target.value})}
                   placeholder="Add any additional notes about this fee record"
                   rows="3"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all resize-none" 
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all resize-none" 
                 />
               </div>
 
               {/* Fee Summary */}
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
                 <h4 className="font-bold text-slate-800 mb-3">Fee Summary</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -1095,7 +1096,7 @@ function FeeManagement() {
                       <span className="font-semibold">-₹{newFeeForm.discount.amount.toLocaleString()}</span>
                     </div>
                   )}
-                  <div className="border-t border-amber-300 pt-2 mt-2">
+                  <div className="border-t border-blue-300 pt-2 mt-2">
                     <div className="flex justify-between font-bold">
                       <span>Final Amount:</span>
                       <span className="text-slate-800">
@@ -1167,7 +1168,7 @@ function FeeManagement() {
               </div>
 
               {/* Amount Breakdown */}
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                 <h3 className="text-lg font-bold text-slate-800 mb-4">Amount Breakdown</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -1189,7 +1190,7 @@ function FeeManagement() {
                     </div>
                   )}
                   
-                  <div className="border-t border-amber-300 pt-3 mt-3">
+                  <div className="border-t border-blue-300 pt-3 mt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-slate-800">Total Amount:</span>
                       <span className="text-2xl font-black text-slate-800">
@@ -1207,7 +1208,7 @@ function FeeManagement() {
                     </div>
                   )}
 
-                  <div className="border-t border-amber-300 pt-3 mt-3">
+                  <div className="border-t border-blue-300 pt-3 mt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-slate-800">Balance Due:</span>
                       {(() => {
@@ -1410,7 +1411,7 @@ function FeeManagement() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl border-2 border-black">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(to right, #006CB5, #0056A3)' }}>
                 <span className="text-2xl text-white font-bold">A</span>
               </div>
               <h2 className="text-2xl font-bold text-slate-800">Admin Login Required</h2>
@@ -1435,7 +1436,7 @@ function FeeManagement() {
                   name="email"
                   defaultValue="admin@combatwarrior.com"
                   placeholder="Enter your email address"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                   required
                 />
               </div>
@@ -1446,7 +1447,7 @@ function FeeManagement() {
                   name="password"
                   defaultValue="admin123"
                   placeholder="Enter your password"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all"
                   required
                 />
               </div>
@@ -1461,7 +1462,10 @@ function FeeManagement() {
               
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg"
+                className="w-full text-white py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg"
+                style={{ backgroundColor: '#006CB5' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#0056A3'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#006CB5'}
               >
                 Login to Dashboard
               </button>

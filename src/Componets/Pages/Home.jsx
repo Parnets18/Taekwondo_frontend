@@ -17,7 +17,8 @@ import {
   FaDumbbell,
   FaUserTie,
   FaPray,
-  FaHandPaper
+  FaHandPaper,
+  FaWhatsapp
 } from 'react-icons/fa';
 
 function Home() {
@@ -28,8 +29,8 @@ function Home() {
   const [aboutSection, setAboutSection] = useState(null);
   const [loadingAbout, setLoadingAbout] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   // Fetch banners from API
   useEffect(() => {
@@ -224,6 +225,22 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+      {/* Floating WhatsApp Button */}
+      <a
+        href="https://wa.me/917259113288"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 animate-bounce flex items-center justify-center"
+        style={{ 
+          width: '60px', 
+          height: '60px',
+          backgroundColor: '#25D366',
+        }}
+        title="Chat with us on WhatsApp"
+      >
+        <FaWhatsapp style={{ fontSize: '32px', color: '#FFFFFF' }} />
+      </a>
+
       {/* Hero Section - Only show if banners are available */}
       {loadingBanners ? (
         <section className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-gradient-to-br from-yellow-50 via-white to-red-50">
@@ -635,7 +652,7 @@ function Home() {
             Your path to black belt mastery starts with a single step into our dojang.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center">
             <Link
               to="/admission"
               className="text-white px-8 py-4 rounded-full text-base font-bold hover:shadow-2xl transition-all duration-300"
@@ -667,6 +684,68 @@ function Home() {
               </span>
             </Link>
           </div>
+
+          {/* App Download Section */}
+          <div className="mt-12">
+            <h3 className="text-4xl font-bold mb-2 text-center" style={{ color: '#006CB5' }}>Download Our Mobile App</h3>
+            <p className="text-gray-600 mb-6 text-center">Track your progress, book classes, and stay connected</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* Android Card */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300" style={{ border: '2px solid #006CB5' }}>
+                <div className="text-center">
+                  <h4 className="text-xl font-bold mb-4" style={{ color: '#006CB5' }}>Android</h4>
+                  <div className="bg-gray-50 p-3 rounded-xl mb-4 inline-block">
+                    <img 
+                      src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://play.google.com/store" 
+                      alt="Android QR Code"
+                      className="w-32 h-32"
+                    />
+                  </div>
+                  <p className="text-gray-600 mb-4 text-xs">Scan to download</p>
+                  <a
+                    href="https://play.google.com/store"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block transform hover:scale-105 transition-transform"
+                  >
+                    <img 
+                      src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                      alt="Get it on Google Play"
+                      className="h-12"
+                    />
+                  </a>
+                </div>
+              </div>
+
+              {/* iOS Card */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300" style={{ border: '2px solid #006CB5' }}>
+                <div className="text-center">
+                  <h4 className="text-xl font-bold mb-4" style={{ color: '#006CB5' }}>iOS</h4>
+                  <div className="bg-gray-50 p-3 rounded-xl mb-4 inline-block">
+                    <img 
+                      src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://apps.apple.com" 
+                      alt="iOS QR Code"
+                      className="w-32 h-32"
+                    />
+                  </div>
+                  <p className="text-gray-600 mb-4 text-xs">Scan to download</p>
+                  <a
+                    href="https://apps.apple.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block transform hover:scale-105 transition-transform"
+                  >
+                    <img 
+                      src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
+                      alt="Download on the App Store"
+                      className="h-12"
+                    />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -678,7 +757,7 @@ function RecentPromotions() {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -839,7 +918,7 @@ function MembersBirthdaysCard() {
   const [birthdays, setBirthdays] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     const fetchBirthdays = async () => {

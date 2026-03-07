@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { scrollToTop } from '../utils/useScrollToTop';
-import { FaMapMarkerAlt, FaPhone, FaFacebookF, FaInstagram, FaChevronDown } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhone, FaFacebookF, FaInstagram, FaTwitter, FaChevronDown } from 'react-icons/fa';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,6 +52,9 @@ function Navbar() {
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
               <FaFacebookF style={{ color: '#006CB5', fontSize: '0.875rem' }} />
             </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+              <FaTwitter style={{ color: '#006CB5', fontSize: '0.875rem' }} />
+            </a>
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
               <FaInstagram style={{ color: '#006CB5', fontSize: '0.875rem' }} />
             </a>
@@ -62,13 +65,13 @@ function Navbar() {
       {/* Main Navbar */}
       <nav className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-24">
+          <div className="flex justify-between items-center h-32">
             {/* Left Logo */}
             <Link to="/" onClick={scrollToTop} className="flex-shrink-0">
               <img 
                 src="/combat-warrior-logo.png" 
                 alt="Combat Warrior Logo" 
-                className="h-20 w-20 object-contain"
+                className="h-28 w-28 object-contain"
               />
             </Link>
 
@@ -83,7 +86,7 @@ function Navbar() {
                     onMouseLeave={() => setMembersDropdownOpen(false)}
                   >
                     <button
-                      className="text-base font-semibold transition-colors duration-200 flex items-center gap-1 whitespace-nowrap"
+                      className="text-lg font-semibold transition-colors duration-200 flex items-center gap-1 whitespace-nowrap"
                       style={{ color: '#006CB5' }}
                     >
                       {item.name}
@@ -113,7 +116,7 @@ function Navbar() {
                     key={item.name}
                     to={item.href}
                     onClick={scrollToTop}
-                    className="text-base font-semibold transition-colors duration-200 whitespace-nowrap"
+                    className="text-lg font-semibold transition-colors duration-200 whitespace-nowrap"
                     style={{ color: '#006CB5' }}
                   >
                     {item.name}
@@ -127,12 +130,12 @@ function Navbar() {
               <img 
                 src="/logo img 2.png" 
                 alt="ITF Logo" 
-                className="h-16 w-16 object-contain"
+                className="h-24 w-24 object-contain"
               />
               <img 
                 src="/logo img 3.png" 
                 alt="Organization Logo" 
-                className="h-16 w-16 object-contain"
+                className="h-24 w-24 object-contain"
               />
             </div>
 

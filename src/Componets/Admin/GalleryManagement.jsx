@@ -7,14 +7,11 @@ function GalleryManagement() {
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [formData, setFormData] = useState({
-    category: ''
-  });
+  const [photoFiles, setPhotoFiles] = useState([]);
+  const [photoPreviews, setPhotoPreviews] = useState([]);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     fetchPhotos();
@@ -42,26 +39,38 @@ function GalleryManagement() {
   };
 
   const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB');
-        return;
-      }
-      setPhotoFile(file);
+    const files = Array.from(e.target.files);
+    
+    if (files.length === 0) return;
+
+    // Check file sizes
+    const oversizedFiles = files.filter(file => file.size > 10 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      alert('Some files are larger than 10MB and will be skipped');
+    }
+
+    const validFiles = files.filter(file => file.size <= 10 * 1024 * 1024);
+    setPhotoFiles(validFiles);
+
+    // Generate previews
+    const previews = [];
+    validFiles.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhotoPreview(reader.result);
+        previews.push(reader.result);
+        if (previews.length === validFiles.length) {
+          setPhotoPreviews(previews);
+        }
       };
       reader.readAsDataURL(file);
-    }
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!photoFile && !selectedPhoto) {
-      alert('Please select a photo');
+    if (photoFiles.length === 0 && !selectedPhoto) {
+      alert('Please select at least one photo');
       return;
     }
 
@@ -69,18 +78,13 @@ function GalleryManagement() {
       const token = localStorage.getItem('token');
       const formDataToSend = new FormData();
       
-      if (photoFile) {
-        formDataToSend.append('photo', photoFile);
-      }
-      
-      // Add category
-      formDataToSend.append('category', formData.category);
+      // Add all photos
+      photoFiles.forEach(file => {
+        formDataToSend.append('photos', file);
+      });
 
-      const url = selectedPhoto
-        ? `${API_BASE_URL}/gallery/${selectedPhoto._id}`
-        : `${API_BASE_URL}/gallery`;
-      
-      const method = selectedPhoto ? 'PUT' : 'POST';
+      const url = `${API_BASE_URL}/gallery`;
+      const method = 'POST';
 
       const response = await fetch(url, {
         method,
@@ -93,16 +97,16 @@ function GalleryManagement() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        alert(selectedPhoto ? 'Photo updated successfully!' : 'Photo uploaded successfully!');
+        alert(`${photoFiles.length} photo(s) uploaded successfully!`);
         setShowModal(false);
         resetForm();
         fetchPhotos();
       } else {
-        alert(data.message || 'Error saving photo');
+        alert(data.message || 'Error saving photos');
       }
     } catch (error) {
-      console.error('Error saving photo:', error);
-      alert('Error saving photo');
+      console.error('Error saving photos:', error);
+      alert('Error saving photos');
     }
   };
 
@@ -139,22 +143,10 @@ function GalleryManagement() {
     setShowModal(true);
   };
 
-  const openEditModal = (photo) => {
-    setSelectedPhoto(photo);
-    setPhotoPreview(`${BASE_URL}/${photo.photo}`);
-    setFormData({
-      category: photo.category || 'All'
-    });
-    setShowModal(true);
-  };
-
   const resetForm = () => {
     setSelectedPhoto(null);
-    setPhotoFile(null);
-    setPhotoPreview(null);
-    setFormData({
-      category: ''
-    });
+    setPhotoFiles([]);
+    setPhotoPreviews([]);
   };
 
   if (loading) {
@@ -177,7 +169,7 @@ function GalleryManagement() {
           className="px-6 py-3 text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center gap-2"
           style={{ backgroundColor: '#006CB5' }}
         >
-          <FaPlus /> Add Photo
+          <FaPlus /> Add Photos
         </button>
       </div>
 
@@ -216,9 +208,6 @@ function GalleryManagement() {
                     Photo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Upload Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -244,11 +233,6 @@ function GalleryManagement() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {photo.category || 'All'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {new Date(photo.createdAt).toLocaleDateString()}
                       </div>
@@ -270,20 +254,12 @@ function GalleryManagement() {
                         <button
                           onClick={() => {
                             setSelectedPhoto(photo);
-                            setPhotoPreview(`${BASE_URL}/${photo.photo}`);
                             setShowViewModal(true);
                           }}
                           className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center border border-gray-300"
                           title="View"
                         >
                           <FaEye className="w-4 h-4" style={{ color: '#006CB5' }} />
-                        </button>
-                        <button
-                          onClick={() => openEditModal(photo)}
-                          className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center border border-gray-300"
-                          title="Edit"
-                        >
-                          <FaEdit className="w-4 h-4" style={{ color: '#006CB5' }} />
                         </button>
                         <button
                           onClick={() => handleDelete(photo._id)}
@@ -302,14 +278,12 @@ function GalleryManagement() {
         )}
       </div>
 
-      {/* Add/Edit Modal */}
+      {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {selectedPhoto ? 'Edit Photo' : 'Add New Photo'}
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Add Photos</h2>
               <button
                 onClick={() => {
                   setShowModal(false);
@@ -322,59 +296,42 @@ function GalleryManagement() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white">
-              {/* Category */}
-              <div className="bg-white">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category *
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  <option value="Seminars">Seminars</option>
-                  <option value="Stunts">Stunts</option>
-                  <option value="Our Memories">Our Memories</option>
-                  <option value="Video">Video</option>
-                  <option value="Competitions">Competitions</option>
-                  <option value="Belt Ceremonies">Belt Ceremonies</option>
-                </select>
-              </div>
-
               {/* Photo Upload */}
               <div className="bg-white">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Photo *
+                  Select Photos (Multiple)
                 </label>
                 <div className="flex flex-col items-center gap-4 bg-white p-6 rounded-lg border-2 border-dashed border-gray-300">
-                  {photoPreview && (
-                    <div className="w-full max-w-md">
-                      <img
-                        src={photoPreview}
-                        alt="Preview"
-                        className="w-full h-64 object-cover rounded-lg border-2 border-gray-300"
-                      />
+                  {photoPreviews.length > 0 && (
+                    <div className="w-full grid grid-cols-3 gap-4">
+                      {photoPreviews.map((preview, index) => (
+                        <img
+                          key={index}
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-300"
+                        />
+                      ))}
                     </div>
                   )}
                   <div className="w-full">
                     <input
                       type="file"
-                      id="photo"
+                      id="photos"
                       accept="image/*"
+                      multiple
                       onChange={handlePhotoChange}
                       className="hidden"
-                      required={!selectedPhoto}
+                      required
                     />
                     <label
-                      htmlFor="photo"
+                      htmlFor="photos"
                       className="cursor-pointer inline-block w-full px-4 py-3 text-white text-center rounded-lg hover:opacity-90 transition-colors font-medium"
                       style={{ backgroundColor: '#006CB5' }}
                     >
-                      {photoPreview ? 'Change Photo' : 'Choose Photo'}
+                      {photoPreviews.length > 0 ? `${photoPreviews.length} Photo(s) Selected` : 'Choose Photos'}
                     </label>
-                    <p className="text-xs text-gray-500 mt-2 text-center">JPG, PNG, GIF. Max 10MB</p>
+                    <p className="text-xs text-gray-500 mt-2 text-center">JPG, PNG, GIF. Max 10MB per file. Select multiple files.</p>
                   </div>
                 </div>
               </div>
@@ -396,7 +353,7 @@ function GalleryManagement() {
                   className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"
                   style={{ backgroundColor: '#006CB5' }}
                 >
-                  {selectedPhoto ? 'Update Photo' : 'Upload Photo'}
+                  Upload Photos
                 </button>
               </div>
             </form>
@@ -414,7 +371,6 @@ function GalleryManagement() {
                 onClick={() => {
                   setShowViewModal(false);
                   setSelectedPhoto(null);
-                  setPhotoPreview(null);
                 }}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
               >
@@ -427,7 +383,7 @@ function GalleryManagement() {
               <div className="bg-white">
                 <div className="flex justify-center">
                   <img
-                    src={photoPreview}
+                    src={`${BASE_URL}/${selectedPhoto.photo}`}
                     alt="Gallery photo"
                     className="max-w-full max-h-[70vh] object-contain rounded-lg border-2 border-gray-300"
                   />
@@ -473,7 +429,6 @@ function GalleryManagement() {
                   onClick={() => {
                     setShowViewModal(false);
                     setSelectedPhoto(null);
-                    setPhotoPreview(null);
                   }}
                   className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
                 >

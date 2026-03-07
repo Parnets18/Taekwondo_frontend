@@ -13,7 +13,17 @@ export const StudentFormModal = ({
   setPhotoPreview,
   photoFile,
   setPhotoFile,
-  handlePhotoChange
+  handlePhotoChange,
+  aadharPreview,
+  setAadharPreview,
+  aadharFile,
+  setAadharFile,
+  handleAadharChange,
+  birthCertificatePreview,
+  setBirthCertificatePreview,
+  birthCertificateFile,
+  setBirthCertificateFile,
+  handleBirthCertificateChange
 }) => {
   const [achievements, setAchievements] = useState(
     student?.achievements || [{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]
@@ -26,6 +36,7 @@ export const StudentFormModal = ({
     black: false,
     current: false
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   // Update achievements when student prop changes
   useEffect(() => {
@@ -46,7 +57,9 @@ export const StudentFormModal = ({
   if (!show) return null;
 
   const isEdit = !!student;
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  // Remove /api from base URL for static file access (images)
+  const BASE_URL = API_BASE_URL.replace('/api', '');
 
   const handleAddAchievement = () => {
     setAchievements([...achievements, { tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]);
@@ -155,11 +168,15 @@ export const StudentFormModal = ({
             <label className="block text-sm font-semibold text-slate-700 mb-3">Student Photo *</label>
             <div className="flex items-center gap-4">
               <div className="flex-shrink-0">
-                {photoPreview || (isEdit && student?.photo) ? (
+                {photoPreview || (isEdit && student && student.photo) ? (
                   <img 
-                    src={photoPreview || `${API_BASE_URL}/${student.photo}`} 
+                    src={photoPreview || `${BASE_URL}/${student.photo}`} 
                     alt="Preview" 
                     className="w-24 h-24 object-cover rounded-lg border-2 border-slate-300"
+                    onError={(e) => {
+                      console.error('Image load error:', e.target.src);
+                      e.target.style.display = 'none';
+                    }}
                   />
                 ) : (
                   <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center">
@@ -184,6 +201,100 @@ export const StudentFormModal = ({
                   Choose Photo
                 </label>
                 <p className="text-xs text-slate-500 mt-2">JPG, JPEG, or PNG. Max 5MB (required)</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Aadhar Upload */}
+          <div className="border-2 border-dashed border-slate-300 rounded-xl p-4">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">Aadhar Card</label>
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0">
+                {aadharPreview || (isEdit && student && student.aadhar) ? (
+                  aadharPreview && aadharPreview.includes('application/pdf') ? (
+                    <div className="w-24 h-24 bg-red-100 rounded-lg flex items-center justify-center">
+                      <span className="text-3xl">📄</span>
+                    </div>
+                  ) : (
+                    <img 
+                      src={aadharPreview || `${BASE_URL}/${student.aadhar}`} 
+                      alt="Aadhar Preview" 
+                      className="w-24 h-24 object-cover rounded-lg border-2 border-slate-300"
+                      onError={(e) => {
+                        console.error('Image load error:', e.target.src);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  )
+                ) : (
+                  <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center">
+                    <span className="text-3xl">🆔</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  id="aadhar"
+                  name="aadhar"
+                  accept="image/jpeg,image/jpg,image/png,application/pdf"
+                  onChange={handleAadharChange}
+                  className="hidden"
+                />
+                <label 
+                  htmlFor="aadhar"
+                  className="cursor-pointer inline-block px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                >
+                  Choose Aadhar
+                </label>
+                <p className="text-xs text-slate-500 mt-2">JPG, JPEG, PNG, or PDF. Max 5MB (optional)</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Birth Certificate Upload */}
+          <div className="border-2 border-dashed border-slate-300 rounded-xl p-4">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">Birth Certificate</label>
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0">
+                {birthCertificatePreview || (isEdit && student && student.birthCertificate) ? (
+                  birthCertificatePreview && birthCertificatePreview.includes('application/pdf') ? (
+                    <div className="w-24 h-24 bg-red-100 rounded-lg flex items-center justify-center">
+                      <span className="text-3xl">📄</span>
+                    </div>
+                  ) : (
+                    <img 
+                      src={birthCertificatePreview || `${BASE_URL}/${student.birthCertificate}`} 
+                      alt="Birth Certificate Preview" 
+                      className="w-24 h-24 object-cover rounded-lg border-2 border-slate-300"
+                      onError={(e) => {
+                        console.error('Image load error:', e.target.src);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  )
+                ) : (
+                  <div className="w-24 h-24 bg-slate-100 rounded-lg flex items-center justify-center">
+                    <span className="text-3xl">📜</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  id="birthCertificate"
+                  name="birthCertificate"
+                  accept="image/jpeg,image/jpg,image/png,application/pdf"
+                  onChange={handleBirthCertificateChange}
+                  className="hidden"
+                />
+                <label 
+                  htmlFor="birthCertificate"
+                  className="cursor-pointer inline-block px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                >
+                  Choose Birth Certificate
+                </label>
+                <p className="text-xs text-slate-500 mt-2">JPG, JPEG, PNG, or PDF. Max 5MB (optional)</p>
               </div>
             </div>
           </div>
@@ -389,6 +500,39 @@ export const StudentFormModal = ({
                 />
               </div>
               <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Password *</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    defaultValue=""
+                    placeholder={isEdit ? "Leave blank to keep current password" : "Enter student password"}
+                    className="w-full px-4 py-3 pr-12 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    required={!isEdit}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {isEdit && (
+                  <p className="text-xs text-slate-500 mt-1">Leave blank to keep current password</p>
+                )}
+              </div>
+              <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Phone *</label>
                 <input
                   type="tel"
@@ -487,21 +631,43 @@ export const StudentFormModal = ({
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-slate-800">Student Achievements (Optional)</h3>
-                <div className="flex gap-4 mt-2">
-                  <span className="text-sm font-medium text-slate-600">
-                    No. of Events: <span className="text-blue-600 font-bold">
-                      {achievements.reduce((total, ach) => {
-                        return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
-                      }, 0)}
+                <div className="mt-2">
+                  <div className="flex gap-4">
+                    <span className="text-sm font-medium text-slate-600">
+                      No. of Events: <span className="text-blue-600 font-bold">
+                        {achievements.reduce((total, ach) => {
+                          return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
+                        }, 0)}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-sm font-medium text-slate-600">
-                    No. of Medals: <span className="text-blue-600 font-bold">
-                      {achievements.reduce((total, ach) => {
-                        return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
-                      }, 0)}
+                    <span className="text-sm font-medium text-slate-600">
+                      No. of Medals: <span className="text-blue-600 font-bold">
+                        {achievements.reduce((total, ach) => {
+                          return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
+                        }, 0)}
+                      </span>
                     </span>
-                  </span>
+                  </div>
+                  {/* Medal Breakdown */}
+                  {(() => {
+                    const medalCounts = { Gold: 0, Silver: 0, Bronze: 0 };
+                    achievements.forEach(ach => {
+                      ach.typePrices?.forEach(tp => {
+                        if (tp.price) {
+                          const medalType = tp.price.toLowerCase();
+                          if (medalType.includes('gold')) medalCounts.Gold++;
+                          else if (medalType.includes('silver') || medalType.includes('sliver')) medalCounts.Silver++;
+                          else if (medalType.includes('bronze')) medalCounts.Bronze++;
+                        }
+                      });
+                    });
+                    const total = medalCounts.Gold + medalCounts.Silver + medalCounts.Bronze;
+                    return total > 0 && (
+                      <div className="text-sm text-slate-600 mt-1">
+                        Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver}, Bronze: {medalCounts.Bronze}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
               <button
@@ -609,14 +775,17 @@ export const StudentFormModal = ({
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-600 mb-1">Medal</label>
-                          <input
-                            type="text"
+                          <select
                             name={`achievement_${index}_typePrice_${tpIndex}_price`}
                             value={typePrice.price || ''}
                             onChange={(e) => handleTypePriceChange(index, tpIndex, 'price', e.target.value)}
-                            placeholder="Enter medal (optional)"
                             className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          />
+                          >
+                            <option value="">Select medal (optional)</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Bronze">Bronze</option>
+                          </select>
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>

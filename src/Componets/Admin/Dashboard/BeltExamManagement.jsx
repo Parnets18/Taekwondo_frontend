@@ -22,7 +22,7 @@ function BeltExamManagement() {
       try {
         const token = localStorage.getItem('token');
         
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
         const response = await fetch(`${API_BASE_URL}/admin/belt-exams`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -81,7 +81,7 @@ function BeltExamManagement() {
       try {
         const token = localStorage.getItem('token');
         
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
         const response = await fetch(`${API_BASE_URL}/admin/belt-exams/${examId}`, {
           method: 'DELETE',
           headers: {
@@ -262,7 +262,7 @@ function BeltExamManagement() {
                           <td className="px-6 py-4">
                             {exam.photo ? (
                               <img 
-                                src={`https://taekwondo-backend-j8w4.onrender.com/${exam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
+                                src={`http://localhost:5000/${exam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
                                 alt={exam.candidateName}
                                 className="w-12 h-12 rounded-full object-cover border-2 border-slate-300"
                                 onError={(e) => {
@@ -431,7 +431,7 @@ function BeltExamManagement() {
                       <div className="md:col-span-2 bg-slate-50 p-4 rounded-lg">
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Photo</label>
                         <img 
-                          src={`https://taekwondo-backend-j8w4.onrender.com/${selectedExam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
+                          src={`http://localhost:5000/${selectedExam.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
                           alt="Candidate" 
                           className="w-32 h-32 object-cover rounded-lg border-2 border-slate-300"
                           onError={(e) => {

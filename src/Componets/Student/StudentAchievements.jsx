@@ -11,7 +11,7 @@ const StudentAchievements = () => {
   const [nextMilestones, setNextMilestones] = useState([]);
 
   // API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     fetchStudentData();
@@ -89,6 +89,24 @@ const StudentAchievements = () => {
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
+  };
+
+  const getMedalCounts = (achievementsList) => {
+    const counts = { Gold: 0, Silver: 0, Bronze: 0, total: 0, events: 0 };
+    const uniqueEvents = new Set();
+    
+    achievementsList.forEach(achievement => {
+      if (achievement.medalType) {
+        counts[achievement.medalType]++;
+        counts.total++;
+      }
+      if (achievement.eventName) {
+        uniqueEvents.add(achievement.eventName);
+      }
+    });
+    
+    counts.events = uniqueEvents.size;
+    return counts;
   };
 
   const getCategoryColor = (category) => {
@@ -219,37 +237,83 @@ const StudentAchievements = () => {
               No achievements yet. Keep training to earn your first achievement!
             </div>
           ) : (
-            achievements.map((achievement) => (
-              <div key={achievement._id} className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-medium text-gray-900">{achievement.title}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(achievement.category)}`}>
-                        {achievement.category.replace('_', ' ').toUpperCase()}
-                      </span>
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                        {achievement.points} pts
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mb-2">{achievement.description}</p>
-                    <div className="text-sm text-gray-500">
-                      Achieved on {formatDate(achievement.dateAchieved)}
+            <>
+              {/* Medal Summary */}
+              {(() => {
+                const medalCounts = getMedalCounts(achievements);
+                return medalCounts.total > 0 && (
+                  <div className="bg-white rounded-lg shadow p-6 mb-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Medal Summary</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gray-900">{medalCounts.events}</div>
+                        <div className="text-sm text-gray-500">No. of Events</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gray-900">{medalCounts.total}</div>
+                        <div className="text-sm text-gray-500">Total Medals</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-yellow-600">{medalCounts.Gold}</div>
+                        <div className="text-sm text-gray-500">Gold</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gray-600">{medalCounts.Silver}</div>
+                        <div className="text-sm text-gray-500">Silver</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-orange-600">{medalCounts.Bronze}</div>
+                        <div className="text-sm text-gray-500">Bronze</div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {achievement.certificateId && (
-                      <button
-                        onClick={() => downloadCertificate(achievement.certificateId)}
-                        className="text-blue-600 hover:text-blue-900 text-sm"
-                      >
-                        Download Certificate
-                      </button>
-                    )}
+                );
+              })()}
+              
+              {achievements.map((achievement) => (
+                <div key={achievement._id} className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-medium text-gray-900">{achievement.title}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(achievement.category)}`}>
+                          {achievement.category.replace('_', ' ').toUpperCase()}
+                        </span>
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                          {achievement.points} pts
+                        </span>
+                        {achievement.medalType && (
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            achievement.medalType === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
+                            achievement.medalType === 'Silver' ? 'bg-gray-100 text-gray-800' :
+                            'bg-orange-100 text-orange-800'
+                          }`}>
+                            {achievement.medalType} Medal
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-600 mb-2">{achievement.description}</p>
+                      {achievement.eventName && (
+                        <p className="text-sm text-gray-500 mb-1">Event: {achievement.eventName}</p>
+                      )}
+                      <div className="text-sm text-gray-500">
+                        Achieved on {formatDate(achievement.dateAchieved)}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {achievement.certificateId && (
+                        <button
+                          onClick={() => downloadCertificate(achievement.certificateId)}
+                          className="text-blue-600 hover:text-blue-900 text-sm"
+                        >
+                          Download Certificate
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </>
           )}
         </div>
       )}

@@ -233,10 +233,10 @@ function CertificationManagement() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      // Validate file type - now includes PDF
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid image file (JPEG, PNG, or GIF)');
+        alert('Please select a valid file (JPEG, PNG, GIF, or PDF)');
         return;
       }
 
@@ -248,12 +248,17 @@ function CertificationManagement() {
 
       setCertificateImage(file);
       
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      // Create preview - only for images, not PDFs
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else if (file.type === 'application/pdf') {
+        // For PDF, just show a placeholder
+        setImagePreview('PDF');
+      }
     }
   };
 
@@ -716,10 +721,10 @@ function CertificationManagement() {
             </div>
             
             <form onSubmit={handleCreateCertificate} className="space-y-6">
-              {/* Certificate Image Upload - Required */}
+              {/* Certificate File Upload - Required */}
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Certificate Image <span className="text-red-500">*</span>
+                  Certificate File <span className="text-red-500">*</span>
                 </label>
                 <div className="border-2 border-dashed border-slate-300 rounded-xl p-6">
                   {!imagePreview ? (
@@ -730,17 +735,17 @@ function CertificationManagement() {
                       <div className="mt-4">
                         <label htmlFor="certificate-image" className="cursor-pointer">
                           <span className="mt-2 block text-sm font-bold text-slate-800">
-                            Upload certificate image
+                            Upload certificate file
                           </span>
                           <span className="mt-1 block text-sm text-slate-500">
-                            PNG, JPG, GIF up to 5MB
+                            PNG, JPG, GIF, or PDF up to 5MB
                           </span>
                         </label>
                         <input
                           id="certificate-image"
                           name="certificate-image"
                           type="file"
-                          accept="image/*"
+                          accept="image/*,application/pdf"
                           onChange={handleImageUpload}
                           className="sr-only"
                           required
@@ -749,11 +754,20 @@ function CertificationManagement() {
                     </div>
                   ) : (
                     <div className="relative">
-                      <img
-                        src={imagePreview}
-                        alt="Certificate preview"
-                        className="mx-auto max-h-48 rounded-lg"
-                      />
+                      {imagePreview === 'PDF' ? (
+                        <div className="text-center py-8">
+                          <svg className="mx-auto h-16 w-16 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                          </svg>
+                          <p className="mt-2 text-sm font-bold text-slate-800">PDF File Selected</p>
+                        </div>
+                      ) : (
+                        <img
+                          src={imagePreview}
+                          alt="Certificate preview"
+                          className="mx-auto max-h-48 rounded-lg"
+                        />
+                      )}
                       <button
                         type="button"
                         onClick={removeImage}
@@ -970,10 +984,10 @@ function CertificationManagement() {
             </div>
             
             <form onSubmit={handleUpdateCertificate} className="space-y-6">
-              {/* Certificate Image Upload - Optional for edit */}
+              {/* Certificate File Upload - Optional for edit */}
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Certificate Image (Optional - leave empty to keep current image)
+                  Certificate File (Optional - leave empty to keep current file)
                 </label>
                 <div className="border-2 border-dashed border-slate-300 rounded-xl p-6">
                   {!imagePreview ? (
@@ -984,17 +998,17 @@ function CertificationManagement() {
                       <div className="mt-4">
                         <label htmlFor="edit-certificate-image" className="cursor-pointer">
                           <span className="mt-2 block text-sm font-bold text-slate-800">
-                            Upload new certificate image
+                            Upload new certificate file
                           </span>
                           <span className="mt-1 block text-sm text-slate-500">
-                            PNG, JPG, GIF up to 5MB
+                            PNG, JPG, GIF, or PDF up to 5MB
                           </span>
                         </label>
                         <input
                           id="edit-certificate-image"
                           name="edit-certificate-image"
                           type="file"
-                          accept="image/*"
+                          accept="image/*,application/pdf"
                           onChange={handleImageUpload}
                           className="sr-only"
                         />
@@ -1002,11 +1016,20 @@ function CertificationManagement() {
                     </div>
                   ) : (
                     <div className="relative">
-                      <img
-                        src={imagePreview}
-                        alt="Certificate preview"
-                        className="mx-auto max-h-48 rounded-lg"
-                      />
+                      {imagePreview === 'PDF' ? (
+                        <div className="text-center py-8">
+                          <svg className="mx-auto h-16 w-16 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                          </svg>
+                          <p className="mt-2 text-sm font-bold text-slate-800">PDF File Selected</p>
+                        </div>
+                      ) : (
+                        <img
+                          src={imagePreview}
+                          alt="Certificate preview"
+                          className="mx-auto max-h-48 rounded-lg"
+                        />
+                      )}
                       <button
                         type="button"
                         onClick={removeImage}
@@ -1219,24 +1242,34 @@ function CertificationManagement() {
               </button>
             </div>
             
-            {/* Certificate Image Display */}
+            {/* Certificate File Display */}
             {selectedCertificate.imageUrl ? (
               <div className="mb-8">
                 <div className="bg-slate-50 rounded-2xl p-6 text-center">
-                  <img 
-                    src={selectedCertificate.imageUrl} 
-                    alt="Certificate" 
-                    className="max-w-full max-h-96 mx-auto rounded-lg shadow-lg border"
-                  />
-                  <p className="text-slate-600 mt-4 text-sm">Certificate Image - {selectedCertificate.verificationCode}</p>
+                  {selectedCertificate.imageUrl.toLowerCase().endsWith('.pdf') ? (
+                    <div className="py-12">
+                      <svg className="mx-auto h-24 w-24 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                      <p className="text-slate-800 font-bold text-xl mt-4">PDF Certificate</p>
+                      <p className="text-slate-600 mt-2 text-sm">Click "Open in New Tab" to view the PDF</p>
+                    </div>
+                  ) : (
+                    <img 
+                      src={selectedCertificate.imageUrl} 
+                      alt="Certificate" 
+                      className="max-w-full max-h-96 mx-auto rounded-lg shadow-lg border"
+                    />
+                  )}
+                  <p className="text-slate-600 mt-4 text-sm">Certificate - {selectedCertificate.verificationCode}</p>
                 </div>
               </div>
             ) : (
               <div className="mb-8">
                 <div className="bg-slate-100 rounded-2xl p-12 text-center">
                   <div className="text-6xl text-slate-400 mb-4">📄</div>
-                  <h3 className="text-xl font-bold text-slate-600 mb-2">No Certificate Image</h3>
-                  <p className="text-slate-500">Certificate image has not been uploaded yet</p>
+                  <h3 className="text-xl font-bold text-slate-600 mb-2">No Certificate File</h3>
+                  <p className="text-slate-500">Certificate file has not been uploaded yet</p>
                 </div>
               </div>
             )}

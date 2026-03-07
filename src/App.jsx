@@ -40,6 +40,7 @@ import LocationManagement from './Componets/Admin/LocationManagement';
 import AboutSectionManagement from './Componets/Admin/AboutSectionManagement';
 import AboutDojangStoryManagement from './Componets/Admin/AboutDojangStoryManagement';
 import MentorManagement from './Componets/Admin/MentorManagement';
+import FounderManagement from './Componets/Admin/FounderManagement';
 import LeadershipManagement from './Componets/Admin/LeadershipManagement';
 
 // Layout wrapper component that includes scroll-to-top functionality
@@ -166,6 +167,7 @@ function App() {
           <Route path="locations" element={<LocationManagement />} />
           <Route path="about-section" element={<AboutSectionManagement />} />
           <Route path="about-dojang-story" element={<AboutDojangStoryManagement />} />
+          <Route path="founders" element={<FounderManagement />} />
           <Route path="mentors" element={<MentorManagement />} />
           <Route path="leadership" element={<LeadershipManagement />} />
         </Route>

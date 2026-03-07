@@ -13,6 +13,10 @@ function StudentManagement() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
+  const [aadharPreview, setAadharPreview] = useState(null);
+  const [aadharFile, setAadharFile] = useState(null);
+  const [birthCertificatePreview, setBirthCertificatePreview] = useState(null);
+  const [birthCertificateFile, setBirthCertificateFile] = useState(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -30,8 +34,8 @@ function StudentManagement() {
   const [formAge, setFormAge] = useState(null);
 
   // API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com'; // For static files like images
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000'; // For static files like images
 
   // Helper function to calculate age
   const calculateAge = (dateOfBirth) => {
@@ -205,6 +209,10 @@ function StudentManagement() {
         setFormAge(null);
         setPhotoPreview(null);
         setPhotoFile(null);
+        setAadharPreview(null);
+        setAadharFile(null);
+        setBirthCertificatePreview(null);
+        setBirthCertificateFile(null);
         alert('Student created successfully!');
       }
     } catch (error) {
@@ -429,6 +437,52 @@ function StudentManagement() {
     }
   };
 
+  const handleAadharChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Only JPG, JPEG, PNG, and PDF files are allowed');
+        return;
+      }
+      
+      setAadharFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAadharPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBirthCertificateChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Only JPG, JPEG, PNG, and PDF files are allowed');
+        return;
+      }
+      
+      setBirthCertificateFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBirthCertificatePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddStudent = (formData) => {
     // Client-side age validation
     const dateOfBirth = formData.get('dateOfBirth');
@@ -445,6 +499,7 @@ function StudentManagement() {
       gender: formData.get('gender'),
       phone: formData.get('phone'),
       email: formData.get('email'),
+      password: formData.get('password'),
       address: formData.get('address'),
       bloodGroup: formData.get('bloodGroup') || undefined,
       fatherName: formData.get('fatherName') || undefined,
@@ -461,6 +516,8 @@ function StudentManagement() {
       admissionNumber: formData.get('admissionNumber') || undefined,
       joiningDate: formData.get('joiningDate') || undefined,
       photo: photoFile || undefined,
+      aadhar: aadharFile || undefined,
+      birthCertificate: birthCertificateFile || undefined,
       // Achievements (already stringified in form)
       achievements: formData.get('achievements'),
       // Exam Dates
@@ -494,6 +551,7 @@ function StudentManagement() {
         cleanedFormData.append(key, value);
       } else if (['fullName', 'phone', 'email', 'address', 'admissionNumber', 'joiningDate'].includes(key)) {
         // Keep required fields even if empty (will be validated by backend)
+        // Note: password is intentionally not in this list - empty password means "don't update"
         cleanedFormData.append(key, value);
       }
     }
@@ -847,6 +905,16 @@ function StudentManagement() {
         photoFile={photoFile}
         setPhotoFile={setPhotoFile}
         handlePhotoChange={handlePhotoChange}
+        aadharPreview={aadharPreview}
+        setAadharPreview={setAadharPreview}
+        aadharFile={aadharFile}
+        setAadharFile={setAadharFile}
+        handleAadharChange={handleAadharChange}
+        birthCertificatePreview={birthCertificatePreview}
+        setBirthCertificatePreview={setBirthCertificatePreview}
+        birthCertificateFile={birthCertificateFile}
+        setBirthCertificateFile={setBirthCertificateFile}
+        handleBirthCertificateChange={handleBirthCertificateChange}
       />
 
       <StudentFormModal
@@ -865,6 +933,16 @@ function StudentManagement() {
         photoFile={photoFile}
         setPhotoFile={setPhotoFile}
         handlePhotoChange={handlePhotoChange}
+        aadharPreview={aadharPreview}
+        setAadharPreview={setAadharPreview}
+        aadharFile={aadharFile}
+        setAadharFile={setAadharFile}
+        handleAadharChange={handleAadharChange}
+        birthCertificatePreview={birthCertificatePreview}
+        setBirthCertificatePreview={setBirthCertificatePreview}
+        birthCertificateFile={birthCertificateFile}
+        setBirthCertificateFile={setBirthCertificateFile}
+        handleBirthCertificateChange={handleBirthCertificateChange}
       />
 
       {/* View Student Modal */}
@@ -1050,33 +1128,203 @@ function StudentManagement() {
             </div>
             
             <div className="space-y-6">
-              {/* Photo Section */}
-              <div className="flex justify-center">
-                {selectedStudent.photo ? (
-                  <img 
-                    src={`${BASE_URL}/${selectedStudent.photo}`} 
-                    alt={selectedStudent.fullName}
-                    className="w-32 h-32 object-cover rounded-lg border-4 border-blue-300 shadow-lg"
-                    onError={(e) => {
-                      console.error('View modal image failed to load:', `${BASE_URL}/${selectedStudent.photo}`);
-                      e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = `
-                        <div class="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center border-4 border-blue-300 shadow-lg">
-                          <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                          </svg>
+              {/* Documents Section - Photo, Aadhar, Birth Certificate */}
+              <div className="grid grid-cols-3 gap-4">
+                {/* Photo */}
+                <div className="flex flex-col items-center">
+                  {selectedStudent.photo ? (
+                    <div className="relative w-32 h-32 rounded-lg border-4 border-black shadow-lg overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center z-10">
+                        Photo
+                      </div>
+                      <img 
+                        src={`${BASE_URL}/${selectedStudent.photo}`} 
+                        alt={selectedStudent.fullName}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.parentElement.innerHTML = `
+                            <div class="w-full h-full bg-gray-200 flex flex-col items-center justify-center pt-6">
+                              <div class="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center">Photo</div>
+                              <svg class="w-12 h-12 text-blue-600 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                              </svg>
+                              <span class="text-xs text-gray-600">Not uploaded</span>
+                            </div>
+                          `;
+                        }}
+                      />
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const response = await fetch(`${BASE_URL}/${selectedStudent.photo}`);
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `${selectedStudent.fullName}_photo.jpg`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                          } catch (error) {
+                            console.error('Download failed:', error);
+                            alert('Failed to download photo');
+                          }
+                        }}
+                        className="absolute bottom-1 right-1 bg-white text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors z-10 shadow-lg border-2 border-blue-600"
+                        title="Download Photo"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative w-32 h-32 bg-gray-200 rounded-lg flex flex-col items-center justify-center border-4 border-black shadow-lg pt-6">
+                      <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center">
+                        Photo
+                      </div>
+                      <svg className="w-12 h-12 text-blue-600 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                      </svg>
+                      <span className="text-xs text-gray-600">Not uploaded</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Aadhar */}
+                <div className="flex flex-col items-center">
+                  {selectedStudent.aadhar ? (
+                    <div className="relative w-32 h-32 rounded-lg border-4 border-black shadow-lg overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center z-10">
+                        Aadhar Card
+                      </div>
+                      {selectedStudent.aadhar.endsWith('.pdf') ? (
+                        <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center pt-6">
+                          <span className="text-4xl mb-1">📄</span>
+                          <span className="text-xs text-gray-700 font-semibold">PDF</span>
                         </div>
-                      `;
-                    }}
-                  />
-                ) : (
-                  <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center border-4 border-blue-300 shadow-lg">
-                    <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                )}
+                      ) : (
+                        <img 
+                          src={`${BASE_URL}/${selectedStudent.aadhar}`} 
+                          alt="Aadhar"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.parentElement.innerHTML = `
+                              <div class="w-full h-full bg-gray-200 flex flex-col items-center justify-center pt-6">
+                                <span class="text-4xl mb-1">🆔</span>
+                                <span class="text-xs text-gray-600">Not uploaded</span>
+                              </div>
+                            `;
+                          }}
+                        />
+                      )}
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const response = await fetch(`${BASE_URL}/${selectedStudent.aadhar}`);
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `${selectedStudent.fullName}_aadhar${selectedStudent.aadhar.endsWith('.pdf') ? '.pdf' : '.jpg'}`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                          } catch (error) {
+                            console.error('Download failed:', error);
+                            alert('Failed to download aadhar');
+                          }
+                        }}
+                        className="absolute bottom-1 right-1 bg-white text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors z-10 shadow-lg border-2 border-blue-600"
+                        title="Download Aadhar"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative w-32 h-32 bg-gray-200 rounded-lg flex flex-col items-center justify-center border-4 border-black shadow-lg pt-6">
+                      <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center">
+                        Aadhar Card
+                      </div>
+                      <span className="text-4xl mb-1">🆔</span>
+                      <span className="text-xs text-gray-600">Not uploaded</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Birth Certificate */}
+                <div className="flex flex-col items-center">
+                  {selectedStudent.birthCertificate ? (
+                    <div className="relative w-32 h-32 rounded-lg border-4 border-black shadow-lg overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center z-10">
+                        Birth Certificate
+                      </div>
+                      {selectedStudent.birthCertificate.endsWith('.pdf') ? (
+                        <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center pt-6">
+                          <span className="text-4xl mb-1">📄</span>
+                          <span className="text-xs text-gray-700 font-semibold">PDF</span>
+                        </div>
+                      ) : (
+                        <img 
+                          src={`${BASE_URL}/${selectedStudent.birthCertificate}`} 
+                          alt="Birth Certificate"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.parentElement.innerHTML = `
+                              <div class="w-full h-full bg-gray-200 flex flex-col items-center justify-center pt-6">
+                                <span class="text-4xl mb-1">📜</span>
+                                <span class="text-xs text-gray-600">Not uploaded</span>
+                              </div>
+                            `;
+                          }}
+                        />
+                      )}
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const response = await fetch(`${BASE_URL}/${selectedStudent.birthCertificate}`);
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `${selectedStudent.fullName}_birth_certificate${selectedStudent.birthCertificate.endsWith('.pdf') ? '.pdf' : '.jpg'}`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                          } catch (error) {
+                            console.error('Download failed:', error);
+                            alert('Failed to download birth certificate');
+                          }
+                        }}
+                        className="absolute bottom-1 right-1 bg-white text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors z-10 shadow-lg border-2 border-blue-600"
+                        title="Download Birth Certificate"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative w-32 h-32 bg-gray-200 rounded-lg flex flex-col items-center justify-center border-4 border-black shadow-lg pt-6">
+                      <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center">
+                        Birth Certificate
+                      </div>
+                      <span className="text-4xl mb-1">📜</span>
+                      <span className="text-xs text-gray-600">Not uploaded</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Personal Information */}
@@ -1204,21 +1452,47 @@ function StudentManagement() {
                 <div className="bg-slate-50 p-4 rounded-lg">
                   <div className="mb-4">
                     <h3 className="text-lg font-semibold text-slate-800 mb-2">Achievements</h3>
-                    <div className="flex gap-4">
-                      <span className="text-sm font-medium text-slate-600">
-                        No. of Events: <span className="text-blue-600 font-bold">
-                          {selectedStudent.achievements.reduce((total, ach) => {
-                            return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
-                          }, 0)}
+                    <div className="space-y-1">
+                      <div className="flex gap-4">
+                        <span className="text-sm font-medium text-slate-600">
+                          No. of Events: <span className="text-blue-600 font-bold">
+                            {selectedStudent.achievements.reduce((total, ach) => {
+                              return total + (ach.typePrices?.filter(tp => tp.type).length || 0);
+                            }, 0)}
+                          </span>
                         </span>
-                      </span>
-                      <span className="text-sm font-medium text-slate-600">
-                        No. of Medals: <span className="text-blue-600 font-bold">
-                          {selectedStudent.achievements.reduce((total, ach) => {
-                            return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
-                          }, 0)}
+                        <span className="text-sm font-medium text-slate-600">
+                          No. of Medals: <span className="text-blue-600 font-bold">
+                            {selectedStudent.achievements.reduce((total, ach) => {
+                              return total + (ach.typePrices?.filter(tp => tp.price).length || 0);
+                            }, 0)}
+                          </span>
                         </span>
-                      </span>
+                      </div>
+                      {/* Medal Breakdown */}
+                      {(() => {
+                        const medalCounts = { Gold: 0, Silver: 0, Bronze: 0 };
+                        selectedStudent.achievements.forEach(ach => {
+                          ach.typePrices?.forEach(tp => {
+                            if (tp.price) {
+                              const medalType = tp.price.toLowerCase().trim();
+                              if (medalType === 'gold' || medalType.includes('gold')) {
+                                medalCounts.Gold++;
+                              } else if (medalType === 'silver' || medalType.includes('silver')) {
+                                medalCounts.Silver++;
+                              } else if (medalType === 'bronze' || medalType.includes('bronze')) {
+                                medalCounts.Bronze++;
+                              }
+                            }
+                          });
+                        });
+                        const total = medalCounts.Gold + medalCounts.Silver + medalCounts.Bronze;
+                        return total > 0 && (
+                          <div className="text-sm text-slate-600">
+                            Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver}, Bronze: {medalCounts.Bronze}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                   {selectedStudent.achievements.map((achievement, index) => (

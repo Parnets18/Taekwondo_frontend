@@ -6,9 +6,11 @@ function BlackBelt() {
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     fetchMembers();
@@ -79,14 +81,19 @@ function BlackBelt() {
             {members.map((member) => (
               <div
                 key={member._id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
-                onClick={() => {
-                  setSelectedMember(member);
-                  setShowModal(true);
-                }}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
               >
-                {/* Photo Section */}
-                <div className="relative h-64 bg-gradient-to-br from-gray-800 to-black overflow-hidden">
+                {/* Photo Section - Click to view image */}
+                <div 
+                  className="relative h-64 bg-gradient-to-br from-gray-800 to-black overflow-hidden cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (member.photo) {
+                      setSelectedImage(`${BASE_URL}/${member.photo}`);
+                      setShowImageModal(true);
+                    }
+                  }}
+                >
                   {member.photo ? (
                     <img
                       src={`${BASE_URL}/${member.photo}`}
@@ -115,8 +122,14 @@ function BlackBelt() {
                   </div>
                 </div>
 
-                {/* Info Section */}
-                <div className="p-6">
+                {/* Info Section - Click to view full card */}
+                <div 
+                  className="p-6 cursor-pointer"
+                  onClick={() => {
+                    setSelectedMember(member);
+                    setShowModal(true);
+                  }}
+                >
                   {/* Name */}
                   <h3 className="text-xl font-bold text-gray-800 mb-3 text-center uppercase">
                     {member.name}
@@ -160,8 +173,8 @@ function BlackBelt() {
 
       {/* Member Details Modal */}
       {showModal && selectedMember && (
-        <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4 pt-32">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Black Belt Details</h2>
               <button
@@ -256,6 +269,39 @@ function BlackBelt() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal - Show only photo */}
+      {showImageModal && selectedImage && (
+        <div 
+          className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4 pt-32"
+          onClick={() => {
+            setShowImageModal(false);
+            setSelectedImage(null);
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl p-4 w-[50vw] max-w-[600px] max-h-[80vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => {
+                  setShowImageModal(false);
+                  setSelectedImage(null);
+                }}
+                className="text-red-500 hover:text-red-700 text-3xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <img
+              src={selectedImage}
+              alt="Black Belt Member"
+              className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
+            />
           </div>
         </div>
       )}

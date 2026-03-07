@@ -81,6 +81,7 @@ function AdminLayout() {
       isDropdown: true,
       items: [
         { path: '/admin/about-dojang-story', name: 'Our Dojang Story', icon: FaInfoCircle},
+        { path: '/admin/founders', name: 'Founder of Taekwon-Do', icon: FaUsers},
         { path: '/admin/mentors', name: 'Our Esteemed Mentors', icon: FaUsers},
         { path: '/admin/leadership', name: 'CWTAK Leadership', icon: FaUsers},
         { path: '/admin/achievements', name: 'Achievements', icon: FaMedal},

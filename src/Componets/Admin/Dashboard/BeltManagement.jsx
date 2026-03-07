@@ -96,7 +96,7 @@ function BeltManagement() {
   const [showEditTestModal, setShowEditTestModal] = useState(false);
 
   // API base URL - using direct backend URL to bypass proxy issues
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   // Log API URL on component mount
   useEffect(() => {
@@ -243,7 +243,7 @@ function BeltManagement() {
     if (!authToken) return;
     
     try {
-      const response = await fetch(`${API_BASE_URL}/belts/tests?upcoming=true&limit=4`, {
+      const response = await fetch(`${API_BASE_URL}/belts/tests?limit=50`, {
         headers: getAuthHeaders()
       });
 
@@ -317,6 +317,81 @@ function BeltManagement() {
 
   const getBeltColor = (color, hex) => {
     return color === 'white' ? '#E5E7EB' : hex;
+  };
+
+  // Helper function to check if belt is a stripe belt
+  const isStripeBelt = (colorName) => {
+    return colorName && colorName.includes('-stripe');
+  };
+
+  // Helper function to get stripe colors
+  const getStripeColors = (colorName, primaryHex) => {
+    const colorMap = {
+      'white': '#FFFFFF',
+      'yellow': '#D4AF37',  // Darker gold
+      'green': '#006400',   // Dark green
+      'blue': '#00008B',    // Dark blue
+      'red': '#8B0000',     // Dark red
+      'black': '#000000'
+    };
+    
+    if (colorName.includes('white-yellow')) {
+      return { color1: colorMap.white, color2: colorMap.yellow };
+    } else if (colorName.includes('yellow-green')) {
+      return { color1: colorMap.yellow, color2: colorMap.green };
+    } else if (colorName.includes('green-blue')) {
+      return { color1: colorMap.green, color2: colorMap.blue };
+    } else if (colorName.includes('blue-red')) {
+      return { color1: colorMap.blue, color2: colorMap.red };
+    } else if (colorName.includes('red-black')) {
+      return { color1: colorMap.red, color2: colorMap.black };
+    }
+    
+    return null;
+  };
+
+  // Component to render belt color circle
+  const BeltColorCircle = ({ belt, size = 'w-9 h-9' }) => {
+    const isStripe = isStripeBelt(belt.color);
+    const stripeColors = isStripe ? getStripeColors(belt.color, belt.hex) : null;
+    
+    if (isStripe && stripeColors) {
+      return (
+        <div 
+          className={`${size} rounded-full shadow-sm relative overflow-hidden`}
+          style={{ 
+            border: '2px solid #1F2937'
+          }}
+          title={`${belt.color} belt`}
+        >
+          <div 
+            className="absolute left-0 top-0 bottom-0"
+            style={{ 
+              width: '70%',
+              backgroundColor: stripeColors.color1
+            }}
+          />
+          <div 
+            className="absolute right-0 top-0 bottom-0"
+            style={{ 
+              width: '30%',
+              backgroundColor: stripeColors.color2
+            }}
+          />
+        </div>
+      );
+    }
+    
+    return (
+      <div 
+        className={`${size} rounded-full shadow-sm`}
+        style={{ 
+          backgroundColor: getBeltColor(belt.color, belt.hex),
+          border: '2px solid #1F2937'
+        }}
+        title={`${belt.color} belt`}
+      />
+    );
   };
 
   const getReadinessColor = (readiness) => {
@@ -718,7 +793,16 @@ function BeltManagement() {
       return;
     }
 
+    // Prevent double submission
+    if (loading) {
+      console.log('⚠️ Already submitting, please wait...');
+      return;
+    }
+
     try {
+      setLoading(true);
+      console.log('📝 Scheduling test for:', testForm.studentName);
+      
       const formData = new FormData();
       formData.append('studentName', testForm.studentName);
       formData.append('currentBelt', testForm.currentBelt);
@@ -742,15 +826,18 @@ function BeltManagement() {
       }
 
       if (data.status === 'success') {
+        console.log('✅ Test scheduled successfully');
         alert('Test scheduled successfully!');
         setShowTestModal(false);
         resetTestForm();
-        fetchBeltTests();
-        fetchStatistics();
+        await fetchBeltTests();
+        await fetchStatistics();
       }
     } catch (error) {
       console.error('Error scheduling test:', error);
       alert(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -980,6 +1067,8 @@ function BeltManagement() {
     }
 
     try {
+      console.log('🗑️ Deleting test with ID:', testId);
+      
       const response = await fetch(`${API_BASE_URL}/belts/tests/${testId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
@@ -988,6 +1077,12 @@ function BeltManagement() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 404) {
+          alert('This test no longer exists in the database. It may have already been deleted. Refreshing the list...');
+          await fetchBeltTests();
+          await fetchStatistics();
+          return;
+        }
         throw new Error(data.message || 'Failed to delete test');
       }
 
@@ -999,6 +1094,39 @@ function BeltManagement() {
     } catch (error) {
       console.error('Error deleting test:', error);
       alert(`Error: ${error.message}`);
+    }
+  };
+
+  const handleDownloadCertificate = async (test) => {
+    try {
+      if (!test.certificateFile) {
+        alert('No certificate file available for this test');
+        return;
+      }
+
+      console.log('📥 Downloading certificate:', test.certificateFile);
+      
+      // Construct the full URL
+      const BASE_URL = API_BASE_URL.replace('/api', '');
+      const certificateUrl = test.certificateFile.startsWith('http') 
+        ? test.certificateFile 
+        : `${BASE_URL}/${test.certificateFile}`;
+      
+      console.log('📥 Certificate URL:', certificateUrl);
+
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = certificateUrl;
+      link.download = `certificate_${test.studentName.replace(/\s+/g, '_')}_${test.certificateCode || 'test'}.${test.certificateFile.split('.').pop()}`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log('✅ Certificate download initiated');
+    } catch (error) {
+      console.error('❌ Error downloading certificate:', error);
+      alert(`Error downloading certificate: ${error.message}`);
     }
   };
 
@@ -1169,11 +1297,7 @@ function BeltManagement() {
                 <tr key={belt._id || belt.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                   <td className="py-3 px-3">
                     <div className="flex justify-center">
-                      <div 
-                        className="w-9 h-9 rounded-full border-2 border-slate-300 shadow-sm"
-                        style={{ backgroundColor: getBeltColor(belt.color, belt.hex) }}
-                        title={`${belt.color} belt`}
-                      />
+                      <BeltColorCircle belt={belt} />
                     </div>
                   </td>
                   <td className="py-3 px-3">
@@ -1400,6 +1524,16 @@ function BeltManagement() {
                         >
                           <FaEye className="w-4 h-4" />
                         </button>
+                        {test.certificateFile && (
+                          <button 
+                            onClick={() => handleDownloadCertificate(test)}
+                            className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
+                            title="Download Certificate"
+                            style={{ color: '#10B981', backgroundColor: 'transparent' }}
+                          >
+                            <FaDownload className="w-4 h-4" />
+                          </button>
+                        )}
                         <button 
                           onClick={() => handleEditTest(test)}
                           className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
@@ -2258,6 +2392,8 @@ function BeltManagement() {
                       type="date"
                       value={testForm.testDate}
                       onChange={(e) => handleTestFormChange('testDate', e.target.value)}
+                      min="1900-01-01"
+                      max="2099-12-31"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       required
                     />
@@ -2303,10 +2439,11 @@ function BeltManagement() {
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90"
+                    disabled={loading}
+                    className="flex-1 py-2 rounded-md font-medium transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ backgroundColor: '#006CB5', color: 'white' }}
                   >
-                    Schedule Test
+                    {loading ? 'Scheduling...' : 'Schedule Test'}
                   </button>
                 </div>
               </form>
@@ -2323,16 +2460,8 @@ function BeltManagement() {
             <div className="px-6 py-5 rounded-t-xl" style={{ backgroundColor: '#006CB5' }}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-4">
-                  <div 
-                    className="w-14 h-14 rounded-full border-3 flex items-center justify-center shadow-lg"
-                    style={{ 
-                      backgroundColor: getBeltColor(selectedBelt.color, selectedBelt.hex),
-                      borderColor: 'white',
-                      borderWidth: '3px',
-                      borderStyle: 'solid'
-                    }}
-                  >
-                    <FaMedal className="w-7 h-7" style={{ color: selectedBelt.color === 'white' ? '#006CB5' : 'white' }} />
+                  <div className="flex items-center justify-center">
+                    <BeltColorCircle belt={selectedBelt} size="w-14 h-14" />
                   </div>
                   <div>
                     <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold', margin: 0, marginBottom: '4px' }}>
@@ -2363,10 +2492,7 @@ function BeltManagement() {
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                   <p className="text-sm text-slate-600 mb-1">Belt Color</p>
                   <div className="flex items-center space-x-2">
-                    <div 
-                      className="w-8 h-8 rounded-full border-2 border-slate-300"
-                      style={{ backgroundColor: getBeltColor(selectedBelt.color, selectedBelt.hex) }}
-                    ></div>
+                    <BeltColorCircle belt={selectedBelt} size="w-8 h-8" />
                     <span className="font-semibold text-slate-900 capitalize">{selectedBelt.color}</span>
                   </div>
                 </div>
@@ -2535,32 +2661,50 @@ function BeltManagement() {
                   <button
                     onClick={async () => {
                       try {
+                        const filename = selectedTest.certificateFile.split('/').pop();
+                        const ext = filename.split('.').pop();
+                        const downloadFilename = `certificate_${selectedTest.studentName.replace(/\s+/g, '_')}_${selectedTest.certificateCode || selectedTest._id}.${ext}`;
+                        
+                        console.log('📥 Starting download:', downloadFilename);
+                        
+                        // Use fetch with blob to force download
                         const response = await fetch(`${API_BASE_URL}/belts/tests/${selectedTest._id}/certificate/download`, {
-                          method: 'GET',
-                          headers: {
-                            'Authorization': `Bearer ${authToken}`
-                          }
+                          headers: getAuthHeaders()
                         });
-
+                        
                         if (!response.ok) {
                           throw new Error('Failed to download certificate');
                         }
-
+                        
+                        // Get the blob from response
                         const blob = await response.blob();
+                        
+                        // Create a hidden iframe to trigger download without opening
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        // Create blob URL
                         const url = window.URL.createObjectURL(blob);
-                        const link = document.createElement('a');
+                        
+                        // Create link in iframe
+                        const link = iframe.contentDocument.createElement('a');
                         link.href = url;
-                        
-                        // Get file extension from the certificateFile path
-                        const fileExt = selectedTest.certificateFile.split('.').pop();
-                        link.download = `certificate_${selectedTest.studentName.replace(/\s+/g, '_')}_${selectedTest.certificateCode || selectedTest._id}.${fileExt}`;
-                        
-                        document.body.appendChild(link);
+                        link.download = downloadFilename;
+                        link.target = '_self';
+                        iframe.contentDocument.body.appendChild(link);
                         link.click();
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(url);
+                        
+                        // Cleanup after a short delay
+                        setTimeout(() => {
+                          document.body.removeChild(iframe);
+                          window.URL.revokeObjectURL(url);
+                        }, 100);
+                        
+                        console.log('✅ Certificate download initiated');
+                        alert('Certificate download started. Check your Downloads folder.');
                       } catch (error) {
-                        console.error('Error downloading certificate:', error);
+                        console.error('❌ Error downloading certificate:', error);
                         alert('Failed to download certificate. Please try again.');
                       }
                     }}
@@ -2706,6 +2850,8 @@ function BeltManagement() {
                       type="date"
                       value={testForm.testDate}
                       onChange={(e) => handleTestFormChange('testDate', e.target.value)}
+                      min="1900-01-01"
+                      max="2099-12-31"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />

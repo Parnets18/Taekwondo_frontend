@@ -3,14 +3,30 @@ import memberImage from '../../assets/member.png';
 
 function Community() {
   const [members, setMembers] = useState([]);
+  const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     fetchMembers();
+    fetchAchievements();
   }, []);
+
+  const fetchAchievements = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/achievements`);
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        setAchievements(data.data.achievements || []);
+      }
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+    }
+  };
 
   const fetchMembers = async () => {
     try {
@@ -88,8 +104,68 @@ function Community() {
     return { backgroundColor: '#E5E7EB', color: '#1F2937', border: '2px solid #1F2937' };
   };
 
+  const getMedalCounts = (achievements) => {
+    if (!achievements || !Array.isArray(achievements)) {
+      return { Gold: 0, Silver: 0, Bronze: 0, total: 0, events: 0 };
+    }
+    
+    const counts = { Gold: 0, Silver: 0, Bronze: 0, total: 0, events: 0 };
+    const uniqueEvents = new Set();
+    
+    achievements.forEach(achievement => {
+      if (achievement.medalType) {
+        counts[achievement.medalType]++;
+        counts.total++;
+      }
+      if (achievement.eventName) {
+        uniqueEvents.add(achievement.eventName);
+      }
+    });
+    
+    counts.events = uniqueEvents.size;
+    return counts;
+  };
+
+  const getInstructorAchievements = () => {
+    return achievements.filter(a => a.type === 'instructor');
+  };
+
+  const getStudentAchievements = () => {
+    return achievements.filter(a => a.type === 'student');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Image Modal - Just photo in a card */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="relative bg-white rounded-2xl shadow-2xl p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold hover:bg-red-600 shadow-lg z-10"
+            >
+              ×
+            </button>
+
+            {/* Photo Only - Bigger Size */}
+            <img
+              src={selectedImage.url}
+              alt={selectedImage.name}
+              className="max-w-[90vw] max-h-[95vh] object-contain rounded-lg"
+              style={{ minWidth: '600px', minHeight: '600px' }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <div 
         className="relative h-96 bg-cover bg-center"
@@ -126,7 +202,7 @@ function Community() {
             <p className="text-gray-500">Community members will appear here once added</p>
           </div>
         ) : (
-          /* Community Members Grid */
+          // Community Members Grid
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {members.map((member) => (
               <div
@@ -134,12 +210,21 @@ function Community() {
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
               >
                 {/* Photo Section */}
-                <div className="relative h-64 bg-gradient-to-br from-blue-500 to-blue-700 overflow-hidden">
+                <div 
+                  className="relative h-64 bg-gradient-to-br from-blue-500 to-blue-700 overflow-hidden cursor-pointer"
+                  onClick={() => member.photo && setSelectedImage({
+                    url: `${BASE_URL}/${member.photo}`,
+                    name: member.name,
+                    role: member.role,
+                    belt: member.belt,
+                    beltStyle: getBeltColorStyle(member.belt)
+                  })}
+                >
                   {member.photo ? (
                     <img
                       src={`${BASE_URL}/${member.photo}`}
                       alt={member.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                     />
                   ) : null}
                   
