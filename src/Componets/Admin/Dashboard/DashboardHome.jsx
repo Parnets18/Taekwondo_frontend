@@ -46,7 +46,7 @@ function DashboardHome() {
           upcomingEventsData = eventsData.filter(e => new Date(e.date) >= now).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 3)
             .map(e => ({ title: e.name, date: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
               participants: e.capacity || 0, status: e.status || 'Scheduled',
-              statusColor: e.status === 'Completed' ? 'bg-green-100 text-green-700' : e.status === 'Cancelled' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700' }));
+              statusColor: e.status === 'Completed' ? 'bg-green-100 text-green-700' : e.status === 'Cancelled' ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-700' }));
         }
       }
 

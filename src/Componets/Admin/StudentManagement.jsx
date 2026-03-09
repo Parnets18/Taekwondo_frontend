@@ -34,8 +34,8 @@ function StudentManagement() {
   const [formAge, setFormAge] = useState(null);
 
   // API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000'; // For static files like images
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com'; // For static files like images
 
   // Helper function to calculate age
   const calculateAge = (dateOfBirth) => {

@@ -15,7 +15,7 @@ const CertificateVerification = () => {
   const [loginLoading, setLoginLoading] = useState(false);
 
   // API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   useEffect(() => {
     if (urlCode) {
@@ -491,14 +491,40 @@ const CertificateVerification = () => {
 
               {/* Modal Body */}
               <div className="p-6">
-                <form onSubmit={(e) => {
+                <form onSubmit={async (e) => {
                   e.preventDefault();
-                  // Handle login here
                   setLoginLoading(true);
-                  setTimeout(() => {
+                  
+                  try {
+                    // Call the actual login API (not student-specific, just /auth/login)
+                    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+                      email: loginEmail,
+                      password: loginPassword
+                    });
+
+                    if (response.data.status === 'success') {
+                      // Check if the user is a student
+                      if (response.data.data.user.role !== 'student') {
+                        setError('This login is for students only. Please use the admin login.');
+                        setLoginLoading(false);
+                        return;
+                      }
+
+                      // Store the token and student data
+                      localStorage.setItem('studentToken', response.data.data.token);
+                      localStorage.setItem('studentData', JSON.stringify(response.data.data.user));
+                      
+                      // Redirect to dashboard
+                      window.location.href = '/student/dashboard';
+                    } else {
+                      setError('Login failed. Please check your credentials.');
+                      setLoginLoading(false);
+                    }
+                  } catch (error) {
+                    console.error('Login error:', error);
+                    setError(error.response?.data?.message || 'Invalid email or password. Please try again.');
                     setLoginLoading(false);
-                    window.location.href = '/membership';
-                  }, 1000);
+                  }
                 }}>
                   {/* Email Input */}
                   <div className="mb-4">

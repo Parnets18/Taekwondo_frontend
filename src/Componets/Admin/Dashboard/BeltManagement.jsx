@@ -54,12 +54,11 @@ function BeltManagement() {
     { name: 'Green', value: 'green', hex: '#008000' },
     { name: 'Green / Blue Stripe', value: 'green-blue-stripe', hex: '#008000' },
     { name: 'Blue', value: 'blue', hex: '#0000FF' },
-    { name: 'Blue / Red Stripe', value: 'blue-red-stripe', hex: '#0000FF' },
-    { name: 'Red', value: 'red', hex: '#FF0000' },
-    { name: 'Red / Black Stripe', value: 'red-black-stripe', hex: '#FF0000' },
+    { name: 'Blue / Purple Stripe', value: 'blue-purple-stripe', hex: '#0000FF' },
+    { name: 'Purple', value: 'purple', hex: '#800080' },
+    { name: 'Purple / Black Stripe', value: 'purple-black-stripe', hex: '#800080' },
     { name: 'Black 1st Dan', value: 'black', hex: '#000000' },
     { name: 'Orange', value: 'orange', hex: '#FFA500' },
-    { name: 'Purple', value: 'purple', hex: '#800080' },
     { name: 'Brown', value: 'brown', hex: '#8B4513' }
   ];
 
@@ -96,7 +95,7 @@ function BeltManagement() {
   const [showEditTestModal, setShowEditTestModal] = useState(false);
 
   // API base URL - using direct backend URL to bypass proxy issues
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   // Log API URL on component mount
   useEffect(() => {

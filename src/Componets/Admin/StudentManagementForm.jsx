@@ -57,7 +57,7 @@ export const StudentFormModal = ({
   if (!show) return null;
 
   const isEdit = !!student;
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
   // Remove /api from base URL for static file access (images)
   const BASE_URL = API_BASE_URL.replace('/api', '');
 

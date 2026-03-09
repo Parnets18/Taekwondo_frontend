@@ -29,8 +29,8 @@ function Home() {
   const [aboutSection, setAboutSection] = useState(null);
   const [loadingAbout, setLoadingAbout] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
   // Fetch banners from API
   useEffect(() => {
@@ -126,35 +126,35 @@ function Home() {
       icon: <FaFistRaised className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Self-Defence',
       description: 'Master practical self-defense techniques and gain confidence to protect yourself in real-world situations',
-      color: 'from-red-500 to-red-700',
+      color: 'from-blue-500 to-blue-700',
       delay: '100ms'
     },
     {
       icon: <FaBullseye className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Focus',
       description: 'Enhance concentration and mental clarity through mindful practice, improving performance in all areas of life',
-      color: 'from-yellow-400 to-yellow-600',
+      color: 'from-sky-400 to-sky-600',
       delay: '200ms'
     },
     {
       icon: <FaPray className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Self-Respect',
       description: 'Build confidence and self-worth through achievement and personal growth in a supportive martial arts environment',
-      color: 'from-red-500 to-red-700',
+      color: 'from-blue-500 to-blue-700',
       delay: '300ms'
     },
     {
       icon: <FaUsers className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Leadership',
       description: 'Cultivate leadership qualities and learn to inspire others through example, teamwork, and mentorship',
-      color: 'from-yellow-400 to-yellow-600',
+      color: 'from-sky-400 to-sky-600',
       delay: '400ms'
     },
     {
       icon: <FaHandPaper className="text-4xl mb-4 mx-auto transform group-hover:scale-110 transition-transform duration-300" />,
       title: 'Anti-Bullying',
       description: 'Develop the confidence and skills to stand against bullying while promoting respect and kindness',
-      color: 'from-red-500 to-red-700',
+      color: 'from-blue-500 to-blue-700',
       delay: '500ms'
     }
   ];
@@ -166,7 +166,7 @@ function Home() {
       duration: '45 minutes',
       schedule: 'Mon, Wed, Fri - 4:00 PM',
       icon: '🐅',
-      color: 'from-yellow-400 to-red-500',
+      color: 'from-sky-400 to-blue-500',
       features: ['Korean Commands', 'Basic Patterns (Tul)', 'Respect & Discipline', 'White to Yellow Belt']
     },
     {
@@ -175,7 +175,7 @@ function Home() {
       duration: '60 minutes',
       schedule: 'Tue, Thu, Sat - 5:00 PM',
       icon: '🦅',
-      color: 'from-red-500 to-black',
+      color: 'from-blue-600 to-blue-900',
       features: ['ITF Patterns (Tul)', 'Sparring Basics', 'Breaking Techniques', 'Yellow to Green Belt']
     },
     {
@@ -202,7 +202,7 @@ function Home() {
       role: "Adult Student",
       text: "Best decision I made for my fitness and mental discipline. Highly recommended!",
       rating: 5,
-      icon: <FaGraduationCap className="text-3xl text-red-600" />
+      icon: <FaGraduationCap className="text-3xl text-blue-600" />
     },
     {
       name: "Anita Reddy",
@@ -243,7 +243,7 @@ function Home() {
 
       {/* Hero Section - Only show if banners are available */}
       {loadingBanners ? (
-        <section className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-gradient-to-br from-yellow-50 via-white to-red-50">
+        <section className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-gradient-to-br from-blue-50 via-white to-sky-50">
           <div className="relative z-10 max-w-7xl mx-auto px-4 w-full h-full">
             <div className="flex justify-start items-center min-h-screen pt-16">
               <div className="text-gray-800 text-center w-full">
@@ -416,7 +416,7 @@ function Home() {
       </section>
 
       {/* Enhanced Features Section */}
-      <section className="py-12 bg-gradient-to-br from-gray-50 via-yellow-50 to-red-50 relative overflow-hidden">
+      <section className="py-12 bg-gradient-to-br from-gray-50 via-blue-50 to-sky-50 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gray-50 opacity-50"></div>
         
@@ -627,7 +627,7 @@ function Home() {
           {/* Martial Arts background */}
           <div className="absolute inset-0 opacity-10">
             <div className="text-9xl font-bold text-yellow-400 absolute top-10 left-10 rotate-12">TAEKWON-DO</div>
-            <div className="text-6xl font-bold text-red-400 absolute bottom-10 right-10 -rotate-12">ITF</div>
+            <div className="text-6xl font-bold text-blue-400 absolute bottom-10 right-10 -rotate-12">ITF</div>
           </div>
           {[...Array(15)].map((_, i) => (
             <div
@@ -757,7 +757,7 @@ function RecentPromotions() {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -918,7 +918,7 @@ function MembersBirthdaysCard() {
   const [birthdays, setBirthdays] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   useEffect(() => {
     const fetchBirthdays = async () => {

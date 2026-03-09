@@ -23,7 +23,7 @@ function AdmissionManagement() {
         // Get auth token from localStorage
         const token = localStorage.getItem('token');
         
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
         const response = await fetch(`${API_BASE_URL}/admin/admissions`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -84,7 +84,7 @@ function AdmissionManagement() {
       // Get auth token from localStorage
       const token = localStorage.getItem('token');
       
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
       const response = await fetch(`${API_BASE_URL}/admin/admissions/${admissionId}/status`, {
         method: 'PUT',
         headers: {
@@ -156,7 +156,7 @@ function AdmissionManagement() {
         // Get auth token from localStorage
         const token = localStorage.getItem('token');
         
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
         const response = await fetch(`${API_BASE_URL}/admin/admissions/${admissionId}`, {
           method: 'DELETE',
           headers: {
@@ -368,7 +368,7 @@ function AdmissionManagement() {
                           <td className="px-6 py-4">
                             {admission.photo ? (
                               <img 
-                                src={`http://localhost:5000/${admission.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
+                                src={`https://taekwondo-backend-j8w4.onrender.com/${admission.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
                                 alt={admission.name}
                                 className="w-12 h-12 rounded-full object-cover border-2 border-slate-300"
                                 onError={(e) => {
@@ -537,7 +537,7 @@ function AdmissionManagement() {
                       <div className="md:col-span-2 bg-slate-50 p-4 rounded-lg">
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Upload Photo</label>
                         <img 
-                          src={`http://localhost:5000/${selectedAdmission.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
+                          src={`https://taekwondo-backend-j8w4.onrender.com/${selectedAdmission.photo.replace(/\\/g, '/').replace(/^.*uploads/, 'uploads')}`}
                           alt="Student" 
                           className="w-32 h-32 object-cover rounded-lg border-2 border-slate-300"
                           onError={(e) => {

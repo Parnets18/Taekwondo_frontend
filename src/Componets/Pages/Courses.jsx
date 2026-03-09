@@ -25,7 +25,7 @@ function Courses() {
   const [error, setError] = useState(null);
 
   // API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
 
   // Fetch courses from backend
   const fetchCourses = async () => {
@@ -77,12 +77,12 @@ function Courses() {
   // Get color gradient for course cards based on index
   const getColorForIndex = (index) => {
     const colors = [
-      'from-yellow-400 to-orange-500',
+      'from-sky-400 to-blue-500',
       'from-blue-400 to-blue-600',
       'from-green-400 to-green-600',
-      'from-red-400 to-red-600',
-      'from-purple-400 to-purple-600',
-      'from-pink-400 to-rose-500'
+      'from-cyan-400 to-cyan-600',
+      'from-indigo-400 to-indigo-600',
+      'from-teal-400 to-teal-500'
     ];
     return colors[index % colors.length];
   };
@@ -100,9 +100,9 @@ function Courses() {
     { name: 'Green Belt', requirements: 'Dan-Gun pattern, intermediate techniques', duration: '4-5 months', bgColor: '#22C55E', borderColor: '#16A34A' },
     { name: 'Green Belt / Blue Stripe', requirements: 'Do-San pattern introduction', duration: '4-5 months', bgColor: 'linear-gradient(to right, #22C55E 0%, #22C55E 60%, #86EFAC 65%, #93C5FD 70%, #2563EB 80%, #2563EB 100%)', borderColor: '#1D4ED8' },
     { name: 'Blue Belt', requirements: 'Do-San pattern, advanced kicks', duration: '5-6 months', bgColor: '#2563EB', borderColor: '#1D4ED8' },
-    { name: 'Blue Belt / Red Stripe', requirements: 'Won-Hyo pattern introduction', duration: '5-6 months', bgColor: 'linear-gradient(to right, #2563EB 0%, #2563EB 60%, #93C5FD 65%, #FCA5A5 70%, #DC2626 80%, #DC2626 100%)', borderColor: '#B91C1C' },
-    { name: 'Red Belt', requirements: 'Won-Hyo pattern, sparring techniques', duration: '6-8 months', bgColor: '#DC2626', borderColor: '#B91C1C' },
-    { name: 'Red Belt / Black Stripe', requirements: 'Yul-Gok pattern, black belt preparation', duration: '8-10 months', bgColor: 'linear-gradient(to right, #DC2626 0%, #DC2626 60%, #EF4444 65%, #6B7280 70%, #000000 80%, #000000 100%)', borderColor: '#000000' },
+    { name: 'Blue Belt / Purple Stripe', requirements: 'Won-Hyo pattern introduction', duration: '5-6 months', bgColor: 'linear-gradient(to right, #2563EB 0%, #2563EB 60%, #93C5FD 65%, #C4B5FD 70%, #7C3AED 80%, #7C3AED 100%)', borderColor: '#6D28D9' },
+    { name: 'Purple Belt', requirements: 'Won-Hyo pattern, sparring techniques', duration: '6-8 months', bgColor: '#7C3AED', borderColor: '#6D28D9' },
+    { name: 'Purple Belt / Black Stripe', requirements: 'Yul-Gok pattern, black belt preparation', duration: '8-10 months', bgColor: 'linear-gradient(to right, #7C3AED 0%, #7C3AED 60%, #A78BFA 65%, #6B7280 70%, #000000 80%, #000000 100%)', borderColor: '#000000' },
     { name: 'Black Belt 1st Dan', requirements: 'All color belt patterns, breaking', duration: '12+ months', bgColor: '#000000', borderColor: '#4B5563' }
   ];
 
@@ -135,7 +135,7 @@ function Courses() {
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-center">
-              <FaSpinner className="animate-spin text-4xl text-red-600 mr-4" />
+              <FaSpinner className="animate-spin text-4xl text-blue-600 mr-4" />
               <span className="text-xl text-gray-600">Loading courses...</span>
             </div>
           </div>
@@ -147,10 +147,10 @@ function Courses() {
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <div className="text-red-600 text-xl mb-4">{error}</div>
+              <div className="text-blue-600 text-xl mb-4">{error}</div>
               <button
                 onClick={fetchCourses}
-                className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
                 Try Again
               </button>
@@ -255,7 +255,7 @@ function Courses() {
       )}
 
       {/* Belt System */}
-      <section className="py-12 bg-gradient-to-r from-yellow-50 to-red-50">
+      <section className="py-12 bg-gradient-to-r from-blue-50 to-sky-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 transform hover:scale-105 transition-all duration-500">
             <h2 className="text-4xl font-bold mb-3 flex items-center justify-center">

@@ -116,7 +116,7 @@ function Admission() {
         }
       });
 
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/api';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
       const response = await fetch(`${API_BASE_URL}/admissions`, {
         method: 'POST',
         body: formDataToSend
@@ -172,7 +172,7 @@ function Admission() {
   // Thank You Card Component
   if (showThankYou) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 p-4">
         <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center animate-fadeIn">
           <div className="mb-6 flex justify-center">
             <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center animate-bounce">

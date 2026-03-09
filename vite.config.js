@@ -17,12 +17,12 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://taekwondo-backend-j8w4.onrender.com',
         changeOrigin: true,
         secure: false,
       },
       '/uploads': {
-        target: 'http://localhost:5000',
+        target: 'https://taekwondo-backend-j8w4.onrender.com',
         changeOrigin: true,
         secure: false,
       }

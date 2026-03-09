@@ -42,6 +42,13 @@ import AboutDojangStoryManagement from './Componets/Admin/AboutDojangStoryManage
 import MentorManagement from './Componets/Admin/MentorManagement';
 import FounderManagement from './Componets/Admin/FounderManagement';
 import LeadershipManagement from './Componets/Admin/LeadershipManagement';
+import StudentDashboard from './Componets/StudentPortal/StudentDashboard';
+import StudentProfile from './Componets/StudentPortal/StudentProfile';
+import StudentAttendance from './Componets/StudentPortal/StudentAttendance';
+import StudentCertificates from './Componets/StudentPortal/StudentCertificates';
+import StudentEvents from './Componets/StudentPortal/StudentEvents';
+import StudentFees from './Componets/StudentPortal/StudentFees';
+import StudentLevel from './Componets/StudentPortal/StudentLevel';
 
 // Layout wrapper component that includes scroll-to-top functionality
 function PublicLayout({ children }) {
@@ -137,6 +144,13 @@ function App() {
         } />
 
         {/* Student Portal */}
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/student/profile" element={<StudentProfile />} />
+        <Route path="/student/attendance" element={<StudentAttendance />} />
+        <Route path="/student/certificates" element={<StudentCertificates />} />
+        <Route path="/student/events" element={<StudentEvents />} />
+        <Route path="/student/fees" element={<StudentFees />} />
+        <Route path="/student/level" element={<StudentLevel />} />
         <Route path="/student/achievements" element={
           <PublicLayout>
             <StudentAchievements />
