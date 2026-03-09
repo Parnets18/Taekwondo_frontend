@@ -1132,24 +1132,26 @@ function StudentManagement() {
               <div className="grid grid-cols-3 gap-4">
                 {/* Photo */}
                 <div className="flex flex-col items-center">
-                  {selectedStudent.photo ? (
+                  {selectedStudent.photo && selectedStudent.photo.trim() !== '' ? (
                     <div className="relative w-32 h-32 rounded-lg border-4 border-black shadow-lg overflow-hidden">
                       <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center z-10">
                         Photo
                       </div>
                       <img 
-                        src={`${BASE_URL}/${selectedStudent.photo}`} 
+                        src={selectedStudent.photo.startsWith('http') ? selectedStudent.photo : `${BASE_URL}/${selectedStudent.photo}`}
                         alt={selectedStudent.fullName}
                         className="w-full h-full object-cover"
                         onError={(e) => {
+                          console.error('❌ Failed to load photo:', selectedStudent.photo);
+                          console.error('   Tried URL:', e.target.src);
                           e.target.onerror = null;
                           e.target.parentElement.innerHTML = `
                             <div class="w-full h-full bg-gray-200 flex flex-col items-center justify-center pt-6">
                               <div class="absolute top-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs font-semibold py-1 text-center">Photo</div>
-                              <svg class="w-12 h-12 text-blue-600 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                              <svg class="w-12 h-12 text-red-600 mb-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                               </svg>
-                              <span class="text-xs text-gray-600">Not uploaded</span>
+                              <span class="text-xs text-red-600">Load failed</span>
                             </div>
                           `;
                         }}
@@ -1158,7 +1160,8 @@ function StudentManagement() {
                         onClick={async (e) => {
                           e.stopPropagation();
                           try {
-                            const response = await fetch(`${BASE_URL}/${selectedStudent.photo}`);
+                            const photoUrl = selectedStudent.photo.startsWith('http') ? selectedStudent.photo : `${BASE_URL}/${selectedStudent.photo}`;
+                            const response = await fetch(photoUrl);
                             const blob = await response.blob();
                             const url = window.URL.createObjectURL(blob);
                             const link = document.createElement('a');
