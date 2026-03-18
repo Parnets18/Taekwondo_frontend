@@ -17,6 +17,12 @@ function AboutDojangStoryManagement() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
   const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
 
+  const getPhotoUrl = (photo) => {
+    if (!photo) return '';
+    if (photo.startsWith('http')) return photo;
+    return `${BASE_URL}/${photo.replace(/^\//, '')}`;
+  };
+
   useEffect(() => {
     fetchStories();
   }, []);
@@ -147,7 +153,7 @@ function AboutDojangStoryManagement() {
 
   const openEditModal = (story) => {
     setSelectedStory(story);
-    setPhotoPreview(`${BASE_URL}/${story.photo}`);
+    setPhotoPreview(getPhotoUrl(story.photo));
     setFormData({
       title: story.title,
       description: story.description
@@ -244,7 +250,7 @@ function AboutDojangStoryManagement() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-20 w-20">
                           <img
-                            src={`${BASE_URL}/${story.photo}`}
+                            src={getPhotoUrl(story.photo)}
                             alt="Story"
                             className="h-20 w-20 rounded-lg object-cover border-2 border-gray-200"
                           />
@@ -273,7 +279,7 @@ function AboutDojangStoryManagement() {
                         <button
                           onClick={() => {
                             setSelectedStory(story);
-                            setPhotoPreview(`${BASE_URL}/${story.photo}`);
+                            setPhotoPreview(getPhotoUrl(story.photo));
                             setShowViewModal(true);
                           }}
                           className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center border border-gray-300"
@@ -489,3 +495,4 @@ function AboutDojangStoryManagement() {
 }
 
 export default AboutDojangStoryManagement;
+

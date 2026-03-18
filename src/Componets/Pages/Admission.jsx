@@ -1,88 +1,98 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import image from '../../assets/admission.jpg';
-import { 
-  FaUser, 
-  FaCalendarAlt, 
-  FaPhone, 
-  FaEnvelope, 
-  FaMapMarkerAlt, 
-  FaGraduationCap, 
-  FaHeartbeat, 
-  FaCheckCircle, 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import image from "../../assets/admission.jpg";
+import {
+  FaUser,
+  FaCalendarAlt,
+  FaPhone,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaGraduationCap,
+  FaHeartbeat,
+  FaCheckCircle,
   FaPaperPlane,
   FaSpinner,
   FaHome,
-  FaStar
-} from 'react-icons/fa';
+  FaStar,
+} from "react-icons/fa";
 
 function Admission() {
   const navigate = useNavigate();
   const [showThankYou, setShowThankYou] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    dateOfBirth: '',
-    age: '',
-    gender: '',
-    fatherName: '',
-    motherName: '',
-    residentialAddress: '',
-    mobileNumber: '',
-    emergencyContact: '',
-    email: '',
-    aadhaarNumber: '',
-    bloodGroup: '',
-    height: '',
-    weight: '',
-    physicalDisorder: '',
+    name: "",
+    dateOfBirth: "",
+    age: "",
+    gender: "",
+    fatherName: "",
+    motherName: "",
+    residentialAddress: "",
+    mobileNumber: "",
+    emergencyContact: "",
+    email: "",
+    aadhaarNumber: "",
+    bloodGroup: "",
+    height: "",
+    weight: "",
+    physicalDisorder: "",
     photo: null,
-    agreeToTerms: false
+    agreeToTerms: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    
-    if (type === 'file') {
-      setFormData(prev => ({
+
+    if (type === "file") {
+      setFormData((prev) => ({
         ...prev,
-        [name]: files[0]
+        [name]: files[0],
       }));
-    } else if (name === 'dateOfBirth') {
+    } else if (name === "dateOfBirth") {
       // Auto-calculate age when date of birth changes
       const birthDate = new Date(value);
       const today = new Date();
       const calculatedAge = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      
-      const finalAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) 
-        ? calculatedAge - 1 
-        : calculatedAge;
-      
-      setFormData(prev => ({
+
+      const finalAge =
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+          ? calculatedAge - 1
+          : calculatedAge;
+
+      setFormData((prev) => ({
         ...prev,
         dateOfBirth: value,
-        age: finalAge > 0 ? finalAge.toString() : ''
+        age: finalAge > 0 ? finalAge.toString() : "",
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : value
+        [name]: type === "checkbox" ? checked : value,
       }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Basic validation
-    if (!formData.name || !formData.dateOfBirth || !formData.gender || 
-        !formData.fatherName || !formData.motherName || !formData.residentialAddress || 
-        !formData.mobileNumber || !formData.email || !formData.agreeToTerms) {
+    if (
+      !formData.name ||
+      !formData.dateOfBirth ||
+      !formData.gender ||
+      !formData.fatherName ||
+      !formData.motherName ||
+      !formData.residentialAddress ||
+      !formData.mobileNumber ||
+      !formData.email ||
+      !formData.agreeToTerms
+    ) {
       setSubmitStatus({
-        type: 'error',
-        message: 'Please fill in all required fields and agree to terms.'
+        type: "error",
+        message: "Please fill in all required fields and agree to terms.",
       });
       return;
     }
@@ -92,15 +102,18 @@ function Admission() {
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
 
     if (age < 3) {
       setSubmitStatus({
-        type: 'error',
-        message: `Student must be at least 3 years old. Current age: ${age} years. Please check the date of birth.`
+        type: "error",
+        message: `Student must be at least 3 years old. Current age: ${age} years. Please check the date of birth.`,
       });
       return;
     }
@@ -110,59 +123,63 @@ function Admission() {
 
     try {
       const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (formData[key] !== null && formData[key] !== '') {
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] !== null && formData[key] !== "") {
           formDataToSend.append(key, formData[key]);
         }
       });
 
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+      const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api/api";
       const response = await fetch(`${API_BASE_URL}/admissions`, {
-        method: 'POST',
-        body: formDataToSend
+        method: "POST",
+        body: formDataToSend,
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         if (data.errors && Array.isArray(data.errors)) {
-          const errorMessages = data.errors.map(err => err.msg || err.message || JSON.stringify(err));
-          throw new Error(errorMessages.join(', '));
+          const errorMessages = data.errors.map(
+            (err) => err.msg || err.message || JSON.stringify(err),
+          );
+          throw new Error(errorMessages.join(", "));
         }
-        throw new Error(data.message || 'Failed to submit application');
+        throw new Error(data.message || "Failed to submit application");
       }
 
       setShowThankYou(true);
-      
+
       // Reset form
       setFormData({
-        name: '',
-        dateOfBirth: '',
-        age: '',
-        gender: '',
-        fatherName: '',
-        motherName: '',
-        residentialAddress: '',
-        mobileNumber: '',
-        emergencyContact: '',
-        email: '',
-        aadhaarNumber: '',
-        bloodGroup: '',
-        height: '',
-        weight: '',
-        physicalDisorder: '',
+        name: "",
+        dateOfBirth: "",
+        age: "",
+        gender: "",
+        fatherName: "",
+        motherName: "",
+        residentialAddress: "",
+        mobileNumber: "",
+        emergencyContact: "",
+        email: "",
+        aadhaarNumber: "",
+        bloodGroup: "",
+        height: "",
+        weight: "",
+        physicalDisorder: "",
         photo: null,
-        agreeToTerms: false
+        agreeToTerms: false,
       });
 
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 300000);
     } catch (error) {
-      console.error('Admission form submission error:', error);
+      console.error("Admission form submission error:", error);
       setSubmitStatus({
-        type: 'error',
-        message: error.message || 'Error submitting application. Please try again.'
+        type: "error",
+        message:
+          error.message || "Error submitting application. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -183,15 +200,17 @@ function Admission() {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Thank You! 🎉
           </h1>
-          
+
           <p className="text-xl text-gray-700 mb-6">
             Your admission application has been successfully submitted!
           </p>
 
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 mb-8">
             <p className="text-gray-800 text-lg leading-relaxed">
-              We're excited to have you join our <span className="font-bold text-red-600">Taekwon-Do family</span>! 
-              Our team will carefully review your application and contact you within <span className="font-semibold">24-48 hours</span>.
+              We're excited to have you join our{" "}
+              <span className="font-bold text-red-600">Taekwon-Do family</span>!
+              Our team will carefully review your application and contact you
+              within <span className="font-semibold">24-48 hours</span>.
             </p>
           </div>
 
@@ -211,7 +230,7 @@ function Admission() {
           </div>
 
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-xl hover:from-red-700 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <FaHome className="mr-2" />
@@ -231,24 +250,24 @@ function Admission() {
   return (
     <div>
       {/* Hero Section */}
-      <section 
+      <section
         className="hero-section mobile-hero-fix relative py-20 sm:py-24 min-h-[60vh] flex items-center justify-center"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url(${image})`,
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'scroll'
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "scroll",
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10">
-          
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
-            Join <span className="text-white">Combat</span> <span className="text-white">Warrior</span>
+            Join <span className="text-white">Combat</span>{" "}
+            <span className="text-white">Warrior</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-white max-w-4xl mx-auto leading-relaxed">
-            Begin your martial arts journey with Karnataka's premier Taekwon-do academy. 
-            Complete the application below to secure your spot.
+            Begin your martial arts journey with Karnataka's premier Taekwon-do
+            academy. Complete the application below to secure your spot.
           </p>
         </div>
       </section>
@@ -257,24 +276,39 @@ function Admission() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
             {/* Form Header */}
-            <div className="p-8 text-white text-center" style={{ backgroundColor: '#006CB5' }}>
+            <div
+              className="p-8 text-white text-center"
+              style={{ backgroundColor: "#006CB5" }}
+            >
               <div className="flex items-center justify-center mb-2">
                 <FaGraduationCap className="text-4xl mr-3 text-white" />
-                <h2 style={{ color: 'white', fontSize: '1.875rem', fontWeight: 'bold' }}>Student Admission Application</h2>
+                <h2
+                  style={{
+                    color: "white",
+                    fontSize: "1.875rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Student Admission Application
+                </h2>
               </div>
-              <p className="text-white text-opacity-90">All fields marked with * are required</p>
+              <p className="text-white text-opacity-90">
+                All fields marked with * are required
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-6">
               {/* Status Message */}
               {submitStatus && (
-                <div className={`p-4 rounded-xl mb-6 ${
-                  submitStatus.type === 'success' 
-                    ? 'bg-green-50 border border-green-200 text-green-700' 
-                    : 'bg-red-50 border border-red-200 text-red-700'
-                }`}>
+                <div
+                  className={`p-4 rounded-xl mb-6 ${
+                    submitStatus.type === "success"
+                      ? "bg-green-50 border border-green-200 text-green-700"
+                      : "bg-red-50 border border-red-200 text-red-700"
+                  }`}
+                >
                   <div className="flex items-center">
-                    {submitStatus.type === 'success' ? (
+                    {submitStatus.type === "success" ? (
                       <FaCheckCircle className="mr-2" />
                     ) : (
                       <FaUser className="mr-2" />
@@ -306,8 +340,14 @@ function Admission() {
                   <label className="block text-sm font-bold text-slate-700 mb-2">
                     2. Date of Birth (dd/mm/yyyy) *
                     {formData.age && (
-                      <span className={`ml-2 text-sm ${parseInt(formData.age) >= 3 ? 'text-green-600' : 'text-red-600'}`}>
-                        (Age: {formData.age} years {parseInt(formData.age) < 3 ? '- Too young!' : '- Valid'})
+                      <span
+                        className={`ml-2 text-sm ${parseInt(formData.age) >= 3 ? "text-green-600" : "text-red-600"}`}
+                      >
+                        (Age: {formData.age} years{" "}
+                        {parseInt(formData.age) < 3
+                          ? "- Too young!"
+                          : "- Valid"}
+                        )
                       </span>
                     )}
                   </label>
@@ -319,8 +359,8 @@ function Admission() {
                     required
                     className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 ${
                       formData.age && parseInt(formData.age) < 3
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-slate-200'
+                        ? "border-red-300 bg-red-50"
+                        : "border-slate-200"
                     }`}
                   />
                   {formData.age && parseInt(formData.age) < 3 && (
@@ -342,8 +382,8 @@ function Admission() {
                     readOnly
                     className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-300 ${
                       formData.age && parseInt(formData.age) < 3
-                        ? 'bg-red-50 border-red-300'
-                        : 'bg-gray-50 border-slate-200'
+                        ? "bg-red-50 border-red-300"
+                        : "bg-gray-50 border-slate-200"
                     }`}
                     placeholder="Auto-calculated"
                   />
@@ -360,7 +400,7 @@ function Admission() {
                         type="radio"
                         name="gender"
                         value="Male"
-                        checked={formData.gender === 'Male'}
+                        checked={formData.gender === "Male"}
                         onChange={handleInputChange}
                         required
                         className="w-5 h-5 text-amber-500 border-2 border-slate-300 focus:ring-amber-500"
@@ -372,7 +412,7 @@ function Admission() {
                         type="radio"
                         name="gender"
                         value="Female"
-                        checked={formData.gender === 'Female'}
+                        checked={formData.gender === "Female"}
                         onChange={handleInputChange}
                         required
                         className="w-5 h-5 text-amber-500 border-2 border-slate-300 focus:ring-amber-500"
@@ -384,7 +424,7 @@ function Admission() {
                         type="radio"
                         name="gender"
                         value="Other"
-                        checked={formData.gender === 'Other'}
+                        checked={formData.gender === "Other"}
                         onChange={handleInputChange}
                         required
                         className="w-5 h-5 text-amber-500 border-2 border-slate-300 focus:ring-amber-500"
@@ -576,19 +616,29 @@ function Admission() {
                 {/* Photo Upload */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-3">
-                   Upload Photo (Optional)
+                    Upload Photo (Optional)
                   </label>
                   <div className="flex items-center gap-4">
                     <label className="flex-1 cursor-pointer">
                       <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-amber-500 transition-all duration-300 bg-slate-50 hover:bg-amber-50">
                         <div className="flex flex-col items-center">
                           <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mb-3">
-                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                            <svg
+                              className="w-8 h-8 text-white"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                           </div>
                           <p className="text-sm font-semibold text-slate-700 mb-1">
-                            {formData.photo ? formData.photo.name : 'Click to upload photo (optional)'}
+                            {formData.photo
+                              ? formData.photo.name
+                              : "Click to upload photo (optional)"}
                           </p>
                           <p className="text-xs text-gray-500">
                             PNG, JPG up to 5MB
@@ -606,9 +656,9 @@ function Admission() {
                     {formData.photo ? (
                       <div className="flex-shrink-0">
                         <div className="w-24 h-24 border-2 border-slate-200 rounded-lg overflow-hidden">
-                          <img 
-                            src={URL.createObjectURL(formData.photo)} 
-                            alt="Preview" 
+                          <img
+                            src={URL.createObjectURL(formData.photo)}
+                            alt="Preview"
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -616,8 +666,16 @@ function Admission() {
                     ) : (
                       <div className="flex-shrink-0">
                         <div className="w-24 h-24 border-2 border-slate-200 rounded-lg overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                          <svg
+                            className="w-12 h-12 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                         </div>
                       </div>
@@ -638,22 +696,25 @@ function Admission() {
                     className="w-5 h-5 text-amber-500 border-2 border-slate-300 rounded focus:ring-amber-500 mt-1"
                   />
                   <label className="text-sm text-slate-600 leading-relaxed">
-                    <strong>I agree to the terms and conditions *</strong> - I understand that martial arts training involves physical activity and inherent risks. I consent to emergency medical treatment if necessary and agree to the academy's policies.
+                    <strong>I agree to the terms and conditions *</strong> - I
+                    understand that martial arts training involves physical
+                    activity and inherent risks. I consent to emergency medical
+                    treatment if necessary and agree to the academy's policies.
                   </label>
                 </div>
-                
+
                 <div className="text-center">
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className={`px-12 py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg text-white ${
-                      isSubmitting 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'hover:shadow-xl hover:scale-105 hover:opacity-90'
+                      isSubmitting
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "hover:shadow-xl hover:scale-105 hover:opacity-90"
                     }`}
                     style={{
-                      backgroundColor: isSubmitting ? '' : '#006CB5',
-                      color: 'white'
+                      backgroundColor: isSubmitting ? "" : "#006CB5",
+                      color: "white",
                     }}
                   >
                     {isSubmitting ? (
@@ -669,7 +730,8 @@ function Admission() {
                     )}
                   </button>
                   <p className="text-sm text-gray-500 mt-4">
-                    We'll review your application and contact you within 24-48 hours
+                    We'll review your application and contact you within 24-48
+                    hours
                   </p>
                 </div>
               </div>

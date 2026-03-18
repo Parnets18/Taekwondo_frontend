@@ -1,5 +1,14 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaEye, FaTimes, FaImage, FaMedal, FaAward } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaEye,
+  FaTimes,
+  FaImage,
+  FaMedal,
+  FaAward,
+} from "react-icons/fa";
 
 function AchievementManagement() {
   const [achievements, setAchievements] = useState([]);
@@ -9,16 +18,17 @@ function AchievementManagement() {
   const [viewingAchievement, setViewingAchievement] = useState(null);
   const [editingAchievement, setEditingAchievement] = useState(null);
   const [formData, setFormData] = useState({
-    type: 'instructor',
-    description: '',
-    eventName: '',
-    medalType: ''
+    type: "instructor",
+    description: "",
+    eventName: "",
+    medalType: "",
   });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com";
 
   useEffect(() => {
     fetchAchievements();
@@ -29,13 +39,13 @@ function AchievementManagement() {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/achievements`);
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         setAchievements(data.data.achievements);
       }
     } catch (error) {
-      console.error('Error fetching achievements:', error);
-      alert('Failed to fetch achievements');
+      console.error("Error fetching achievements:", error);
+      alert("Failed to fetch achievements");
     } finally {
       setLoading(false);
     }
@@ -43,9 +53,9 @@ function AchievementManagement() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -64,45 +74,47 @@ function AchievementManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      alert('Please login to continue');
+      alert("Please login to continue");
       return;
     }
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('type', formData.type);
-      formDataToSend.append('description', formData.description);
-      if (formData.eventName) formDataToSend.append('eventName', formData.eventName);
-      if (formData.medalType) formDataToSend.append('medalType', formData.medalType);
+      formDataToSend.append("type", formData.type);
+      formDataToSend.append("description", formData.description);
+      if (formData.eventName)
+        formDataToSend.append("eventName", formData.eventName);
+      if (formData.medalType)
+        formDataToSend.append("medalType", formData.medalType);
 
       const url = editingAchievement
         ? `${API_BASE_URL}/achievements/${editingAchievement._id}`
         : `${API_BASE_URL}/achievements`;
 
-      const method = editingAchievement ? 'PUT' : 'POST';
+      const method = editingAchievement ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: formDataToSend
+        body: formDataToSend,
       });
 
       const data = await response.json();
 
-      if (data.status === 'success') {
+      if (data.status === "success") {
         alert(data.message);
         fetchAchievements();
         handleCloseModal();
       } else {
-        alert(data.message || 'Operation failed');
+        alert(data.message || "Operation failed");
       }
     } catch (error) {
-      console.error('Error saving achievement:', error);
-      alert('Failed to save achievement');
+      console.error("Error saving achievement:", error);
+      alert("Failed to save achievement");
     }
   };
 
@@ -111,8 +123,8 @@ function AchievementManagement() {
     setFormData({
       type: achievement.type,
       description: achievement.description,
-      eventName: achievement.eventName || '',
-      medalType: achievement.medalType || ''
+      eventName: achievement.eventName || "",
+      medalType: achievement.medalType || "",
     });
     setShowModal(true);
   };
@@ -123,35 +135,35 @@ function AchievementManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this achievement?')) {
+    if (!window.confirm("Are you sure you want to delete this achievement?")) {
       return;
     }
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      alert('Please login to continue');
+      alert("Please login to continue");
       return;
     }
 
     try {
       const response = await fetch(`${API_BASE_URL}/achievements/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await response.json();
 
-      if (data.status === 'success') {
+      if (data.status === "success") {
         alert(data.message);
         fetchAchievements();
       } else {
-        alert(data.message || 'Delete failed');
+        alert(data.message || "Delete failed");
       }
     } catch (error) {
-      console.error('Error deleting achievement:', error);
-      alert('Failed to delete achievement');
+      console.error("Error deleting achievement:", error);
+      alert("Failed to delete achievement");
     }
   };
 
@@ -159,23 +171,25 @@ function AchievementManagement() {
     setShowModal(false);
     setEditingAchievement(null);
     setFormData({
-      type: 'instructor',
-      description: '',
-      eventName: '',
-      medalType: ''
+      type: "instructor",
+      description: "",
+      eventName: "",
+      medalType: "",
     });
     setPhotoFile(null);
     setPhotoPreview(null);
   };
 
-  const instructorAchievements = achievements.filter(a => a.type === 'instructor');
-  const studentAchievements = achievements.filter(a => a.type === 'student');
+  const instructorAchievements = achievements.filter(
+    (a) => a.type === "instructor",
+  );
+  const studentAchievements = achievements.filter((a) => a.type === "student");
 
   const getMedalCounts = (achievementsList) => {
     const counts = { Gold: 0, Silver: 0, Bronze: 0, total: 0, events: 0 };
     const uniqueEvents = new Set();
-    
-    achievementsList.forEach(achievement => {
+
+    achievementsList.forEach((achievement) => {
       if (achievement.medalType) {
         counts[achievement.medalType]++;
         counts.total++;
@@ -184,7 +198,7 @@ function AchievementManagement() {
         uniqueEvents.add(achievement.eventName);
       }
     });
-    
+
     counts.events = uniqueEvents.size;
     return counts;
   };
@@ -192,7 +206,10 @@ function AchievementManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4" style={{ borderColor: '#006CB5' }}></div>
+        <div
+          className="animate-spin rounded-full h-16 w-16 border-b-4"
+          style={{ borderColor: "#006CB5" }}
+        ></div>
       </div>
     );
   }
@@ -200,11 +217,13 @@ function AchievementManagement() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Achievement Management</h1>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Achievement Management
+        </h1>
         <button
           onClick={() => setShowModal(true)}
           className="text-white px-6 py-3 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
-          style={{ backgroundColor: '#006CB5' }}
+          style={{ backgroundColor: "#006CB5" }}
         >
           <FaPlus className="text-white" /> Add Achievement
         </button>
@@ -214,15 +233,24 @@ function AchievementManagement() {
       <div className="mb-8">
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
-            <FaMedal style={{ color: '#DC2626' }} /> Instructor Achievements ({instructorAchievements.length})
+            <FaMedal style={{ color: "#DC2626" }} /> Instructor Achievements (
+            {instructorAchievements.length})
           </h2>
           {(() => {
             const medalCounts = getMedalCounts(instructorAchievements);
-            return medalCounts.total > 0 && (
-              <div className="text-sm text-gray-700 ml-8">
-                <div>No. of Events: {medalCounts.events}  No. of Medals: {medalCounts.total}</div>
-                <div>Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver}, Bronze: {medalCounts.Bronze}</div>
-              </div>
+            return (
+              medalCounts.total > 0 && (
+                <div className="text-sm text-gray-700 ml-8">
+                  <div>
+                    No. of Events: {medalCounts.events} No. of Medals:{" "}
+                    {medalCounts.total}
+                  </div>
+                  <div>
+                    Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver},
+                    Bronze: {medalCounts.Bronze}
+                  </div>
+                </div>
+              )
             );
           })()}
         </div>
@@ -231,28 +259,44 @@ function AchievementManagement() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event/Tournament</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medal</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Event/Tournament
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Medal
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {instructorAchievements.map((achievement) => (
                   <tr key={achievement._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{achievement.description}</div>
+                      <div className="text-sm text-gray-900">
+                        {achievement.description}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{achievement.eventName || '-'}</div>
+                      <div className="text-sm text-gray-900">
+                        {achievement.eventName || "-"}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       {achievement.medalType ? (
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          achievement.medalType === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
-                          achievement.medalType === 'Silver' ? 'bg-gray-100 text-gray-800' :
-                          'bg-orange-100 text-orange-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            achievement.medalType === "Gold"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : achievement.medalType === "Silver"
+                                ? "bg-gray-100 text-gray-800"
+                                : "bg-orange-100 text-orange-800"
+                          }`}
+                        >
                           {achievement.medalType}
                         </span>
                       ) : (
@@ -264,21 +308,21 @@ function AchievementManagement() {
                         <button
                           onClick={() => handleView(achievement)}
                           className="text-white px-3 py-1.5 rounded hover:opacity-90 transition-colors flex items-center gap-1 text-sm"
-                          style={{ backgroundColor: '#006CB5' }}
+                          style={{ backgroundColor: "#006CB5" }}
                         >
                           <FaEye className="text-white" /> View
                         </button>
                         <button
                           onClick={() => handleEdit(achievement)}
                           className="text-white px-3 py-1.5 rounded hover:opacity-90 transition-colors flex items-center gap-1 text-sm"
-                          style={{ backgroundColor: '#006CB5' }}
+                          style={{ backgroundColor: "#006CB5" }}
                         >
                           <FaEdit className="text-white" /> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(achievement._id)}
                           className="text-white px-3 py-1.5 rounded hover:opacity-90 transition-colors flex items-center gap-1 text-sm"
-                          style={{ backgroundColor: '#006CB5' }}
+                          style={{ backgroundColor: "#006CB5" }}
                         >
                           <FaTrash className="text-white" /> Delete
                         </button>
@@ -292,7 +336,9 @@ function AchievementManagement() {
         </div>
         {instructorAchievements.length === 0 && (
           <div className="text-center py-12 bg-white rounded-lg shadow-lg">
-            <p className="text-gray-500 text-lg">No instructor achievements found.</p>
+            <p className="text-gray-500 text-lg">
+              No instructor achievements found.
+            </p>
           </div>
         )}
       </div>
@@ -301,15 +347,24 @@ function AchievementManagement() {
       <div>
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
-            <FaAward style={{ color: '#DC2626' }} /> Student Achievements ({studentAchievements.length})
+            <FaAward style={{ color: "#DC2626" }} /> Student Achievements (
+            {studentAchievements.length})
           </h2>
           {(() => {
             const medalCounts = getMedalCounts(studentAchievements);
-            return medalCounts.total > 0 && (
-              <div className="text-sm text-gray-700 ml-8">
-                <div>No. of Events: {medalCounts.events}  No. of Medals: {medalCounts.total}</div>
-                <div>Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver}, Bronze: {medalCounts.Bronze}</div>
-              </div>
+            return (
+              medalCounts.total > 0 && (
+                <div className="text-sm text-gray-700 ml-8">
+                  <div>
+                    No. of Events: {medalCounts.events} No. of Medals:{" "}
+                    {medalCounts.total}
+                  </div>
+                  <div>
+                    Gold: {medalCounts.Gold}, Silver: {medalCounts.Silver},
+                    Bronze: {medalCounts.Bronze}
+                  </div>
+                </div>
+              )
             );
           })()}
         </div>
@@ -318,28 +373,44 @@ function AchievementManagement() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event/Tournament</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medal</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Event/Tournament
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Medal
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {studentAchievements.map((achievement) => (
                   <tr key={achievement._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{achievement.description}</div>
+                      <div className="text-sm text-gray-900">
+                        {achievement.description}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{achievement.eventName || '-'}</div>
+                      <div className="text-sm text-gray-900">
+                        {achievement.eventName || "-"}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       {achievement.medalType ? (
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          achievement.medalType === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
-                          achievement.medalType === 'Silver' ? 'bg-gray-100 text-gray-800' :
-                          'bg-orange-100 text-orange-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            achievement.medalType === "Gold"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : achievement.medalType === "Silver"
+                                ? "bg-gray-100 text-gray-800"
+                                : "bg-orange-100 text-orange-800"
+                          }`}
+                        >
                           {achievement.medalType}
                         </span>
                       ) : (
@@ -351,21 +422,21 @@ function AchievementManagement() {
                         <button
                           onClick={() => handleView(achievement)}
                           className="text-white px-3 py-1.5 rounded hover:opacity-90 transition-colors flex items-center gap-1 text-sm"
-                          style={{ backgroundColor: '#006CB5' }}
+                          style={{ backgroundColor: "#006CB5" }}
                         >
                           <FaEye className="text-white" /> View
                         </button>
                         <button
                           onClick={() => handleEdit(achievement)}
                           className="text-white px-3 py-1.5 rounded hover:opacity-90 transition-colors flex items-center gap-1 text-sm"
-                          style={{ backgroundColor: '#006CB5' }}
+                          style={{ backgroundColor: "#006CB5" }}
                         >
                           <FaEdit className="text-white" /> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(achievement._id)}
                           className="text-white px-3 py-1.5 rounded hover:opacity-90 transition-colors flex items-center gap-1 text-sm"
-                          style={{ backgroundColor: '#006CB5' }}
+                          style={{ backgroundColor: "#006CB5" }}
                         >
                           <FaTrash className="text-white" /> Delete
                         </button>
@@ -379,7 +450,9 @@ function AchievementManagement() {
         </div>
         {studentAchievements.length === 0 && (
           <div className="text-center py-12 bg-white rounded-lg shadow-lg">
-            <p className="text-gray-500 text-lg">No student achievements found.</p>
+            <p className="text-gray-500 text-lg">
+              No student achievements found.
+            </p>
           </div>
         )}
       </div>
@@ -390,7 +463,7 @@ function AchievementManagement() {
           <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">
-                {editingAchievement ? 'Edit Achievement' : 'Add Achievement'}
+                {editingAchievement ? "Edit Achievement" : "Add Achievement"}
               </h2>
               <button
                 onClick={handleCloseModal}
@@ -402,7 +475,9 @@ function AchievementManagement() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">Type *</label>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Type *
+                </label>
                 <select
                   name="type"
                   value={formData.type}
@@ -416,7 +491,9 @@ function AchievementManagement() {
               </div>
 
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">Description *</label>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Description *
+                </label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -429,7 +506,9 @@ function AchievementManagement() {
               </div>
 
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">Event/Tournament Name</label>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Event/Tournament Name
+                </label>
                 <input
                   type="text"
                   name="eventName"
@@ -441,7 +520,9 @@ function AchievementManagement() {
               </div>
 
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">Medal Type</label>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Medal Type
+                </label>
                 <select
                   name="medalType"
                   value={formData.medalType}
@@ -459,9 +540,11 @@ function AchievementManagement() {
                 <button
                   type="submit"
                   className="flex-1 text-white py-3 rounded-lg hover:opacity-90 transition-colors font-semibold"
-                  style={{ backgroundColor: '#006CB5' }}
+                  style={{ backgroundColor: "#006CB5" }}
                 >
-                  {editingAchievement ? 'Update Achievement' : 'Add Achievement'}
+                  {editingAchievement
+                    ? "Update Achievement"
+                    : "Add Achievement"}
                 </button>
                 <button
                   type="button"
@@ -481,7 +564,9 @@ function AchievementManagement() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Achievement Details</h2>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Achievement Details
+              </h2>
               <button
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -493,32 +578,51 @@ function AchievementManagement() {
             <div className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-gray-500 text-sm font-semibold mb-1">Type</label>
-                  <p className="text-lg font-semibold capitalize" style={{ color: '#006CB5' }}>
+                  <label className="block text-gray-500 text-sm font-semibold mb-1">
+                    Type
+                  </label>
+                  <p
+                    className="text-lg font-semibold capitalize"
+                    style={{ color: "#006CB5" }}
+                  >
                     {viewingAchievement.type}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-gray-500 text-sm font-semibold mb-1">Description</label>
-                  <p className="text-gray-700 leading-relaxed">{viewingAchievement.description}</p>
+                  <label className="block text-gray-500 text-sm font-semibold mb-1">
+                    Description
+                  </label>
+                  <p className="text-gray-700 leading-relaxed">
+                    {viewingAchievement.description}
+                  </p>
                 </div>
 
                 {viewingAchievement.eventName && (
                   <div>
-                    <label className="block text-gray-500 text-sm font-semibold mb-1">Event/Tournament Name</label>
-                    <p className="text-gray-700 leading-relaxed">{viewingAchievement.eventName}</p>
+                    <label className="block text-gray-500 text-sm font-semibold mb-1">
+                      Event/Tournament Name
+                    </label>
+                    <p className="text-gray-700 leading-relaxed">
+                      {viewingAchievement.eventName}
+                    </p>
                   </div>
                 )}
 
                 {viewingAchievement.medalType && (
                   <div>
-                    <label className="block text-gray-500 text-sm font-semibold mb-1">Medal Type</label>
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                      viewingAchievement.medalType === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
-                      viewingAchievement.medalType === 'Silver' ? 'bg-gray-100 text-gray-800' :
-                      'bg-orange-100 text-orange-800'
-                    }`}>
+                    <label className="block text-gray-500 text-sm font-semibold mb-1">
+                      Medal Type
+                    </label>
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                        viewingAchievement.medalType === "Gold"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : viewingAchievement.medalType === "Silver"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-orange-100 text-orange-800"
+                      }`}
+                    >
                       {viewingAchievement.medalType} Medal
                     </span>
                   </div>
@@ -529,7 +633,7 @@ function AchievementManagement() {
                 <button
                   onClick={() => setShowViewModal(false)}
                   className="w-full text-white py-3 rounded-lg hover:opacity-90 transition-colors font-semibold"
-                  style={{ backgroundColor: '#006CB5' }}
+                  style={{ backgroundColor: "#006CB5" }}
                 >
                   Close
                 </button>

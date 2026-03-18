@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { IoMdArrowBack, IoMdClose } from 'react-icons/io';
-import { MdCardMembership, MdVisibility, MdFileDownload, MdWorkspacePremium } from 'react-icons/md';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { IoMdArrowBack, IoMdClose } from "react-icons/io";
+import {
+  MdCardMembership,
+  MdVisibility,
+  MdFileDownload,
+  MdWorkspacePremium,
+} from "react-icons/md";
 
 const StudentCertificates = () => {
   const navigate = useNavigate();
@@ -9,13 +14,14 @@ const StudentCertificates = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com";
 
   useEffect(() => {
-    const token = localStorage.getItem('studentToken');
+    const token = localStorage.getItem("studentToken");
     if (!token) {
-      navigate('/verify-certificate');
+      navigate("/verify-certificate");
       return;
     }
     loadCertificates();
@@ -24,27 +30,30 @@ const StudentCertificates = () => {
   const loadCertificates = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('studentToken');
-      
-      console.log('📜 Loading certificates...');
-      
-      const response = await fetch(`${API_BASE_URL}/student-portal/certificates`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const token = localStorage.getItem("studentToken");
+
+      console.log("📜 Loading certificates...");
+
+      const response = await fetch(
+        `${API_BASE_URL}/student-portal/certificates`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
-        console.log('📊 Certificates response:', data);
-        if (data.status === 'success') {
+        console.log("📊 Certificates response:", data);
+        if (data.status === "success") {
           const certs = data.data?.certificates || [];
-          console.log('✅ Loaded certificates:', certs);
+          console.log("✅ Loaded certificates:", certs);
           setCertificates(certs);
         }
       } else {
-        console.error('❌ Failed to load certificates:', response.status);
+        console.error("❌ Failed to load certificates:", response.status);
       }
     } catch (error) {
-      console.error('❌ Error loading certificates:', error);
+      console.error("❌ Error loading certificates:", error);
     } finally {
       setLoading(false);
     }
@@ -53,48 +62,48 @@ const StudentCertificates = () => {
   const handleDownload = async (certificate) => {
     try {
       if (!certificate.imageUrl) {
-        alert('No certificate file available');
+        alert("No certificate file available");
         return;
       }
 
-      const fullUrl = certificate.imageUrl.startsWith('/')
+      const fullUrl = certificate.imageUrl.startsWith("/")
         ? `${BASE_URL}${certificate.imageUrl}`
         : certificate.imageUrl;
 
       const response = await fetch(fullUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `certificate_${certificate.student.replace(/\s+/g, '_')}_${certificate.verificationCode}.${certificate.imageUrl.split('.').pop()}`;
+      a.download = `certificate_${certificate.student.replace(/\s+/g, "_")}_${certificate.verificationCode}.${certificate.imageUrl.split(".").pop()}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading certificate:', error);
-      alert('Failed to download certificate');
+      console.error("Error downloading certificate:", error);
+      alert("Failed to download certificate");
     }
   };
 
   const handleView = (certificate) => {
     if (!certificate.imageUrl) {
-      alert('No certificate file available');
+      alert("No certificate file available");
       return;
     }
 
     let fullUrl = certificate.imageUrl;
-    
+
     // If it's a relative path, construct the full URL
-    if (certificate.imageUrl.startsWith('/')) {
+    if (certificate.imageUrl.startsWith("/")) {
       fullUrl = `${BASE_URL}${certificate.imageUrl}`;
     }
-    
-    console.log('🖼️ Opening certificate:', fullUrl);
+
+    console.log("🖼️ Opening certificate:", fullUrl);
 
     setSelectedCertificate({
       ...certificate,
-      fullUrl
+      fullUrl,
     });
   };
 
@@ -113,7 +122,7 @@ const StudentCertificates = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => navigate('/student/dashboard')}
+              onClick={() => navigate("/student/dashboard")}
               className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all"
             >
               <IoMdArrowBack className="w-6 h-6" />
@@ -130,28 +139,46 @@ const StudentCertificates = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900">My Certificates</h3>
             <p className="text-sm text-gray-600">
-              {certificates.length} certificate{certificates.length !== 1 ? 's' : ''}
+              {certificates.length} certificate
+              {certificates.length !== 1 ? "s" : ""}
             </p>
           </div>
 
           {certificates.length === 0 ? (
             <div className="bg-white rounded-xl shadow-md p-12 text-center">
               <MdWorkspacePremium className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-lg font-bold text-gray-600 mb-2">No certificates found</h3>
-              <p className="text-gray-500">Your certificates will appear here once issued</p>
+              <h3 className="text-lg font-bold text-gray-600 mb-2">
+                No certificates found
+              </h3>
+              <p className="text-gray-500">
+                Your certificates will appear here once issued
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
               {certificates.map((cert) => (
-                <div key={cert.id} className="bg-white rounded-xl shadow-md p-4">
+                <div
+                  key={cert.id}
+                  className="bg-white rounded-xl shadow-md p-4"
+                >
                   <div className="flex items-start gap-4">
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-lg font-bold text-gray-900 mb-1">{cert.title || 'Certificate'}</h4>
-                      <p className="text-sm text-gray-700 mb-1">{cert.student || 'Student'}</p>
-                      <p className="text-sm text-gray-600 mb-1">{cert.type || 'Achievement'}</p>
-                      <p className="text-sm text-gray-600 mb-1">Issued: {cert.issueDate}</p>
+                      <h4 className="text-lg font-bold text-gray-900 mb-1">
+                        {cert.title || "Certificate"}
+                      </h4>
+                      <p className="text-sm text-gray-700 mb-1">
+                        {cert.student || "Student"}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {cert.type || "Achievement"}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        Issued: {cert.issueDate}
+                      </p>
                       {cert.verificationCode && (
-                        <p className="text-xs text-gray-500">Code: {cert.verificationCode}</p>
+                        <p className="text-xs text-gray-500">
+                          Code: {cert.verificationCode}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -177,7 +204,9 @@ const StudentCertificates = () => {
 
                   {!cert.imageUrl && (
                     <div className="mt-4 p-3 bg-gray-50 rounded-lg text-center">
-                      <p className="text-sm text-gray-600">No certificate file uploaded</p>
+                      <p className="text-sm text-gray-600">
+                        No certificate file uploaded
+                      </p>
                     </div>
                   )}
                 </div>
@@ -189,11 +218,14 @@ const StudentCertificates = () => {
 
       {/* Certificate View Modal */}
       {selectedCertificate && (
-        <div 
-          className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 p-4" 
+        <div
+          className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedCertificate(null)}
         >
-          <div className="relative max-w-4xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="relative max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Close Button */}
             <button
               onClick={() => setSelectedCertificate(null)}
@@ -203,14 +235,15 @@ const StudentCertificates = () => {
             </button>
 
             {/* Certificate Image */}
-            <img 
+            <img
               src={selectedCertificate.fullUrl}
               alt="Certificate"
               className="w-full rounded-lg shadow-2xl"
               onError={(e) => {
-                console.error('❌ Failed to load certificate image');
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<div class="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center"><p class="text-blue-600 font-semibold mb-2">Certificate image not found</p><p class="text-sm text-blue-500">The certificate file is not available on the server. Please contact the administrator.</p></div>';
+                console.error("❌ Failed to load certificate image");
+                e.target.style.display = "none";
+                e.target.parentElement.innerHTML =
+                  '<div class="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center"><p class="text-blue-600 font-semibold mb-2">Certificate image not found</p><p class="text-sm text-blue-500">The certificate file is not available on the server. Please contact the administrator.</p></div>';
               }}
             />
           </div>

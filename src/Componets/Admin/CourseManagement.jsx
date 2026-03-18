@@ -1,68 +1,69 @@
-import { useState, useEffect } from 'react';
-import { FaEye, FaEdit, FaTrash } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 
 function CourseManagement() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courseForm, setCourseForm] = useState({
-    title: '',
-    ageGroup: '',
-    duration: '',
-    schedule: '',
-    price: '',
-    category: '',
-    description: '',
-    features: ['']
+    title: "",
+    ageGroup: "",
+    duration: "",
+    schedule: "",
+    price: "",
+    category: "",
+    description: "",
+    features: [""],
   });
 
   // API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api/api";
 
   // Get auth headers using the existing admin token
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
     };
   };
 
   // Fetch courses from backend
-  const fetchCourses = async (page = 1, search = '', category = '') => {
+  const fetchCourses = async (page = 1, search = "", category = "") => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: '10',
+        limit: "10",
         ...(search && { search }),
-        ...(category && { level: category })
+        ...(category && { level: category }),
       });
 
       const response = await fetch(`${API_BASE_URL}/courses?${params}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch courses');
+        throw new Error("Failed to fetch courses");
       }
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         setCourses(data.data.courses);
       }
     } catch (error) {
-      console.error('Error fetching courses:', error);
-      alert('Error fetching courses. Please try again.');
+      console.error("Error fetching courses:", error);
+      alert("Error fetching courses. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -72,26 +73,26 @@ function CourseManagement() {
   const createCourse = async (courseData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/courses`, {
-        method: 'POST',
+        method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(courseData)
+        body: JSON.stringify(courseData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create course');
+        throw new Error(errorData.message || "Failed to create course");
       }
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         fetchCourses(1, searchTerm, selectedCategory);
         setShowAddModal(false);
         resetForm();
-        alert('Course created successfully!');
+        alert("Course created successfully!");
       }
     } catch (error) {
-      console.error('Error creating course:', error);
+      console.error("Error creating course:", error);
       alert(`Error creating course: ${error.message}`);
     }
   };
@@ -100,81 +101,88 @@ function CourseManagement() {
   const updateCourse = async (courseId, courseData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(courseData)
+        body: JSON.stringify(courseData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update course');
+        throw new Error(errorData.message || "Failed to update course");
       }
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         fetchCourses(1, searchTerm, selectedCategory);
         setShowEditModal(false);
         resetForm();
-        alert('Course updated successfully!');
+        alert("Course updated successfully!");
       }
     } catch (error) {
-      console.error('Error updating course:', error);
+      console.error("Error updating course:", error);
       alert(`Error updating course: ${error.message}`);
     }
   };
 
   const resetForm = () => {
     setCourseForm({
-      title: '',
-      ageGroup: '',
-      duration: '',
-      schedule: '',
-      price: '',
-      category: '',
-      description: '',
-      features: ['']
+      title: "",
+      ageGroup: "",
+      duration: "",
+      schedule: "",
+      price: "",
+      category: "",
+      description: "",
+      features: [""],
     });
   };
 
   const handleFormChange = (field, value) => {
-    setCourseForm(prev => ({
+    setCourseForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleFeatureChange = (index, value) => {
     const newFeatures = [...courseForm.features];
     newFeatures[index] = value;
-    setCourseForm(prev => ({
+    setCourseForm((prev) => ({
       ...prev,
-      features: newFeatures
+      features: newFeatures,
     }));
   };
 
   const addFeature = () => {
-    setCourseForm(prev => ({
+    setCourseForm((prev) => ({
       ...prev,
-      features: [...prev.features, '']
+      features: [...prev.features, ""],
     }));
   };
 
   const removeFeature = (index) => {
     if (courseForm.features.length > 1) {
       const newFeatures = courseForm.features.filter((_, i) => i !== index);
-      setCourseForm(prev => ({
+      setCourseForm((prev) => ({
         ...prev,
-        features: newFeatures
+        features: newFeatures,
       }));
     }
   };
 
   const handleAddCourse = (e) => {
     e.preventDefault();
-    
-    if (!courseForm.title || !courseForm.category || !courseForm.description || !courseForm.price) {
-      alert('Please fill in all required fields: Title, Category, Description, and Price');
+
+    if (
+      !courseForm.title ||
+      !courseForm.category ||
+      !courseForm.description ||
+      !courseForm.price
+    ) {
+      alert(
+        "Please fill in all required fields: Title, Category, Description, and Price",
+      );
       return;
     }
 
@@ -186,7 +194,7 @@ function CourseManagement() {
       price: courseForm.price,
       category: courseForm.category,
       description: courseForm.description,
-      features: courseForm.features.filter(feature => feature.trim() !== '')
+      features: courseForm.features.filter((feature) => feature.trim() !== ""),
     };
 
     createCourse(courseData);
@@ -194,9 +202,16 @@ function CourseManagement() {
 
   const handleEditCourse = (e) => {
     e.preventDefault();
-    
-    if (!courseForm.title || !courseForm.category || !courseForm.description || !courseForm.price) {
-      alert('Please fill in all required fields: Title, Category, Description, and Price');
+
+    if (
+      !courseForm.title ||
+      !courseForm.category ||
+      !courseForm.description ||
+      !courseForm.price
+    ) {
+      alert(
+        "Please fill in all required fields: Title, Category, Description, and Price",
+      );
       return;
     }
 
@@ -208,7 +223,7 @@ function CourseManagement() {
       price: courseForm.price,
       category: courseForm.category,
       description: courseForm.description,
-      features: courseForm.features.filter(feature => feature.trim() !== '')
+      features: courseForm.features.filter((feature) => feature.trim() !== ""),
     };
 
     updateCourse(selectedCourse.id, courseData);
@@ -229,8 +244,12 @@ function CourseManagement() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Course Management</h1>
-        <p className="text-gray-600">Manage training programs, schedules, and enrollment capacity</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Course Management
+        </h1>
+        <p className="text-gray-600">
+          Manage training programs, schedules, and enrollment capacity
+        </p>
       </div>
 
       {/* Stats Cards */}
@@ -238,13 +257,23 @@ function CourseManagement() {
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
-                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>📚</span>
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "#e3f2fd" }}
+              >
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: "#006CB5" }}
+                >
+                  📚
+                </span>
               </div>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Courses</p>
-              <p className="text-2xl font-bold text-gray-900">{courses.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {courses.length}
+              </p>
             </div>
           </div>
         </div>
@@ -252,13 +281,25 @@ function CourseManagement() {
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
-                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>✅</span>
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "#e3f2fd" }}
+              >
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: "#006CB5" }}
+                >
+                  ✅
+                </span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Available Courses</p>
-              <p className="text-2xl font-bold text-gray-900">{courses.length}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Available Courses
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {courses.length}
+              </p>
             </div>
           </div>
         </div>
@@ -271,8 +312,12 @@ function CourseManagement() {
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total Enrollment</p>
-              <p className="text-2xl font-bold text-gray-900">{courses.reduce((sum, c) => sum + (c.currentStudents || 0), 0)}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Total Enrollment
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {courses.reduce((sum, c) => sum + (c.currentStudents || 0), 0)}
+              </p>
             </div>
           </div>
         </div>
@@ -280,13 +325,31 @@ function CourseManagement() {
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e3f2fd' }}>
-                <span className="text-sm font-bold" style={{ color: '#006CB5' }}>💰</span>
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "#e3f2fd" }}
+              >
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: "#006CB5" }}
+                >
+                  💰
+                </span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Monthly Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">₹{courses.reduce((sum, c) => sum + ((c.currentStudents || 0) * (c.price || 0)), 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-500">
+                Monthly Revenue
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                ₹
+                {courses
+                  .reduce(
+                    (sum, c) => sum + (c.currentStudents || 0) * (c.price || 0),
+                    0,
+                  )
+                  .toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -320,7 +383,7 @@ function CourseManagement() {
             <button
               onClick={() => setShowAddModal(true)}
               className="px-6 py-2 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
-              style={{ backgroundColor: '#006CB5' }}
+              style={{ backgroundColor: "#006CB5" }}
             >
               Add Course
             </button>
@@ -333,7 +396,7 @@ function CourseManagement() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">All Courses</h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -358,7 +421,10 @@ function CourseManagement() {
             <tbody className="bg-white divide-y divide-gray-200">
               {courses.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                  <td
+                    colSpan="5"
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
                     No courses found matching your criteria
                   </td>
                 </tr>
@@ -367,8 +433,12 @@ function CourseManagement() {
                   <tr key={course.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{course.title}</div>
-                        <div className="text-sm text-gray-500">Age: {course.ageGroup}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {course.title}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Age: {course.ageGroup}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -377,15 +447,21 @@ function CourseManagement() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{course.schedule}</div>
-                      <div className="text-sm text-gray-500">{course.duration}</div>
+                      <div className="text-sm text-gray-900">
+                        {course.schedule}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {course.duration}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-red-600">₹{course.price}/month</div>
+                      <div className="text-sm font-bold text-red-600">
+                        ₹{course.price}/month
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-3">
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedCourse(course);
                             setShowViewModal(true);
@@ -393,9 +469,9 @@ function CourseManagement() {
                           className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                           title="View"
                         >
-                          <FaEye style={{ color: '#006CB5' }} size={18} />
+                          <FaEye style={{ color: "#006CB5" }} size={18} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedCourse(course);
                             setCourseForm({
@@ -406,26 +482,30 @@ function CourseManagement() {
                               price: course.price.toString(),
                               category: course.category,
                               description: course.description,
-                              features: course.features || ['']
+                              features: course.features || [""],
                             });
                             setShowEditModal(true);
                           }}
                           className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                           title="Edit"
                         >
-                          <FaEdit style={{ color: '#006CB5' }} size={18} />
+                          <FaEdit style={{ color: "#006CB5" }} size={18} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this course?')) {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this course?",
+                              )
+                            ) {
                               // Delete functionality would go here
-                              alert('Delete functionality not implemented yet');
+                              alert("Delete functionality not implemented yet");
                             }
                           }}
                           className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                           title="Delete"
                         >
-                          <FaTrash style={{ color: '#dc2626' }} size={18} />
+                          <FaTrash style={{ color: "#dc2626" }} size={18} />
                         </button>
                       </div>
                     </td>
@@ -439,11 +519,16 @@ function CourseManagement() {
 
       {/* Add Course Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+        <div
+          className="fixed inset-0 overflow-y-auto h-full w-full z-50"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+        >
           <div className="relative top-10 mx-auto p-6 border-2 border-black w-full max-w-4xl shadow-lg rounded-lg bg-white">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Add New Course</h2>
-              <button 
+              <h2 className="text-2xl font-bold text-gray-800">
+                Add New Course
+              </h2>
+              <button
                 onClick={() => {
                   setShowAddModal(false);
                   resetForm();
@@ -453,7 +538,7 @@ function CourseManagement() {
                 ✕
               </button>
             </div>
-            
+
             <form onSubmit={handleAddCourse} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -463,7 +548,7 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.title}
-                    onChange={(e) => handleFormChange('title', e.target.value)}
+                    onChange={(e) => handleFormChange("title", e.target.value)}
                     placeholder="e.g., Little Warriors"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
@@ -476,7 +561,9 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.ageGroup}
-                    onChange={(e) => handleFormChange('ageGroup', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("ageGroup", e.target.value)
+                    }
                     placeholder="e.g., 4-7 Years, 18+ Years, Teen, Adult"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -488,7 +575,9 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.duration}
-                    onChange={(e) => handleFormChange('duration', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("duration", e.target.value)
+                    }
                     placeholder="e.g., 45 Minutes"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -499,7 +588,9 @@ function CourseManagement() {
                   </label>
                   <select
                     value={courseForm.category}
-                    onChange={(e) => handleFormChange('category', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("category", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   >
@@ -516,7 +607,9 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.schedule}
-                    onChange={(e) => handleFormChange('schedule', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("schedule", e.target.value)
+                    }
                     placeholder="e.g., Mon, Wed, Fri - 4:00 PM"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -528,7 +621,7 @@ function CourseManagement() {
                   <input
                     type="number"
                     value={courseForm.price}
-                    onChange={(e) => handleFormChange('price', e.target.value)}
+                    onChange={(e) => handleFormChange("price", e.target.value)}
                     placeholder="e.g., 2500"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
@@ -542,7 +635,9 @@ function CourseManagement() {
                 </label>
                 <textarea
                   value={courseForm.description}
-                  onChange={(e) => handleFormChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleFormChange("description", e.target.value)
+                  }
                   placeholder="Describe what students will learn in this course..."
                   rows="3"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
@@ -570,7 +665,9 @@ function CourseManagement() {
                       <input
                         type="text"
                         value={feature}
-                        onChange={(e) => handleFeatureChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleFeatureChange(index, e.target.value)
+                        }
                         placeholder={`Feature ${index + 1} - e.g., Basic stances and movements`}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                       />
@@ -581,8 +678,18 @@ function CourseManagement() {
                           className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition-colors"
                           title="Remove feature"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
                           </svg>
                         </button>
                       )}
@@ -592,7 +699,7 @@ function CourseManagement() {
               </div>
 
               <div className="flex space-x-3 pt-4">
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setShowAddModal(false);
@@ -602,10 +709,10 @@ function CourseManagement() {
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="flex-1 text-white py-2 rounded-md font-medium hover:opacity-90 transition-colors"
-                  style={{ backgroundColor: '#006CB5' }}
+                  style={{ backgroundColor: "#006CB5" }}
                 >
                   Add Course
                 </button>
@@ -617,11 +724,14 @@ function CourseManagement() {
 
       {/* Edit Course Modal */}
       {showEditModal && selectedCourse && (
-        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+        <div
+          className="fixed inset-0 overflow-y-auto h-full w-full z-50"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+        >
           <div className="relative top-10 mx-auto p-6 border-2 border-black w-full max-w-4xl shadow-lg rounded-lg bg-white">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Edit Course</h2>
-              <button 
+              <button
                 onClick={() => {
                   setShowEditModal(false);
                   resetForm();
@@ -631,7 +741,7 @@ function CourseManagement() {
                 ✕
               </button>
             </div>
-            
+
             <form onSubmit={handleEditCourse} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -641,7 +751,7 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.title}
-                    onChange={(e) => handleFormChange('title', e.target.value)}
+                    onChange={(e) => handleFormChange("title", e.target.value)}
                     placeholder="e.g., Little Warriors"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
@@ -654,7 +764,9 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.ageGroup}
-                    onChange={(e) => handleFormChange('ageGroup', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("ageGroup", e.target.value)
+                    }
                     placeholder="e.g., 4-7 Years, 18+ Years, Teen, Adult"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -666,7 +778,9 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.duration}
-                    onChange={(e) => handleFormChange('duration', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("duration", e.target.value)
+                    }
                     placeholder="e.g., 45 Minutes"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -677,7 +791,9 @@ function CourseManagement() {
                   </label>
                   <select
                     value={courseForm.category}
-                    onChange={(e) => handleFormChange('category', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("category", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   >
@@ -694,7 +810,9 @@ function CourseManagement() {
                   <input
                     type="text"
                     value={courseForm.schedule}
-                    onChange={(e) => handleFormChange('schedule', e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange("schedule", e.target.value)
+                    }
                     placeholder="e.g., Mon, Wed, Fri - 4:00 PM"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -706,7 +824,7 @@ function CourseManagement() {
                   <input
                     type="number"
                     value={courseForm.price}
-                    onChange={(e) => handleFormChange('price', e.target.value)}
+                    onChange={(e) => handleFormChange("price", e.target.value)}
                     placeholder="e.g., 2500"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
@@ -720,7 +838,9 @@ function CourseManagement() {
                 </label>
                 <textarea
                   value={courseForm.description}
-                  onChange={(e) => handleFormChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleFormChange("description", e.target.value)
+                  }
                   placeholder="Describe what students will learn in this course..."
                   rows="3"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
@@ -748,7 +868,9 @@ function CourseManagement() {
                       <input
                         type="text"
                         value={feature}
-                        onChange={(e) => handleFeatureChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleFeatureChange(index, e.target.value)
+                        }
                         placeholder={`Feature ${index + 1} - e.g., Basic stances and movements`}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                       />
@@ -759,8 +881,18 @@ function CourseManagement() {
                           className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition-colors"
                           title="Remove feature"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
                           </svg>
                         </button>
                       )}
@@ -770,7 +902,7 @@ function CourseManagement() {
               </div>
 
               <div className="flex space-x-3 pt-4">
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setShowEditModal(false);
@@ -780,10 +912,10 @@ function CourseManagement() {
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="flex-1 text-white py-2 rounded-md font-medium hover:opacity-90 transition-colors"
-                  style={{ backgroundColor: '#006CB5' }}
+                  style={{ backgroundColor: "#006CB5" }}
                 >
                   Update Course
                 </button>
@@ -795,34 +927,47 @@ function CourseManagement() {
 
       {/* View Course Modal */}
       {showViewModal && selectedCourse && (
-        <div className="fixed inset-0 overflow-y-auto h-full w-full z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+        <div
+          className="fixed inset-0 overflow-y-auto h-full w-full z-50"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+        >
           <div className="relative top-10 mx-auto p-6 border-2 border-black w-full max-w-3xl shadow-lg rounded-lg bg-white">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Course Details</h2>
-              <button 
+              <h2 className="text-2xl font-bold text-gray-800">
+                Course Details
+              </h2>
+              <button
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
               >
                 ✕
               </button>
             </div>
-            
+
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{selectedCourse.title}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    {selectedCourse.title}
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Age Group:</span>
-                      <span className="font-medium">{selectedCourse.ageGroup}</span>
+                      <span className="font-medium">
+                        {selectedCourse.ageGroup}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Duration:</span>
-                      <span className="font-medium">{selectedCourse.duration}</span>
+                      <span className="font-medium">
+                        {selectedCourse.duration}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Schedule:</span>
-                      <span className="font-medium">{selectedCourse.schedule}</span>
+                      <span className="font-medium">
+                        {selectedCourse.schedule}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Category:</span>
@@ -832,45 +977,69 @@ function CourseManagement() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Course Info</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Course Info
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Price:</span>
-                      <span className="font-bold text-red-600">₹{selectedCourse.price}/month</span>
+                      <span className="font-bold text-red-600">
+                        ₹{selectedCourse.price}/month
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Current Students:</span>
-                      <span className="font-medium">{selectedCourse.currentStudents || 0}</span>
+                      <span className="font-medium">
+                        {selectedCourse.currentStudents || 0}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Description</h4>
-                <p className="text-gray-700 leading-relaxed">{selectedCourse.description}</p>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                  Description
+                </h4>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedCourse.description}
+                </p>
               </div>
-              
-              {selectedCourse.features && selectedCourse.features.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">What You'll Learn</h4>
-                  <ul className="space-y-2">
-                    {selectedCourse.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-gray-700">
-                        <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
+
+              {selectedCourse.features &&
+                selectedCourse.features.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                      What You'll Learn
+                    </h4>
+                    <ul className="space-y-2">
+                      {selectedCourse.features.map((feature, index) => (
+                        <li
+                          key={index}
+                          className="flex items-center text-gray-700"
+                        >
+                          <svg
+                            className="w-4 h-4 text-green-500 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
               <div className="flex justify-end pt-4">
-                <button 
+                <button
                   onClick={() => setShowViewModal(false)}
                   className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-400 transition-colors"
                 >

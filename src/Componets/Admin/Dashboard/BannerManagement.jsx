@@ -1,5 +1,13 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaEye, FaImage, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaEye,
+  FaImage,
+  FaArrowUp,
+  FaArrowDown,
+} from "react-icons/fa";
 
 function BannerManagement() {
   const [banners, setBanners] = useState([]);
@@ -8,17 +16,18 @@ function BannerManagement() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    subtitle: '',
-    description: '',
+    title: "",
+    subtitle: "",
+    description: "",
     order: 0,
-    isActive: true
+    isActive: true,
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api/api';
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api/api";
 
   useEffect(() => {
     fetchBanners();
@@ -27,21 +36,21 @@ function BannerManagement() {
   const fetchBanners = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/admin/banners`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch banners');
+      if (!response.ok) throw new Error("Failed to fetch banners");
 
       const data = await response.json();
-      console.log('Fetched banners:', data.data.banners);
+      console.log("Fetched banners:", data.data.banners);
       setBanners(data.data.banners);
     } catch (error) {
-      console.error('Error fetching banners:', error);
-      alert('Failed to load banners');
+      console.error("Error fetching banners:", error);
+      alert("Failed to load banners");
     } finally {
       setLoading(false);
     }
@@ -49,9 +58,9 @@ function BannerManagement() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -72,15 +81,15 @@ function BannerManagement() {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const formDataToSend = new FormData();
 
-      Object.keys(formData).forEach(key => {
+      Object.keys(formData).forEach((key) => {
         formDataToSend.append(key, formData[key]);
       });
 
       if (imageFile) {
-        formDataToSend.append('image', imageFile);
+        formDataToSend.append("image", imageFile);
       }
 
       const url = selectedBanner
@@ -88,24 +97,24 @@ function BannerManagement() {
         : `${API_BASE_URL}/admin/banners`;
 
       const response = await fetch(url, {
-        method: selectedBanner ? 'PUT' : 'POST',
+        method: selectedBanner ? "PUT" : "POST",
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: formDataToSend
+        body: formDataToSend,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save banner');
+        throw new Error(errorData.message || "Failed to save banner");
       }
 
-      alert(`Banner ${selectedBanner ? 'updated' : 'created'} successfully!`);
+      alert(`Banner ${selectedBanner ? "updated" : "created"} successfully!`);
       setShowModal(false);
       resetForm();
       fetchBanners();
     } catch (error) {
-      console.error('Error saving banner:', error);
+      console.error("Error saving banner:", error);
       alert(`Failed to save banner: ${error.message}`);
     } finally {
       setIsSubmitting(false);
@@ -119,12 +128,12 @@ function BannerManagement() {
       subtitle: banner.subtitle,
       description: banner.description,
       order: banner.order,
-      isActive: banner.isActive
+      isActive: banner.isActive,
     });
     // Only set image preview if banner has an image
     if (banner.image) {
-      const imageUrl = `${API_BASE_URL.replace('/api', '')}/${banner.image}`;
-      console.log('Setting image preview URL:', imageUrl);
+      const imageUrl = `${API_BASE_URL.replace("/api", "")}/${banner.image}`;
+      console.log("Setting image preview URL:", imageUrl);
       setImagePreview(imageUrl);
     } else {
       setImagePreview(null);
@@ -133,24 +142,24 @@ function BannerManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this banner?')) return;
+    if (!window.confirm("Are you sure you want to delete this banner?")) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to delete banner');
+      if (!response.ok) throw new Error("Failed to delete banner");
 
-      alert('Banner deleted successfully!');
+      alert("Banner deleted successfully!");
       fetchBanners();
     } catch (error) {
-      console.error('Error deleting banner:', error);
-      alert('Failed to delete banner');
+      console.error("Error deleting banner:", error);
+      alert("Failed to delete banner");
     }
   };
 
@@ -161,55 +170,61 @@ function BannerManagement() {
 
   const handleMoveUp = async (banner, index) => {
     if (index === 0) return;
-    
+
     const newBanners = [...banners];
-    [newBanners[index], newBanners[index - 1]] = [newBanners[index - 1], newBanners[index]];
-    
+    [newBanners[index], newBanners[index - 1]] = [
+      newBanners[index - 1],
+      newBanners[index],
+    ];
+
     await updateBannerOrder(newBanners);
   };
 
   const handleMoveDown = async (banner, index) => {
     if (index === banners.length - 1) return;
-    
+
     const newBanners = [...banners];
-    [newBanners[index], newBanners[index + 1]] = [newBanners[index + 1], newBanners[index]];
-    
+    [newBanners[index], newBanners[index + 1]] = [
+      newBanners[index + 1],
+      newBanners[index],
+    ];
+
     await updateBannerOrder(newBanners);
   };
 
   const updateBannerOrder = async (orderedBanners) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const bannersWithOrder = orderedBanners.map((banner, index) => ({
         id: banner._id,
-        order: index
+        order: index,
       }));
 
       const response = await fetch(`${API_BASE_URL}/admin/banners/order`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ banners: bannersWithOrder })
+        body: JSON.stringify({ banners: bannersWithOrder }),
       });
 
-      if (!response.ok) throw new Error('Failed to update order');
+      if (!response.ok) throw new Error("Failed to update order");
 
       fetchBanners();
     } catch (error) {
-      console.error('Error updating order:', error);
-      alert('Failed to update banner order');
+      console.error("Error updating order:", error);
+      alert("Failed to update banner order");
     }
   };
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      subtitle: '',
-      description: '',
+      title: "",
+      subtitle: "",
+      description: "",
       order: 0,
-      isActive: true
+      isActive: true,
     });
     setImageFile(null);
     setImagePreview(null);
@@ -236,7 +251,7 @@ function BannerManagement() {
         <button
           onClick={openAddModal}
           className="text-white px-4 py-2 rounded-lg flex items-center hover:opacity-90 transition-colors"
-          style={{ backgroundColor: '#006CB5' }}
+          style={{ backgroundColor: "#006CB5" }}
         >
           <FaPlus className="mr-2" />
           Add Banner
@@ -248,11 +263,21 @@ function BannerManagement() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtitle</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Order
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Image
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Title
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Subtitle
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -265,16 +290,20 @@ function BannerManagement() {
                       <button
                         onClick={() => handleMoveUp(banner, index)}
                         disabled={index === 0}
-                        className={`${index === 0 ? 'text-gray-300' : 'hover:opacity-80'}`}
-                        style={index !== 0 ? { color: '#006CB5' } : {}}
+                        className={`${index === 0 ? "text-gray-300" : "hover:opacity-80"}`}
+                        style={index !== 0 ? { color: "#006CB5" } : {}}
                       >
                         <FaArrowUp className="text-xs" />
                       </button>
                       <button
                         onClick={() => handleMoveDown(banner, index)}
                         disabled={index === banners.length - 1}
-                        className={`${index === banners.length - 1 ? 'text-gray-300' : 'hover:opacity-80'}`}
-                        style={index !== banners.length - 1 ? { color: '#006CB5' } : {}}
+                        className={`${index === banners.length - 1 ? "text-gray-300" : "hover:opacity-80"}`}
+                        style={
+                          index !== banners.length - 1
+                            ? { color: "#006CB5" }
+                            : {}
+                        }
                       >
                         <FaArrowDown className="text-xs" />
                       </button>
@@ -284,7 +313,7 @@ function BannerManagement() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {banner.image ? (
                     <img
-                      src={`${API_BASE_URL.replace('/api', '')}/${banner.image}`}
+                      src={`${API_BASE_URL.replace("/api", "")}/${banner.image}`}
                       alt={banner.title}
                       className="h-12 w-20 object-cover rounded"
                     />
@@ -295,7 +324,9 @@ function BannerManagement() {
                   )}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{banner.title}</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {banner.title}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-500">{banner.subtitle}</div>
@@ -304,21 +335,21 @@ function BannerManagement() {
                   <button
                     onClick={() => handleView(banner)}
                     className="hover:opacity-80 mr-3"
-                    style={{ color: '#006CB5' }}
+                    style={{ color: "#006CB5" }}
                   >
                     <FaEye />
                   </button>
                   <button
                     onClick={() => handleEdit(banner)}
                     className="hover:opacity-80 mr-3"
-                    style={{ color: '#006CB5' }}
+                    style={{ color: "#006CB5" }}
                   >
                     <FaEdit />
                   </button>
                   <button
                     onClick={() => handleDelete(banner._id)}
                     className="hover:opacity-80"
-                    style={{ color: '#dc2626' }}
+                    style={{ color: "#dc2626" }}
                   >
                     <FaTrash />
                   </button>
@@ -337,11 +368,14 @@ function BannerManagement() {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+        >
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h3 className="text-xl font-bold mb-4">
-                {selectedBanner ? 'Edit Banner' : 'Add New Banner'}
+                {selectedBanner ? "Edit Banner" : "Add New Banner"}
               </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -389,7 +423,8 @@ function BannerManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Banner Image (Optional) {selectedBanner && '(Leave empty to keep current image)'}
+                    Banner Image (Optional){" "}
+                    {selectedBanner && "(Leave empty to keep current image)"}
                   </label>
                   <input
                     type="file"
@@ -404,15 +439,17 @@ function BannerManagement() {
                         alt="Preview"
                         className="h-32 w-full object-cover rounded"
                         onError={(e) => {
-                          console.error('Image failed to load:', imagePreview);
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
+                          console.error("Image failed to load:", imagePreview);
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "flex";
                         }}
                       />
                       <div className="h-32 w-full bg-gray-200 rounded items-center justify-center hidden">
                         <div className="text-center">
                           <FaImage className="text-4xl text-gray-400 mx-auto mb-2" />
-                          <p className="text-gray-500 text-sm">Image failed to load</p>
+                          <p className="text-gray-500 text-sm">
+                            Image failed to load
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -447,9 +484,15 @@ function BannerManagement() {
                     type="submit"
                     disabled={isSubmitting}
                     className="px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:bg-gray-400"
-                    style={{ backgroundColor: isSubmitting ? '#9ca3af' : '#006CB5' }}
+                    style={{
+                      backgroundColor: isSubmitting ? "#9ca3af" : "#006CB5",
+                    }}
                   >
-                    {isSubmitting ? 'Saving...' : (selectedBanner ? 'Update' : 'Create')}
+                    {isSubmitting
+                      ? "Saving..."
+                      : selectedBanner
+                        ? "Update"
+                        : "Create"}
                   </button>
                 </div>
               </form>
@@ -460,16 +503,19 @@ function BannerManagement() {
 
       {/* View Modal */}
       {showViewModal && selectedBanner && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+        >
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h3 className="text-xl font-bold mb-4">Banner Details</h3>
-              
+
               <div className="space-y-4">
                 {selectedBanner.image ? (
                   <div>
                     <img
-                      src={`${API_BASE_URL.replace('/api', '')}/${selectedBanner.image}`}
+                      src={`${API_BASE_URL.replace("/api", "")}/${selectedBanner.image}`}
                       alt={selectedBanner.title}
                       className="w-full h-64 object-cover rounded-lg"
                     />
@@ -485,33 +531,51 @@ function BannerManagement() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">Title</label>
+                    <label className="block text-sm font-medium text-gray-500">
+                      Title
+                    </label>
                     <p className="mt-1 text-gray-900">{selectedBanner.title}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">Subtitle</label>
-                    <p className="mt-1 text-gray-900">{selectedBanner.subtitle}</p>
+                    <label className="block text-sm font-medium text-gray-500">
+                      Subtitle
+                    </label>
+                    <p className="mt-1 text-gray-900">
+                      {selectedBanner.subtitle}
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Description</label>
-                  <p className="mt-1 text-gray-900">{selectedBanner.description}</p>
+                  <label className="block text-sm font-medium text-gray-500">
+                    Description
+                  </label>
+                  <p className="mt-1 text-gray-900">
+                    {selectedBanner.description}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">Status</label>
+                    <label className="block text-sm font-medium text-gray-500">
+                      Status
+                    </label>
                     <p className="mt-1">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        selectedBanner.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {selectedBanner.isActive ? 'Active' : 'Inactive'}
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          selectedBanner.isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {selectedBanner.isActive ? "Active" : "Inactive"}
                       </span>
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">Order</label>
+                    <label className="block text-sm font-medium text-gray-500">
+                      Order
+                    </label>
                     <p className="mt-1 text-gray-900">{selectedBanner.order}</p>
                   </div>
                 </div>
@@ -521,7 +585,7 @@ function BannerManagement() {
                 <button
                   onClick={() => setShowViewModal(false)}
                   className="px-4 py-2 text-white rounded-lg hover:opacity-90"
-                  style={{ backgroundColor: '#006CB5' }}
+                  style={{ backgroundColor: "#006CB5" }}
                 >
                   Close
                 </button>
