@@ -26,7 +26,7 @@ function Courses() {
 
   // API base URL
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
   // Fetch courses from backend
   const fetchCourses = async () => {
@@ -105,8 +105,7 @@ function Courses() {
       name: "White Belt / Yellow Stripe",
       requirements: "Chon-Ji pattern introduction",
       duration: "2-3 months",
-      bgColor:
-        "linear-gradient(to right, #FFFFFF 0%, #FFFFFF 65%, #FEF3C7 70%, #FDE047 80%, #FACC15 90%, #FACC15 100%)",
+      bgColor: "linear-gradient(to right, #FFFFFF 70%, #FACC15 70%)",
       borderColor: "#D1D5DB",
     },
     {
@@ -120,59 +119,111 @@ function Courses() {
       name: "Yellow Belt / Green Stripe",
       requirements: "Dan-Gun pattern introduction",
       duration: "3-4 months",
-      bgColor:
-        "linear-gradient(to right, #FACC15 0%, #FACC15 60%, #FDE047 65%, #86EFAC 70%, #22C55E 80%, #22C55E 100%)",
+      bgColor: "linear-gradient(to right, #FACC15 70%, #16A34A 70%)",
       borderColor: "#16A34A",
     },
     {
       name: "Green Belt",
       requirements: "Dan-Gun pattern, intermediate techniques",
       duration: "4-5 months",
-      bgColor: "#22C55E",
-      borderColor: "#16A34A",
+      bgColor: "#16A34A",
+      borderColor: "#15803D",
     },
     {
       name: "Green Belt / Blue Stripe",
       requirements: "Do-San pattern introduction",
       duration: "4-5 months",
-      bgColor:
-        "linear-gradient(to right, #22C55E 0%, #22C55E 60%, #86EFAC 65%, #93C5FD 70%, #2563EB 80%, #2563EB 100%)",
+      bgColor: "linear-gradient(to right, #16A34A 70%, #1D4ED8 70%)",
       borderColor: "#1D4ED8",
     },
     {
       name: "Blue Belt",
       requirements: "Do-San pattern, advanced kicks",
       duration: "5-6 months",
-      bgColor: "#2563EB",
-      borderColor: "#1D4ED8",
+      bgColor: "#1D4ED8",
+      borderColor: "#1E40AF",
     },
     {
-      name: "Blue Belt / Purple Stripe",
+      name: "Blue Belt / Red Stripe",
       requirements: "Won-Hyo pattern introduction",
       duration: "5-6 months",
-      bgColor:
-        "linear-gradient(to right, #2563EB 0%, #2563EB 60%, #93C5FD 65%, #C4B5FD 70%, #7C3AED 80%, #7C3AED 100%)",
-      borderColor: "#6D28D9",
+      bgColor: "linear-gradient(to right, #1D4ED8 70%, #DC2626 70%)",
+      borderColor: "#DC2626",
     },
     {
-      name: "Purple Belt",
+      name: "Red Belt",
       requirements: "Won-Hyo pattern, sparring techniques",
       duration: "6-8 months",
-      bgColor: "#7C3AED",
-      borderColor: "#6D28D9",
+      bgColor: "#DC2626",
+      borderColor: "#B91C1C",
     },
     {
-      name: "Purple Belt / Black Stripe",
+      name: "Red Belt / Black Stripe",
       requirements: "Yul-Gok pattern, black belt preparation",
       duration: "8-10 months",
-      bgColor:
-        "linear-gradient(to right, #7C3AED 0%, #7C3AED 60%, #A78BFA 65%, #6B7280 70%, #000000 80%, #000000 100%)",
+      bgColor: "linear-gradient(to right, #DC2626 70%, #000000 70%)",
       borderColor: "#000000",
     },
     {
       name: "Black Belt 1st Dan",
       requirements: "All color belt patterns, breaking",
       duration: "12+ months",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 2nd Dan",
+      requirements: "Advanced patterns, teaching fundamentals",
+      duration: "2 years min",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 3rd Dan",
+      requirements: "Instructor level, advanced sparring",
+      duration: "3 years min",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 4th Dan",
+      requirements: "Senior instructor, pattern mastery",
+      duration: "4 years min",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 5th Dan",
+      requirements: "Master level, advanced theory & teaching",
+      duration: "5 years min",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 6th Dan",
+      requirements: "Senior Master, national contribution",
+      duration: "6 years min",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 7th Dan",
+      requirements: "Grand Master candidate, international recognition",
+      duration: "7 years min",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 8th Dan",
+      requirements: "Grand Master, lifetime achievement",
+      duration: "8 years min",
+      bgColor: "#000000",
+      borderColor: "#4B5563",
+    },
+    {
+      name: "Black Belt 9th Dan",
+      requirements: "Supreme Grand Master, highest honor",
+      duration: "Lifetime",
       bgColor: "#000000",
       borderColor: "#4B5563",
     },

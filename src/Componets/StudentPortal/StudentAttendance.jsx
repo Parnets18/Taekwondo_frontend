@@ -23,7 +23,7 @@ const StudentAttendance = () => {
   });
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
   const months = [
     "January",

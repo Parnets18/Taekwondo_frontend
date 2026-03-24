@@ -39,9 +39,16 @@ function About() {
   const [founders, setFounders] = useState([]);
   const [founderDescription, setFounderDescription] = useState('');
   const [loadingFounders, setLoadingFounders] = useState(true);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
+
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') setLightboxImage(null); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   useEffect(() => {
     // Fetch locations from API
@@ -263,6 +270,48 @@ function About() {
 
   return (
     <div className="about-page" style={{ background: 'linear-gradient(to bottom, #FEF3C7, #FECACA)', minHeight: '100vh' }}>
+      {/* Lightbox Modal */}
+      {lightboxImage && (
+        <div
+          onClick={() => setLightboxImage(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              maxWidth: '560px',
+              width: '90vw',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4)'
+            }}
+          >
+            <button
+              onClick={() => setLightboxImage(null)}
+              style={{
+                position: 'absolute', top: '8px', right: '10px', zIndex: 1,
+                background: 'white', border: 'none', borderRadius: '50%',
+                width: '28px', height: '28px', fontSize: '1.1rem',
+                cursor: 'pointer', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                color: '#333'
+              }}
+            >×</button>
+            <img
+              src={lightboxImage}
+              alt="Full view"
+              style={{ width: '100%', maxHeight: '80vh', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section 
         className="hero-section mobile-hero-fix relative py-20 sm:py-24 min-h-[60vh] flex items-center justify-center"
@@ -497,6 +546,8 @@ function About() {
                         src={`${BASE_URL}/${founder.photo}`}
                         alt={founder.name} 
                         className="w-full h-64 object-cover"
+                        style={{ cursor: 'zoom-in' }}
+                        onClick={() => setLightboxImage(`${BASE_URL}/${founder.photo}`)}
                       />
                     </div>
                     <div className="p-4 text-center bg-white">
@@ -629,6 +680,8 @@ function About() {
                           src={`${BASE_URL}/${mentor.photo}`}
                           alt={mentor.name}
                           className="w-full h-full object-cover"
+                          style={{ cursor: 'zoom-in' }}
+                          onClick={() => setLightboxImage(`${BASE_URL}/${mentor.photo}`)}
                         />
                       ) : (
                         <FaUser style={{ color: '#FFDE21', fontSize: '3rem' }} />
@@ -687,6 +740,8 @@ function About() {
                         src={`${BASE_URL}/${leader.photo}`}
                         alt={leader.name}
                         className="w-full h-full object-cover"
+                        style={{ cursor: 'zoom-in' }}
+                        onClick={() => setLightboxImage(`${BASE_URL}/${leader.photo}`)}
                       />
                     ) : (
                       <FaUser style={{ fontSize: '3rem', color: '#DC2626' }} />
@@ -909,7 +964,7 @@ function About() {
         src={cwtakBanner}
         alt="CWTAK Banner"
         className="mx-auto object-contain"
-        style={{ maxHeight: "140px" }}
+        style={{ maxHeight: "420px", marginTop: "-40px" }}
       />
 
         {/* Text Image */}

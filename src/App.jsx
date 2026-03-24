@@ -8,6 +8,7 @@ import Admission from './Componets/Pages/Admission';
 import BeltExam from './Componets/Pages/BeltExam';
 import Contact from './Componets/Pages/Contact';
 import ClubRules from './Componets/Pages/ClubRules';
+import PrivacyPolicy from './Componets/Pages/PrivacyPolicy';
 import { useScrollToTop } from './utils/useScrollToTop';
 
 // Admin Components
@@ -42,6 +43,8 @@ import AboutDojangStoryManagement from './Componets/Admin/AboutDojangStoryManage
 import MentorManagement from './Componets/Admin/MentorManagement';
 import FounderManagement from './Componets/Admin/FounderManagement';
 import LeadershipManagement from './Componets/Admin/LeadershipManagement';
+import OnboardingManagement from './Componets/Admin/Onboarding/OnboardingManagement';
+import TechniquesManagement from './Componets/Admin/Onboarding/TechniquesManagement';
 import StudentDashboard from './Componets/StudentPortal/StudentDashboard';
 import StudentProfile from './Componets/StudentPortal/StudentProfile';
 import StudentAttendance from './Componets/StudentPortal/StudentAttendance';
@@ -136,6 +139,12 @@ function App() {
           </PublicLayout>
         } />
 
+        <Route path="/privacypolicy" element={
+          <PublicLayout>
+            <PrivacyPolicy />
+          </PublicLayout>
+        } />
+
         {/* Certificate Verification - Public Route */}
         <Route path="/verify-certificate" element={
           <PublicLayout>
@@ -184,6 +193,8 @@ function App() {
           <Route path="founders" element={<FounderManagement />} />
           <Route path="mentors" element={<MentorManagement />} />
           <Route path="leadership" element={<LeadershipManagement />} />
+          <Route path="onboarding" element={<OnboardingManagement />} />
+          <Route path="techniques" element={<TechniquesManagement />} />
         </Route>
       </Routes>
     </Router>

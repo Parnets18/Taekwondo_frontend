@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com";
+const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
 function LocationManagement() {
   const [locations, setLocations] = useState([]);

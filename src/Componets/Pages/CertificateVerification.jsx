@@ -16,7 +16,7 @@ const CertificateVerification = () => {
 
   // API base URL
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     if (urlCode) {
@@ -730,8 +730,8 @@ const CertificateVerification = () => {
             <p>
               <strong>Questions?</strong> If you have questions about a
               certificate or the verification process, please contact us at{" "}
-              <a href="mailto:info@combatwarrior.com" className="underline">
-                info@combatwarrior.com
+              <a href="mailto:contact@cwtakarnataka.com" className="underline">
+                contact@cwtakarnataka.com
               </a>
             </p>
           </div>

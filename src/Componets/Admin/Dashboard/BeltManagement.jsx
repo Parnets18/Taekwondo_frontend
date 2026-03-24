@@ -47,36 +47,35 @@ function BeltManagement() {
 
   // Predefined belt colors with names
   const beltColors = [
-    { name: "White", value: "white", hex: "#FFFFFF" },
-    {
-      name: "White / Yellow Stripe",
-      value: "white-yellow-stripe",
-      hex: "#FFFFFF",
-    },
-    { name: "Yellow", value: "yellow", hex: "#FFD700" },
-    {
-      name: "Yellow / Green Stripe",
-      value: "yellow-green-stripe",
-      hex: "#FFD700",
-    },
-    { name: "Green", value: "green", hex: "#008000" },
-    { name: "Green / Blue Stripe", value: "green-blue-stripe", hex: "#008000" },
-    { name: "Blue", value: "blue", hex: "#0000FF" },
-    {
-      name: "Blue / Purple Stripe",
-      value: "blue-purple-stripe",
-      hex: "#0000FF",
-    },
-    { name: "Purple", value: "purple", hex: "#800080" },
-    {
-      name: "Purple / Black Stripe",
-      value: "purple-black-stripe",
-      hex: "#800080",
-    },
-    { name: "Black 1st Dan", value: "black", hex: "#000000" },
-    { name: "Orange", value: "orange", hex: "#FFA500" },
-    { name: "Brown", value: "brown", hex: "#8B4513" },
+    { name: "White Belt",                  value: "white",                   hex: "#FFFFFF",  stripeHex: null },
+    { name: "White Belt / Yellow Stripe",  value: "white-yellow-stripe",     hex: "#FFFFFF",  stripeHex: "#FACC15" },
+    { name: "Yellow Belt",                 value: "yellow",                  hex: "#FACC15",  stripeHex: null },
+    { name: "Yellow Belt / Green Stripe",  value: "yellow-green-stripe",     hex: "#FACC15",  stripeHex: "#16A34A" },
+    { name: "Green Belt",                  value: "green",                   hex: "#16A34A",  stripeHex: null },
+    { name: "Green Belt / Blue Stripe",    value: "green-blue-stripe",       hex: "#16A34A",  stripeHex: "#1D4ED8" },
+    { name: "Blue Belt",                   value: "blue",                    hex: "#1D4ED8",  stripeHex: null },
+    { name: "Blue Belt / Red Stripe",      value: "blue-red-stripe",         hex: "#1D4ED8",  stripeHex: "#DC2626" },
+    { name: "Red Belt",                    value: "red",                     hex: "#DC2626",  stripeHex: null },
+    { name: "Red Belt / Black Stripe",     value: "red-black-stripe",        hex: "#DC2626",  stripeHex: "#000000" },
+    { name: "Black Belt 1st Dan",          value: "black-1st-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 2nd Dan",          value: "black-2nd-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 3rd Dan",          value: "black-3rd-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 4th Dan",          value: "black-4th-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 5th Dan",          value: "black-5th-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 6th Dan",          value: "black-6th-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 7th Dan",          value: "black-7th-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 8th Dan",          value: "black-8th-dan",           hex: "#000000",  stripeHex: null },
+    { name: "Black Belt 9th Dan",          value: "black-9th-dan",           hex: "#000000",  stripeHex: null },
   ];
+
+  const getBeltPreviewStyle = (colorValue) => {
+    const belt = beltColors.find((c) => c.value === colorValue);
+    if (!belt) return { backgroundColor: "#FFFFFF" };
+    if (belt.stripeHex) {
+      return { background: `linear-gradient(to right, ${belt.hex} 70%, ${belt.stripeHex} 70%)` };
+    }
+    return { backgroundColor: belt.hex };
+  };
 
   const [promotionForm, setPromotionForm] = useState({
     studentName: "",
@@ -114,7 +113,7 @@ function BeltManagement() {
 
   // API base URL - using direct backend URL to bypass proxy issues
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
   // Log API URL on component mount
   useEffect(() => {
@@ -1913,7 +1912,7 @@ function BeltManagement() {
                   >
                     {beltColors.map((color) => (
                       <option key={color.value} value={color.value}>
-                        {color.name} Belt
+                        {color.name}
                       </option>
                     ))}
                   </select>
@@ -1922,16 +1921,10 @@ function BeltManagement() {
                     <span className="text-sm text-gray-600">Preview:</span>
                     <div
                       className="w-8 h-8 rounded-full border-2 border-gray-300"
-                      style={{
-                        backgroundColor:
-                          beltColors.find((c) => c.value === beltForm.color)
-                            ?.hex || "#FFFFFF",
-                      }}
+                      style={getBeltPreviewStyle(beltForm.color)}
                     ></div>
                     <span className="text-sm font-medium text-gray-700">
-                      {beltColors.find((c) => c.value === beltForm.color)
-                        ?.name || "White"}{" "}
-                      Belt
+                      {beltColors.find((c) => c.value === beltForm.color)?.name || "White Belt"}
                     </span>
                   </div>
                 </div>
@@ -2087,7 +2080,7 @@ function BeltManagement() {
                   >
                     {beltColors.map((color) => (
                       <option key={color.value} value={color.value}>
-                        {color.name} Belt
+                        {color.name}
                       </option>
                     ))}
                   </select>
@@ -2096,16 +2089,10 @@ function BeltManagement() {
                     <span className="text-sm text-gray-600">Preview:</span>
                     <div
                       className="w-8 h-8 rounded-full border-2 border-gray-300"
-                      style={{
-                        backgroundColor:
-                          beltColors.find((c) => c.value === beltForm.color)
-                            ?.hex || "#FFFFFF",
-                      }}
+                      style={getBeltPreviewStyle(beltForm.color)}
                     ></div>
                     <span className="text-sm font-medium text-gray-700">
-                      {beltColors.find((c) => c.value === beltForm.color)
-                        ?.name || "White"}{" "}
-                      Belt
+                      {beltColors.find((c) => c.value === beltForm.color)?.name || "White Belt"}
                     </span>
                   </div>
                 </div>

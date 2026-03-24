@@ -15,7 +15,7 @@ const StudentLevel = () => {
   const [viewingCertificate, setViewingCertificate] = useState(null); // Track certificate being viewed
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
   // Debug log for upcomingTests
   useEffect(() => {

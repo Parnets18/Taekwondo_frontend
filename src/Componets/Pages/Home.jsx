@@ -29,8 +29,8 @@ function Home() {
   const [aboutSection, setAboutSection] = useState(null);
   const [loadingAbout, setLoadingAbout] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
   // Fetch banners from API
   useEffect(() => {
@@ -227,7 +227,7 @@ function Home() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/917259113288"
+        href="https://wa.me/919663333247"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 animate-bounce flex items-center justify-center"
@@ -757,7 +757,7 @@ function RecentPromotions() {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -918,7 +918,7 @@ function MembersBirthdaysCard() {
   const [birthdays, setBirthdays] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     const fetchBirthdays = async () => {

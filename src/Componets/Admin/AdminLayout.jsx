@@ -17,7 +17,8 @@ import {
   FaHome,
   FaChevronDown,
   FaChevronRight,
-  FaInfoCircle
+  FaInfoCircle,
+  FaMobileAlt
 } from 'react-icons/fa';
 
 function AdminLayout() {
@@ -116,6 +117,15 @@ function AdminLayout() {
         { path: '/admin/admissions', name: 'Admissions', icon: FaUserPlus},
         { path: '/admin/belt-exams', name: 'Belt Exams', icon: FaMedal},
         { path: '/admin/contacts', name: 'Contact Form', icon: FaEnvelope}
+      ]
+    },
+    {
+      title: 'Mobile App',
+      icon: FaMobileAlt,
+      isDropdown: true,
+      items: [
+        { path: '/admin/onboarding', name: 'Onboarding Slides', icon: FaMobileAlt },
+        { path: '/admin/techniques', name: 'Techniques & Kicks', icon: FaMobileAlt },
       ]
     }
   ];

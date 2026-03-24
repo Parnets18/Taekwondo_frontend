@@ -35,8 +35,8 @@ function StudentManagement() {
 
   // API base URL
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com/api";
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://taekwondo-backend-j8w4.onrender.com"; // For static files like images
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000"; // For static files like images
 
   const getPhotoUrl = (photo) => {
     if (!photo) return '';
@@ -106,6 +106,23 @@ function StudentManagement() {
       "Content-Type": "application/json",
       ...(authToken && { Authorization: `Bearer ${authToken}` }),
     };
+  };
+
+  // Fetch single student with full data (including all exam dates)
+  const fetchStudentById = async (studentId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/${studentId}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (data.status === "success") return data.data.student;
+      return null;
+    } catch (error) {
+      console.error("Error fetching student:", error);
+      return null;
+    }
   };
 
   // Fetch students from backend
@@ -567,6 +584,8 @@ function StudentManagement() {
       // Achievements (already stringified in form)
       achievements: formData.get("achievements"),
       // Exam Dates
+      examWhiteBelt: formData.get("examWhiteBelt") || undefined,
+      examWhiteYellowStripe: formData.get("examWhiteYellowStripe") || undefined,
       examYellowStripe: formData.get("examYellowStripe") || undefined,
       examYellowBelt: formData.get("examYellowBelt") || undefined,
       examGreenStripe: formData.get("examGreenStripe") || undefined,
@@ -577,6 +596,14 @@ function StudentManagement() {
       examRedBelt: formData.get("examRedBelt") || undefined,
       examBlackStripe: formData.get("examBlackStripe") || undefined,
       examBlackBelt: formData.get("examBlackBelt") || undefined,
+      examBlack2Dan: formData.get("examBlack2Dan") || undefined,
+      examBlack3Dan: formData.get("examBlack3Dan") || undefined,
+      examBlack4Dan: formData.get("examBlack4Dan") || undefined,
+      examBlack5Dan: formData.get("examBlack5Dan") || undefined,
+      examBlack6Dan: formData.get("examBlack6Dan") || undefined,
+      examBlack7Dan: formData.get("examBlack7Dan") || undefined,
+      examBlack8Dan: formData.get("examBlack8Dan") || undefined,
+      examBlack9Dan: formData.get("examBlack9Dan") || undefined,
       currentBeltLevel: formData.get("currentBeltLevel") || undefined,
       idNumber: formData.get("idNumber") || undefined,
     };
@@ -868,8 +895,9 @@ function StudentManagement() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <button
-                        onClick={() => {
-                          setSelectedStudent(student);
+                        onClick={async () => {
+                          const full = await fetchStudentById(student.id);
+                          setSelectedStudent(full || student);
                           setShowViewModal(true);
                         }}
                         className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left uppercase"
@@ -920,8 +948,9 @@ function StudentManagement() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => {
-                          setSelectedStudent(student);
+                        onClick={async () => {
+                          const full = await fetchStudentById(student.id);
+                          setSelectedStudent(full || student);
                           setShowViewModal(true);
                         }}
                         className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
@@ -933,8 +962,11 @@ function StudentManagement() {
                         />
                       </button>
                       <button
-                        onClick={() => {
-                          setSelectedStudent(student);
+                        onClick={async () => {
+                          const full = await fetchStudentById(student.id);
+                          setSelectedStudent(full || student);
+                          setFormAge((full || student).age || calculateAge((full || student).dateOfBirth));
+                          setPhotoPreview(null);
                           setShowEditModal(true);
                         }}
                         className="p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
@@ -1112,6 +1144,7 @@ function StudentManagement() {
       />
 
       <StudentFormModal
+        key={selectedStudent?.id || 'edit'}
         show={showEditModal}
         onClose={() => {
           setShowEditModal(false);
@@ -2065,126 +2098,51 @@ function StudentManagement() {
                 <h3 className="text-lg font-semibold text-slate-800 mb-4">
                   Exam Dates
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {selectedStudent.examYellowStripe && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Yellow Stripe
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examYellowStripe,
-                        ).toLocaleDateString()}
-                      </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {[
+                    { label: 'White Belt', field: 'examWhiteBelt', color: '#ffffff', border: true },
+                    { label: 'White / Yellow Stripe', field: 'examWhiteYellowStripe', gradient: 'conic-gradient(#ffffff 0% 70%, #facc15 70% 100%)', border: true },
+                    { label: 'Yellow Belt', field: 'examYellowBelt', color: '#facc15' },
+                    { label: 'Yellow / Green Stripe', field: 'examYellowStripe', gradient: 'conic-gradient(#facc15 0% 70%, #22c55e 70% 100%)' },
+                    { label: 'Green Belt', field: 'examGreenBelt', color: '#22c55e' },
+                    { label: 'Green / Blue Stripe', field: 'examGreenStripe', gradient: 'conic-gradient(#22c55e 0% 70%, #3b82f6 70% 100%)' },
+                    { label: 'Blue Belt', field: 'examBlueBelt', color: '#3b82f6' },
+                    { label: 'Blue / Red Stripe', field: 'examBlueStripe', gradient: 'conic-gradient(#3b82f6 0% 70%, #ef4444 70% 100%)' },
+                    { label: 'Red Belt', field: 'examRedBelt', color: '#ef4444' },
+                    { label: 'Red / Black Stripe', field: 'examRedStripe', gradient: 'conic-gradient(#ef4444 0% 70%, #1f2937 70% 100%)' },
+                    { label: 'Black Belt 1st Dan (Stripe)', field: 'examBlackStripe', gradient: 'conic-gradient(#1f2937 0% 70%, #ef4444 70% 100%)' },
+                    { label: 'Black Belt 1st Dan', field: 'examBlackBelt', color: '#1f2937' },
+                    { label: 'Black Belt 2nd Dan', field: 'examBlack2Dan', color: '#1f2937' },
+                    { label: 'Black Belt 3rd Dan', field: 'examBlack3Dan', color: '#1f2937' },
+                    { label: 'Black Belt 4th Dan', field: 'examBlack4Dan', color: '#1f2937' },
+                    { label: 'Black Belt 5th Dan', field: 'examBlack5Dan', color: '#1f2937' },
+                    { label: 'Black Belt 6th Dan', field: 'examBlack6Dan', color: '#1f2937' },
+                    { label: 'Black Belt 7th Dan', field: 'examBlack7Dan', color: '#1f2937' },
+                    { label: 'Black Belt 8th Dan', field: 'examBlack8Dan', color: '#1f2937' },
+                    { label: 'Black Belt 9th Dan', field: 'examBlack9Dan', color: '#1f2937' },
+                  ].filter(({ field }) => selectedStudent[field])
+                  .map(({ label, field, color, gradient, border }) => (
+                    <div key={field} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-slate-200">
+                      <span
+                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        style={{ background: gradient || color, border: border ? '1px solid #d1d5db' : 'none' }}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-slate-500">{label}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {new Date(selectedStudent[field]).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                  {selectedStudent.examYellowBelt && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Yellow Belt
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examYellowBelt,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examGreenStripe && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Green Stripe
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examGreenStripe,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examGreenBelt && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Green Belt
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examGreenBelt,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examBlueStripe && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Blue Stripe
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examBlueStripe,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examBlueBelt && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Blue Belt
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examBlueBelt,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examRedStripe && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Red Stripe
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examRedStripe,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examRedBelt && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Red Belt
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examRedBelt,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examBlackStripe && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Black Stripe
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examBlackStripe,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                  {selectedStudent.examBlackBelt && (
-                    <div>
-                      <label className="text-sm font-medium text-slate-600">
-                        Black Belt
-                      </label>
-                      <p className="text-slate-900">
-                        {new Date(
-                          selectedStudent.examBlackBelt,
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
+                  ))}
+                  {![
+                    'examWhiteBelt','examWhiteYellowStripe','examYellowBelt','examYellowStripe',
+                    'examGreenBelt','examGreenStripe','examBlueBelt','examBlueStripe',
+                    'examRedBelt','examRedStripe','examBlackStripe','examBlackBelt',
+                    'examBlack2Dan','examBlack3Dan','examBlack4Dan','examBlack5Dan',
+                    'examBlack6Dan','examBlack7Dan','examBlack8Dan','examBlack9Dan'
+                  ].some(f => selectedStudent[f]) && (
+                    <p className="text-sm text-slate-400 col-span-2">No exam dates recorded yet.</p>
                   )}
                 </div>
               </div>
@@ -2192,9 +2150,10 @@ function StudentManagement() {
 
             <div className="flex justify-end space-x-4 pt-6">
               <button
-                onClick={() => {
+                onClick={async () => {
+                  const full = await fetchStudentById(selectedStudent.id);
                   setShowViewModal(false);
-                  setSelectedStudent(selectedStudent);
+                  setSelectedStudent(full || selectedStudent);
                   setShowEditModal(true);
                 }}
                 className="px-6 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-colors"

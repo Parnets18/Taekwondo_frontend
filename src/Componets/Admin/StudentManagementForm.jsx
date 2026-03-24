@@ -29,14 +29,60 @@ export const StudentFormModal = ({
     student?.achievements || [{ tournamentName: '', address: '', date: '', typePrices: [{ type: '', price: '', certificateCode: '', certificateFile: '' }], type: '', prize: '' }]
   );
   const [expandedBelts, setExpandedBelts] = useState({
+    current: false,
+    white: false,
+    whiteYellowStripe: false,
     yellow: false,
+    yellowGreenStripe: false,
     green: false,
+    greenBlueStripe: false,
     blue: false,
+    blueRedStripe: false,
     red: false,
-    black: false,
-    current: false
+    redBlackStripe: false,
+    black1: false,
+    black2: false,
+    black3: false,
+    black4: false,
+    black5: false,
+    black6: false,
+    black7: false,
+    black8: false,
+    black9: false,
   });
   const [showPassword, setShowPassword] = useState(false);
+
+  const formatDateValue = (val) => {
+    if (!val) return '';
+    try { return new Date(val).toISOString().split('T')[0]; } catch { return ''; }
+  };
+
+  const [examDates, setExamDates] = useState({
+    examWhiteBelt: formatDateValue(student?.examWhiteBelt),
+    examWhiteYellowStripe: formatDateValue(student?.examWhiteYellowStripe),
+    examYellowBelt: formatDateValue(student?.examYellowBelt),
+    examYellowStripe: formatDateValue(student?.examYellowStripe),
+    examGreenBelt: formatDateValue(student?.examGreenBelt),
+    examGreenStripe: formatDateValue(student?.examGreenStripe),
+    examBlueBelt: formatDateValue(student?.examBlueBelt),
+    examBlueStripe: formatDateValue(student?.examBlueStripe),
+    examRedBelt: formatDateValue(student?.examRedBelt),
+    examRedStripe: formatDateValue(student?.examRedStripe),
+    examBlackStripe: formatDateValue(student?.examBlackStripe),
+    examBlackBelt: formatDateValue(student?.examBlackBelt),
+    examBlack2Dan: formatDateValue(student?.examBlack2Dan),
+    examBlack3Dan: formatDateValue(student?.examBlack3Dan),
+    examBlack4Dan: formatDateValue(student?.examBlack4Dan),
+    examBlack5Dan: formatDateValue(student?.examBlack5Dan),
+    examBlack6Dan: formatDateValue(student?.examBlack6Dan),
+    examBlack7Dan: formatDateValue(student?.examBlack7Dan),
+    examBlack8Dan: formatDateValue(student?.examBlack8Dan),
+    examBlack9Dan: formatDateValue(student?.examBlack9Dan),
+    currentBeltLevel: student?.currentBeltLevel || '',
+    idNumber: student?.idNumber || '',
+  });
+
+  const setExamDate = (field, value) => setExamDates(prev => ({ ...prev, [field]: value }));
 
   // Update achievements when student prop changes
   useEffect(() => {
@@ -57,7 +103,7 @@ export const StudentFormModal = ({
   if (!show) return null;
 
   const isEdit = !!student;
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://taekwondo-backend-j8w4.onrender.com/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
   // Remove /api from base URL for static file access (images)
   const BASE_URL = API_BASE_URL.replace('/api', '');
 
@@ -160,6 +206,24 @@ export const StudentFormModal = ({
           });
           
           formData.append('achievements', JSON.stringify(achievementsData));
+
+          // Remove any exam date entries captured by native FormData (may be stale/duplicate)
+          // then re-inject from controlled state to ensure correct values
+          const examFields = [
+            'examWhiteBelt','examWhiteYellowStripe','examYellowBelt','examYellowStripe',
+            'examGreenBelt','examGreenStripe','examBlueBelt','examBlueStripe',
+            'examRedBelt','examRedStripe','examBlackStripe','examBlackBelt',
+            'examBlack2Dan','examBlack3Dan','examBlack4Dan','examBlack5Dan',
+            'examBlack6Dan','examBlack7Dan','examBlack8Dan','examBlack9Dan',
+            'currentBeltLevel','idNumber'
+          ];
+          examFields.forEach(f => formData.delete(f));
+
+          // Inject exam dates from controlled state
+          Object.entries(examDates).forEach(([key, value]) => {
+            if (value) formData.append(key, value);
+          });
+
           onSubmit(formData);
         }} className="space-y-6">
           
@@ -828,202 +892,7 @@ export const StudentFormModal = ({
             <h3 className="text-lg font-semibold text-slate-800 mb-4">Exam Dates Details (Optional)</h3>
             
             <div className="space-y-3">
-              {/* Yellow Belt Accordion */}
-              <div className="bg-white rounded-lg border-2 border-yellow-200 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => toggleBelt('yellow')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-yellow-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="w-4 h-4 bg-yellow-400 rounded-full mr-3"></span>
-                    <span className="font-semibold text-yellow-700">Yellow Belt</span>
-                  </div>
-                  <span className="text-yellow-700 text-xl">{expandedBelts.yellow ? '−' : '+'}</span>
-                </button>
-                {expandedBelts.yellow && (
-                  <div className="px-4 pb-4 pt-2 border-t border-yellow-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                        <input
-                          type="date"
-                          name="examYellowStripe"
-                          defaultValue={student?.examYellowStripe ? new Date(student.examYellowStripe).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                        <input
-                          type="date"
-                          name="examYellowBelt"
-                          defaultValue={student?.examYellowBelt ? new Date(student.examYellowBelt).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Green Belt Accordion */}
-              <div className="bg-white rounded-lg border-2 border-green-200 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => toggleBelt('green')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-green-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="w-4 h-4 bg-green-500 rounded-full mr-3"></span>
-                    <span className="font-semibold text-green-700">Green Belt</span>
-                  </div>
-                  <span className="text-green-700 text-xl">{expandedBelts.green ? '−' : '+'}</span>
-                </button>
-                {expandedBelts.green && (
-                  <div className="px-4 pb-4 pt-2 border-t border-green-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                        <input
-                          type="date"
-                          name="examGreenStripe"
-                          defaultValue={student?.examGreenStripe ? new Date(student.examGreenStripe).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                        <input
-                          type="date"
-                          name="examGreenBelt"
-                          defaultValue={student?.examGreenBelt ? new Date(student.examGreenBelt).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Blue Belt Accordion */}
-              <div className="bg-white rounded-lg border-2 border-blue-200 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => toggleBelt('blue')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="w-4 h-4 bg-blue-500 rounded-full mr-3"></span>
-                    <span className="font-semibold text-blue-700">Blue Belt</span>
-                  </div>
-                  <span className="text-blue-700 text-xl">{expandedBelts.blue ? '−' : '+'}</span>
-                </button>
-                {expandedBelts.blue && (
-                  <div className="px-4 pb-4 pt-2 border-t border-blue-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                        <input
-                          type="date"
-                          name="examBlueStripe"
-                          defaultValue={student?.examBlueStripe ? new Date(student.examBlueStripe).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                        <input
-                          type="date"
-                          name="examBlueBelt"
-                          defaultValue={student?.examBlueBelt ? new Date(student.examBlueBelt).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Red Belt Accordion */}
-              <div className="bg-white rounded-lg border-2 border-red-200 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => toggleBelt('red')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-red-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="w-4 h-4 bg-red-500 rounded-full mr-3"></span>
-                    <span className="font-semibold text-red-700">Red Belt</span>
-                  </div>
-                  <span className="text-red-700 text-xl">{expandedBelts.red ? '−' : '+'}</span>
-                </button>
-                {expandedBelts.red && (
-                  <div className="px-4 pb-4 pt-2 border-t border-red-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                        <input
-                          type="date"
-                          name="examRedStripe"
-                          defaultValue={student?.examRedStripe ? new Date(student.examRedStripe).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                        <input
-                          type="date"
-                          name="examRedBelt"
-                          defaultValue={student?.examRedBelt ? new Date(student.examRedBelt).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Black Belt Accordion */}
-              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => toggleBelt('black')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="w-4 h-4 bg-gray-800 rounded-full mr-3"></span>
-                    <span className="font-semibold text-gray-800">Black Belt</span>
-                  </div>
-                  <span className="text-gray-800 text-xl">{expandedBelts.black ? '−' : '+'}</span>
-                </button>
-                {expandedBelts.black && (
-                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                        <input
-                          type="date"
-                          name="examBlackStripe"
-                          defaultValue={student?.examBlackStripe ? new Date(student.examBlackStripe).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                        <input
-                          type="date"
-                          name="examBlackBelt"
-                          defaultValue={student?.examBlackBelt ? new Date(student.examBlackBelt).toISOString().split('T')[0] : ''}
-                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Current Status Accordion */}
+              {/* Current Status & ID — FIRST */}
               <div className="bg-white rounded-lg border-2 border-amber-200 overflow-hidden">
                 <button
                   type="button"
@@ -1044,7 +913,8 @@ export const StudentFormModal = ({
                         <input
                           type="text"
                           name="currentBeltLevel"
-                          defaultValue={student?.currentBeltLevel}
+                          value={examDates.currentBeltLevel}
+                          onChange={e => setExamDate('currentBeltLevel', e.target.value)}
                           placeholder="e.g., Blue Belt"
                           className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                         />
@@ -1054,11 +924,479 @@ export const StudentFormModal = ({
                         <input
                           type="text"
                           name="idNumber"
-                          defaultValue={student?.idNumber}
+                          value={examDates.idNumber}
+                          onChange={e => setExamDate('idNumber', e.target.value)}
                           placeholder="Enter ID"
                           className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
                         />
                       </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* White Belt */}
+              <div className="bg-white rounded-lg border-2 border-gray-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('white')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3 border border-gray-300" style={{ background: '#ffffff' }}></span>
+                    <span className="font-semibold text-gray-700">White Belt</span>
+                  </div>
+                  <span className="text-gray-700 text-xl">{expandedBelts.white ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.white && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input
+                        type="date"
+                        name="examWhiteBelt"
+                        value={examDates.examWhiteBelt}
+                        onChange={e => setExamDate('examWhiteBelt', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* White Belt / Yellow Stripe */}
+              <div className="bg-white rounded-lg border-2 border-yellow-100 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('whiteYellowStripe')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-yellow-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3 border border-gray-200" style={{ background: 'conic-gradient(#ffffff 0% 70%, #facc15 70% 100%)' }}></span>
+                    <span className="font-semibold text-yellow-700">White Belt / Yellow Stripe</span>
+                  </div>
+                  <span className="text-yellow-700 text-xl">{expandedBelts.whiteYellowStripe ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.whiteYellowStripe && (
+                  <div className="px-4 pb-4 pt-2 border-t border-yellow-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                      <input
+                        type="date"
+                        name="examWhiteYellowStripe"
+                        value={examDates.examWhiteYellowStripe}
+                        onChange={e => setExamDate('examWhiteYellowStripe', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Yellow Belt */}
+              <div className="bg-white rounded-lg border-2 border-yellow-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('yellow')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-yellow-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#facc15' }}></span>
+                    <span className="font-semibold text-yellow-700">Yellow Belt</span>
+                  </div>
+                  <span className="text-yellow-700 text-xl">{expandedBelts.yellow ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.yellow && (
+                  <div className="px-4 pb-4 pt-2 border-t border-yellow-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input
+                        type="date"
+                        name="examYellowBelt"
+                        value={examDates.examYellowBelt}
+                        onChange={e => setExamDate('examYellowBelt', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Yellow Belt / Green Stripe */}
+              <div className="bg-white rounded-lg border-2 border-green-100 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('yellowGreenStripe')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-green-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: 'conic-gradient(#facc15 0% 70%, #22c55e 70% 100%)' }}></span>
+                    <span className="font-semibold text-green-700">Yellow Belt / Green Stripe</span>
+                  </div>
+                  <span className="text-green-700 text-xl">{expandedBelts.yellowGreenStripe ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.yellowGreenStripe && (
+                  <div className="px-4 pb-4 pt-2 border-t border-green-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                      <input
+                        type="date"
+                        name="examYellowStripe"
+                        value={examDates.examYellowStripe}
+                        onChange={e => setExamDate('examYellowStripe', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Green Belt */}
+              <div className="bg-white rounded-lg border-2 border-green-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('green')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-green-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#22c55e' }}></span>
+                    <span className="font-semibold text-green-700">Green Belt</span>
+                  </div>
+                  <span className="text-green-700 text-xl">{expandedBelts.green ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.green && (
+                  <div className="px-4 pb-4 pt-2 border-t border-green-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input
+                        type="date"
+                        name="examGreenBelt"
+                        value={examDates.examGreenBelt}
+                        onChange={e => setExamDate('examGreenBelt', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Green Belt / Blue Stripe */}
+              <div className="bg-white rounded-lg border-2 border-blue-100 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('greenBlueStripe')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: 'conic-gradient(#22c55e 0% 70%, #3b82f6 70% 100%)' }}></span>
+                    <span className="font-semibold text-blue-700">Green Belt / Blue Stripe</span>
+                  </div>
+                  <span className="text-blue-700 text-xl">{expandedBelts.greenBlueStripe ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.greenBlueStripe && (
+                  <div className="px-4 pb-4 pt-2 border-t border-blue-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                      <input
+                        type="date"
+                        name="examGreenStripe"
+                        value={examDates.examGreenStripe}
+                        onChange={e => setExamDate('examGreenStripe', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Blue Belt */}
+              <div className="bg-white rounded-lg border-2 border-blue-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('blue')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#3b82f6' }}></span>
+                    <span className="font-semibold text-blue-700">Blue Belt</span>
+                  </div>
+                  <span className="text-blue-700 text-xl">{expandedBelts.blue ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.blue && (
+                  <div className="px-4 pb-4 pt-2 border-t border-blue-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input
+                        type="date"
+                        name="examBlueBelt"
+                        value={examDates.examBlueBelt}
+                        onChange={e => setExamDate('examBlueBelt', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Blue Belt / Red Stripe */}
+              <div className="bg-white rounded-lg border-2 border-red-100 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('blueRedStripe')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-red-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: 'conic-gradient(#3b82f6 0% 70%, #ef4444 70% 100%)' }}></span>
+                    <span className="font-semibold text-red-700">Blue Belt / Red Stripe</span>
+                  </div>
+                  <span className="text-red-700 text-xl">{expandedBelts.blueRedStripe ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.blueRedStripe && (
+                  <div className="px-4 pb-4 pt-2 border-t border-red-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                      <input
+                        type="date"
+                        name="examBlueStripe"
+                        value={examDates.examBlueStripe}
+                        onChange={e => setExamDate('examBlueStripe', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Red Belt */}
+              <div className="bg-white rounded-lg border-2 border-red-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('red')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-red-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#ef4444' }}></span>
+                    <span className="font-semibold text-red-700">Red Belt</span>
+                  </div>
+                  <span className="text-red-700 text-xl">{expandedBelts.red ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.red && (
+                  <div className="px-4 pb-4 pt-2 border-t border-red-100">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input
+                        type="date"
+                        name="examRedBelt"
+                        value={examDates.examRedBelt}
+                        onChange={e => setExamDate('examRedBelt', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Red Belt / Black Stripe */}
+              <div className="bg-white rounded-lg border-2 border-gray-300 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleBelt('redBlackStripe')}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: 'conic-gradient(#ef4444 0% 70%, #1f2937 70% 100%)' }}></span>
+                    <span className="font-semibold text-gray-800">Red Belt / Black Stripe</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.redBlackStripe ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.redBlackStripe && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                      <input
+                        type="date"
+                        name="examRedStripe"
+                        value={examDates.examRedStripe}
+                        onChange={e => setExamDate('examRedStripe', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 1st Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black1')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 1st Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black1 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black1 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                        <input type="date" name="examBlackStripe" value={examDates.examBlackStripe} onChange={e => setExamDate('examBlackStripe', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                        <input type="date" name="examBlackBelt" value={examDates.examBlackBelt} onChange={e => setExamDate('examBlackBelt', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 2nd Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black2')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 2nd Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black2 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black2 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack2Dan" value={examDates.examBlack2Dan} onChange={e => setExamDate('examBlack2Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 3rd Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black3')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 3rd Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black3 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black3 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack3Dan" value={examDates.examBlack3Dan} onChange={e => setExamDate('examBlack3Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 4th Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black4')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 4th Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black4 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black4 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack4Dan" value={examDates.examBlack4Dan} onChange={e => setExamDate('examBlack4Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 5th Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black5')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 5th Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black5 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black5 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack5Dan" value={examDates.examBlack5Dan} onChange={e => setExamDate('examBlack5Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 6th Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black6')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 6th Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black6 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black6 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack6Dan" value={examDates.examBlack6Dan} onChange={e => setExamDate('examBlack6Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 7th Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black7')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 7th Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black7 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black7 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack7Dan" value={examDates.examBlack7Dan} onChange={e => setExamDate('examBlack7Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 8th Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black8')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 8th Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black8 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black8 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack8Dan" value={examDates.examBlack8Dan} onChange={e => setExamDate('examBlack8Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Black Belt 9th Dan */}
+              <div className="bg-white rounded-lg border-2 border-gray-800 overflow-hidden">
+                <button type="button" onClick={() => toggleBelt('black9')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full mr-3" style={{ background: '#1f2937' }}></span>
+                    <span className="font-semibold text-gray-800">Black Belt — 9th Dan</span>
+                  </div>
+                  <span className="text-gray-800 text-xl">{expandedBelts.black9 ? '−' : '+'}</span>
+                </button>
+                {expandedBelts.black9 && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                      <input type="date" name="examBlack9Dan" value={examDates.examBlack9Dan} onChange={e => setExamDate('examBlack9Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
                     </div>
                   </div>
                 )}
