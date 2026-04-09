@@ -120,12 +120,34 @@ function AdminLayout() {
       ]
     },
     {
-      title: 'Mobile App',
+      title: 'Practical Syllabus',
       icon: FaMobileAlt,
       isDropdown: true,
       items: [
         { path: '/admin/onboarding', name: 'Onboarding Slides', icon: FaMobileAlt },
         { path: '/admin/techniques', name: 'Techniques & Kicks', icon: FaMobileAlt },
+        { path: '/admin/belt-content', name: 'Belt Content ', icon: FaMobileAlt },
+        { path: '/admin/programs', name: 'Programs', icon: FaMobileAlt },
+      ]
+    },
+    {
+      title: 'Theory Syllabus',
+      icon: FaBook,
+      isDropdown: true,
+      items: [
+        { path: '/admin/theory-syllabus', name: 'Basic Theory', icon: FaBook },
+        { path: '/admin/theory-syllabus-belts', name: 'Belts Syllabus', icon: FaBook },
+        { path: '/admin/theory-syllabus-stances', name: 'Stances', icon: FaBook },
+        { path: '/admin/theory-syllabus-body-parts', name: 'Body Parts', icon: FaBook },
+        { path: '/admin/theory-syllabus-korean', name: 'Korean', icon: FaBook },
+        { path: '/admin/theory-syllabus-practice-suit', name: 'Practice Suit (Do Bok)', icon: FaBook },
+        { path: '/admin/theory-syllabus-do-jang', name: 'Do Jang', icon: FaBook },
+        { path: '/admin/theory-syllabus-moral-culture', name: 'Moral Culture', icon: FaBook },
+        { path: '/admin/theory-syllabus-questions', name: 'Theory Questions', icon: FaBook },
+        { path: '/admin/theory-syllabus-sparring', name: 'Sparring', icon: FaBook },
+        { path: '/admin/theory-syllabus-technique-divisions', name: 'Division of Techniques', icon: FaBook },
+        { path: '/admin/theory-syllabus-instructor-titles', name: 'Instructor Titles & Stripes', icon: FaBook },
+        { path: '/admin/theory-syllabus-patterns', name: 'Patterns', icon: FaBook },
       ]
     }
   ];
@@ -144,7 +166,7 @@ function AdminLayout() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'white' }}>
       {/* Fixed Sidebar */}
-      <div className="w-80 bg-white text-black flex flex-col h-screen flex-shrink-0 fixed left-0 top-0 z-10 shadow-lg" style={{ borderRight: '1px solid #e5e7eb' }}>
+      <div className="w-80 bg-white text-black flex flex-col h-screen flex-shrink-0 fixed left-0 top-0 z-[60] shadow-lg" style={{ borderRight: '1px solid #e5e7eb' }}>
         {/* Header */}
         <div className="p-6 border-b border-gray-200 bg-white">
           <div className="flex items-center space-x-4">

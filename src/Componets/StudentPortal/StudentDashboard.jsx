@@ -14,6 +14,7 @@ import { IoMdArrowBack } from "react-icons/io";
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [studentName, setStudentName] = useState("Student");
+  const [studentPhoto, setStudentPhoto] = useState(null);
   const [currentBeltLevel, setCurrentBeltLevel] = useState("Loading...");
   const [pendingFees, setPendingFees] = useState(0);
   const [totalEvents, setTotalEvents] = useState(0);
@@ -21,7 +22,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
 
   useEffect(() => {
     // Check if user is logged in
@@ -53,6 +54,11 @@ const StudentDashboard = () => {
             profileData.data.fullName || profileData.data.name || "Student",
           );
           setCurrentBeltLevel(profileData.data.currentBeltLevel || "N/A");
+          const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:9000";
+          const photo = profileData.data.photo;
+          if (photo) {
+            setStudentPhoto(photo.startsWith("http") ? photo : `${BASE_URL}/${photo}`);
+          }
         }
       }
 
@@ -169,31 +175,31 @@ const StudentDashboard = () => {
     {
       title: "Attendance",
       Icon: FaCheckCircle,
-      color: "#e74c3c",
+      color: "#006CB5",
       route: "/student/attendance",
     },
     {
       title: "Level/Belt",
       Icon: FaMedal,
-      color: "#e74c3c",
+      color: "#006CB5",
       route: "/student/level",
     },
     {
       title: "Events",
       Icon: FaCalendarAlt,
-      color: "#e74c3c",
+      color: "#006CB5",
       route: "/student/events",
     },
     {
       title: "Certificates",
       Icon: FaCertificate,
-      color: "#e74c3c",
+      color: "#006CB5",
       route: "/student/certificates",
     },
     {
       title: "Fees",
       Icon: FaMoneyBillWave,
-      color: "#e74c3c",
+      color: "#006CB5",
       route: "/student/fees",
     },
   ];
@@ -220,8 +226,11 @@ const StudentDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-yellow-400 shadow-md">
-                <FaUser className="text-2xl text-[#006CB5]" />
+              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border-2 border-yellow-400 shadow-md overflow-hidden">
+                {studentPhoto
+                  ? <img src={studentPhoto} alt="avatar" className="w-full h-full object-cover" />
+                  : <FaUser className="text-2xl text-[#006CB5]" />
+                }
               </div>
               <div>
                 <p className="text-sm text-[#006CB5] font-semibold">Hello!</p>
@@ -233,12 +242,13 @@ const StudentDashboard = () => {
                 onClick={() => navigate("/student/profile")}
                 className="flex flex-col items-center space-y-1 hover:opacity-80 transition-all"
               >
-                <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
-                  <FaUser className="text-white text-lg" />
+                <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all overflow-hidden border-2 border-white border-opacity-40">
+                  {studentPhoto
+                    ? <img src={studentPhoto} alt="profile" className="w-full h-full object-cover" />
+                    : <FaUser className="text-white text-lg" />
+                  }
                 </div>
-                <span className="text-xs text-[#006CB5] font-semibold">
-                  Profile
-                </span>
+                <span className="text-xs text-white font-semibold">Profile</span>
               </button>
               <button
                 onClick={handleLogout}
@@ -247,9 +257,7 @@ const StudentDashboard = () => {
                 <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all">
                   <FaSignOutAlt className="text-white text-lg" />
                 </div>
-                <span className="text-xs text-[#006CB5] font-semibold">
-                  Logout
-                </span>
+                <span className="text-xs text-white font-semibold">Logout</span>
               </button>
             </div>
           </div>

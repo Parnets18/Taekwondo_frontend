@@ -15,8 +15,8 @@ const StudentCertificates = () => {
   const [selectedCertificate, setSelectedCertificate] = useState(null);
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:9000";
 
   useEffect(() => {
     const token = localStorage.getItem("studentToken");

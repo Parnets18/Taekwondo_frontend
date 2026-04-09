@@ -24,7 +24,6 @@ import EventManagement from './Componets/Admin/Dashboard/EventManagement';
 import FeeManagement from './Componets/Admin/Dashboard/FeeManagement';
 import CertificationManagement from './Componets/Admin/Dashboard/CertificationManagement';
 import AchievementManagement from './Componets/Admin/AchievementManagement';
-import TemplateManagement from './Componets/Admin/TemplateManagement';
 import StudentManagement from './Componets/Admin/StudentManagement';
 import ContactManagement from './Componets/Admin/ContactManagement';
 import CourseManagement from './Componets/Admin/CourseManagement';
@@ -43,8 +42,23 @@ import AboutDojangStoryManagement from './Componets/Admin/AboutDojangStoryManage
 import MentorManagement from './Componets/Admin/MentorManagement';
 import FounderManagement from './Componets/Admin/FounderManagement';
 import LeadershipManagement from './Componets/Admin/LeadershipManagement';
-import OnboardingManagement from './Componets/Admin/Onboarding/OnboardingManagement';
-import TechniquesManagement from './Componets/Admin/Onboarding/TechniquesManagement';
+import OnboardingManagement from './Componets/Admin/PracticalSyllabus/OnboardingManagement';
+import TechniquesManagement from './Componets/Admin/PracticalSyllabus/TechniquesManagement';
+import BeltContentManagement from './Componets/Admin/PracticalSyllabus/BeltContentManagement';
+import ProgramManagement from './Componets/Admin/PracticalSyllabus/ProgramManagement';
+import TheorySyllabusManagement from './Componets/Admin/TheorySyllabus/TheorySyllabusManagement';
+import BeltsSyllabusManagement from './Componets/Admin/TheorySyllabus/BeltsSyllabusManagement';
+import StancesManagement from './Componets/Admin/TheorySyllabus/StancesManagement';
+import BodyPartsManagement from './Componets/Admin/TheorySyllabus/BodyPartsManagement';
+import KoreanManagement from './Componets/Admin/TheorySyllabus/KoreanManagement';
+import PracticeSuitManagement from './Componets/Admin/TheorySyllabus/PracticeSuitManagement';
+import DoJangManagement from './Componets/Admin/TheorySyllabus/DoJangManagement';
+import MoralCultureManagement from './Componets/Admin/TheorySyllabus/MoralCultureManagement';
+import TheoryQuestionsManagement from './Componets/Admin/TheorySyllabus/TheoryQuestionsManagement';
+import SparringManagement from './Componets/Admin/TheorySyllabus/SparringManagement';
+import TechniqueDivisionManagement from './Componets/Admin/TheorySyllabus/TechniqueDivisionManagement';
+import InstructorTitlesManagement from './Componets/Admin/TheorySyllabus/InstructorTitlesManagement';
+import PatternsManagement from './Componets/Admin/TheorySyllabus/PatternsManagement';
 import StudentDashboard from './Componets/StudentPortal/StudentDashboard';
 import StudentProfile from './Componets/StudentPortal/StudentProfile';
 import StudentAttendance from './Componets/StudentPortal/StudentAttendance';
@@ -183,7 +197,6 @@ function App() {
           <Route path="contacts" element={<ContactManagement />} />
           <Route path="courses" element={<CourseManagement />} />
           <Route path="achievements" element={<AchievementManagement />} />
-          <Route path="templates" element={<TemplateManagement />} />
           <Route path="gallery" element={<GalleryManagement />} />
           <Route path="community" element={<CommunityManagement />} />
           <Route path="black-belt" element={<BlackBeltManagement />} />
@@ -195,6 +208,21 @@ function App() {
           <Route path="leadership" element={<LeadershipManagement />} />
           <Route path="onboarding" element={<OnboardingManagement />} />
           <Route path="techniques" element={<TechniquesManagement />} />
+          <Route path="belt-content" element={<BeltContentManagement />} />
+          <Route path="programs" element={<ProgramManagement />} />
+          <Route path="theory-syllabus" element={<TheorySyllabusManagement />} />
+          <Route path="theory-syllabus-belts" element={<BeltsSyllabusManagement />} />
+          <Route path="theory-syllabus-stances" element={<StancesManagement />} />
+          <Route path="theory-syllabus-body-parts" element={<BodyPartsManagement />} />
+          <Route path="theory-syllabus-korean" element={<KoreanManagement />} />
+          <Route path="theory-syllabus-practice-suit" element={<PracticeSuitManagement />} />
+          <Route path="theory-syllabus-do-jang" element={<DoJangManagement />} />
+          <Route path="theory-syllabus-moral-culture" element={<MoralCultureManagement />} />
+          <Route path="theory-syllabus-questions" element={<TheoryQuestionsManagement />} />
+          <Route path="theory-syllabus-sparring" element={<SparringManagement />} />
+          <Route path="theory-syllabus-technique-divisions" element={<TechniqueDivisionManagement />} />
+          <Route path="theory-syllabus-instructor-titles" element={<InstructorTitlesManagement />} />
+          <Route path="theory-syllabus-patterns" element={<PatternsManagement />} />
         </Route>
       </Routes>
     </Router>

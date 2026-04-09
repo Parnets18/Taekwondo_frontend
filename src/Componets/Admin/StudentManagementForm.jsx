@@ -51,6 +51,7 @@ export const StudentFormModal = ({
     black9: false,
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [beltCertFiles, setBeltCertFiles] = useState({});
 
   const formatDateValue = (val) => {
     if (!val) return '';
@@ -59,25 +60,45 @@ export const StudentFormModal = ({
 
   const [examDates, setExamDates] = useState({
     examWhiteBelt: formatDateValue(student?.examWhiteBelt),
+    examWhiteBeltCertCode: student?.examWhiteBeltCertCode || '',
     examWhiteYellowStripe: formatDateValue(student?.examWhiteYellowStripe),
+    examWhiteYellowStripeCertCode: student?.examWhiteYellowStripeCertCode || '',
     examYellowBelt: formatDateValue(student?.examYellowBelt),
+    examYellowBeltCertCode: student?.examYellowBeltCertCode || '',
     examYellowStripe: formatDateValue(student?.examYellowStripe),
+    examYellowStripeCertCode: student?.examYellowStripeCertCode || '',
     examGreenBelt: formatDateValue(student?.examGreenBelt),
+    examGreenBeltCertCode: student?.examGreenBeltCertCode || '',
     examGreenStripe: formatDateValue(student?.examGreenStripe),
+    examGreenStripeCertCode: student?.examGreenStripeCertCode || '',
     examBlueBelt: formatDateValue(student?.examBlueBelt),
+    examBlueBeltCertCode: student?.examBlueBeltCertCode || '',
     examBlueStripe: formatDateValue(student?.examBlueStripe),
+    examBlueStripeCertCode: student?.examBlueStripeCertCode || '',
     examRedBelt: formatDateValue(student?.examRedBelt),
+    examRedBeltCertCode: student?.examRedBeltCertCode || '',
     examRedStripe: formatDateValue(student?.examRedStripe),
+    examRedStripeCertCode: student?.examRedStripeCertCode || '',
     examBlackStripe: formatDateValue(student?.examBlackStripe),
+    examBlackStripeCertCode: student?.examBlackStripeCertCode || '',
     examBlackBelt: formatDateValue(student?.examBlackBelt),
+    examBlackBeltCertCode: student?.examBlackBeltCertCode || '',
     examBlack2Dan: formatDateValue(student?.examBlack2Dan),
+    examBlack2DanCertCode: student?.examBlack2DanCertCode || '',
     examBlack3Dan: formatDateValue(student?.examBlack3Dan),
+    examBlack3DanCertCode: student?.examBlack3DanCertCode || '',
     examBlack4Dan: formatDateValue(student?.examBlack4Dan),
+    examBlack4DanCertCode: student?.examBlack4DanCertCode || '',
     examBlack5Dan: formatDateValue(student?.examBlack5Dan),
+    examBlack5DanCertCode: student?.examBlack5DanCertCode || '',
     examBlack6Dan: formatDateValue(student?.examBlack6Dan),
+    examBlack6DanCertCode: student?.examBlack6DanCertCode || '',
     examBlack7Dan: formatDateValue(student?.examBlack7Dan),
+    examBlack7DanCertCode: student?.examBlack7DanCertCode || '',
     examBlack8Dan: formatDateValue(student?.examBlack8Dan),
+    examBlack8DanCertCode: student?.examBlack8DanCertCode || '',
     examBlack9Dan: formatDateValue(student?.examBlack9Dan),
+    examBlack9DanCertCode: student?.examBlack9DanCertCode || '',
     currentBeltLevel: student?.currentBeltLevel || '',
     idNumber: student?.idNumber || '',
   });
@@ -103,7 +124,7 @@ export const StudentFormModal = ({
   if (!show) return null;
 
   const isEdit = !!student;
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
   // Remove /api from base URL for static file access (images)
   const BASE_URL = API_BASE_URL.replace('/api', '');
 
@@ -224,6 +245,27 @@ export const StudentFormModal = ({
             if (value) formData.append(key, value);
           });
 
+          // Inject belt certificate files
+          Object.entries(beltCertFiles).forEach(([key, file]) => {
+            if (file instanceof File) {
+              formData.append(key, file);
+              console.log(`📎 Belt cert appended: ${key} = ${file.name} (${file.size}b)`);
+            }
+          });
+
+          // Explicitly re-append photo if selected (ensures it's not lost in FormData iteration)
+          const photoInput = e.target.querySelector('input[name="photo"]');
+          if (photoInput && photoInput.files && photoInput.files[0]) {
+            formData.delete('photo');
+            formData.append('photo', photoInput.files[0]);
+            console.log('📸 Photo appended:', photoInput.files[0].name, photoInput.files[0].size);
+          }
+
+          // Final check - log all File entries
+          for (let [k, v] of formData.entries()) {
+            if (v instanceof File) console.log(`✅ File in final formData: ${k} = ${v.name} (${v.size}b)`);
+          }
+          console.log('📤 FormData keys:', [...formData.keys()]);
           onSubmit(formData);
         }} className="space-y-6">
           
@@ -866,7 +908,7 @@ export const StudentFormModal = ({
                           <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Upload</label>
                           <input
                             type="file"
-                            accept=".pdf,.jpg,.jpeg,.png"
+                            accept="*"
                             onChange={(e) => {
                               const file = e.target.files[0];
                               if (file) {
@@ -950,15 +992,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.white && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input
-                        type="date"
-                        name="examWhiteBelt"
-                        value={examDates.examWhiteBelt}
-                        onChange={e => setExamDate('examWhiteBelt', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                        <input type="date" name="examWhiteBelt" value={examDates.examWhiteBelt} onChange={e => setExamDate('examWhiteBelt', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examWhiteBeltCertCode} onChange={e => setExamDate('examWhiteBeltCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examWhiteBeltCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examWhiteBeltCertFile || student?.examWhiteBeltCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examWhiteBeltCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -979,15 +1026,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.whiteYellowStripe && (
                   <div className="px-4 pb-4 pt-2 border-t border-yellow-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                      <input
-                        type="date"
-                        name="examWhiteYellowStripe"
-                        value={examDates.examWhiteYellowStripe}
-                        onChange={e => setExamDate('examWhiteYellowStripe', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                        <input type="date" name="examWhiteYellowStripe" value={examDates.examWhiteYellowStripe} onChange={e => setExamDate('examWhiteYellowStripe', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examWhiteYellowStripeCertCode} onChange={e => setExamDate('examWhiteYellowStripeCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examWhiteYellowStripeCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examWhiteYellowStripeCertFile || student?.examWhiteYellowStripeCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examWhiteYellowStripeCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1008,15 +1060,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.yellow && (
                   <div className="px-4 pb-4 pt-2 border-t border-yellow-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input
-                        type="date"
-                        name="examYellowBelt"
-                        value={examDates.examYellowBelt}
-                        onChange={e => setExamDate('examYellowBelt', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                        <input type="date" name="examYellowBelt" value={examDates.examYellowBelt} onChange={e => setExamDate('examYellowBelt', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examYellowBeltCertCode} onChange={e => setExamDate('examYellowBeltCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examYellowBeltCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examYellowBeltCertFile || student?.examYellowBeltCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examYellowBeltCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1037,15 +1094,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.yellowGreenStripe && (
                   <div className="px-4 pb-4 pt-2 border-t border-green-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                      <input
-                        type="date"
-                        name="examYellowStripe"
-                        value={examDates.examYellowStripe}
-                        onChange={e => setExamDate('examYellowStripe', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                        <input type="date" name="examYellowStripe" value={examDates.examYellowStripe} onChange={e => setExamDate('examYellowStripe', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examYellowStripeCertCode} onChange={e => setExamDate('examYellowStripeCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examYellowStripeCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examYellowStripeCertFile || student?.examYellowStripeCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examYellowStripeCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1066,15 +1128,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.green && (
                   <div className="px-4 pb-4 pt-2 border-t border-green-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input
-                        type="date"
-                        name="examGreenBelt"
-                        value={examDates.examGreenBelt}
-                        onChange={e => setExamDate('examGreenBelt', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                        <input type="date" name="examGreenBelt" value={examDates.examGreenBelt} onChange={e => setExamDate('examGreenBelt', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examGreenBeltCertCode} onChange={e => setExamDate('examGreenBeltCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examGreenBeltCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examGreenBeltCertFile || student?.examGreenBeltCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examGreenBeltCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1095,15 +1162,26 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.greenBlueStripe && (
                   <div className="px-4 pb-4 pt-2 border-t border-blue-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                      <input
-                        type="date"
-                        name="examGreenStripe"
-                        value={examDates.examGreenStripe}
-                        onChange={e => setExamDate('examGreenStripe', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                        <input
+                          type="date"
+                          name="examGreenStripe"
+                          value={examDates.examGreenStripe}
+                          onChange={e => setExamDate('examGreenStripe', e.target.value)}
+                          className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examGreenStripeCertCode} onChange={e => setExamDate('examGreenStripeCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examGreenStripeCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examGreenStripeCertFile || student?.examGreenStripeCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examGreenStripeCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1124,15 +1202,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.blue && (
                   <div className="px-4 pb-4 pt-2 border-t border-blue-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input
-                        type="date"
-                        name="examBlueBelt"
-                        value={examDates.examBlueBelt}
-                        onChange={e => setExamDate('examBlueBelt', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                        <input type="date" name="examBlueBelt" value={examDates.examBlueBelt} onChange={e => setExamDate('examBlueBelt', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examBlueBeltCertCode} onChange={e => setExamDate('examBlueBeltCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlueBeltCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examBlueBeltCertFile || student?.examBlueBeltCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlueBeltCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1153,15 +1236,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.blueRedStripe && (
                   <div className="px-4 pb-4 pt-2 border-t border-red-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                      <input
-                        type="date"
-                        name="examBlueStripe"
-                        value={examDates.examBlueStripe}
-                        onChange={e => setExamDate('examBlueStripe', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                        <input type="date" name="examBlueStripe" value={examDates.examBlueStripe} onChange={e => setExamDate('examBlueStripe', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examBlueStripeCertCode} onChange={e => setExamDate('examBlueStripeCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlueStripeCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examBlueStripeCertFile || student?.examBlueStripeCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlueStripeCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1182,15 +1270,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.red && (
                   <div className="px-4 pb-4 pt-2 border-t border-red-100">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input
-                        type="date"
-                        name="examRedBelt"
-                        value={examDates.examRedBelt}
-                        onChange={e => setExamDate('examRedBelt', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                        <input type="date" name="examRedBelt" value={examDates.examRedBelt} onChange={e => setExamDate('examRedBelt', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examRedBeltCertCode} onChange={e => setExamDate('examRedBeltCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examRedBeltCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examRedBeltCertFile || student?.examRedBeltCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examRedBeltCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1211,15 +1304,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.redBlackStripe && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
-                      <input
-                        type="date"
-                        name="examRedStripe"
-                        value={examDates.examRedStripe}
-                        onChange={e => setExamDate('examRedStripe', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
+                        <input type="date" name="examRedStripe" value={examDates.examRedStripe} onChange={e => setExamDate('examRedStripe', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examRedStripeCertCode} onChange={e => setExamDate('examRedStripeCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examRedStripeCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examRedStripeCertFile || student?.examRedStripeCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examRedStripeCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1236,7 +1334,7 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black1 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1">Stripe Date</label>
                         <input type="date" name="examBlackStripe" value={examDates.examBlackStripe} onChange={e => setExamDate('examBlackStripe', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
@@ -1244,6 +1342,17 @@ export const StudentFormModal = ({
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
                         <input type="date" name="examBlackBelt" value={examDates.examBlackBelt} onChange={e => setExamDate('examBlackBelt', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examBlackBeltCertCode} onChange={e => setExamDate('examBlackBeltCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlackBeltCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examBlackBeltCertFile || student?.examBlackBeltCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlackBeltCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
                       </div>
                     </div>
                   </div>
@@ -1261,9 +1370,20 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black2 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack2Dan" value={examDates.examBlack2Dan} onChange={e => setExamDate('examBlack2Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
+                        <input type="date" name="examBlack2Dan" value={examDates.examBlack2Dan} onChange={e => setExamDate('examBlack2Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label>
+                        <input type="text" value={examDates.examBlack2DanCertCode} onChange={e => setExamDate('examBlack2DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label>
+                        <input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack2DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />
+                        {(beltCertFiles.examBlack2DanCertFile || student?.examBlack2DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack2DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1280,9 +1400,10 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black3 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack3Dan" value={examDates.examBlack3Dan} onChange={e => setExamDate('examBlack3Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label><input type="date" name="examBlack3Dan" value={examDates.examBlack3Dan} onChange={e => setExamDate('examBlack3Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label><input type="text" value={examDates.examBlack3DanCertCode} onChange={e => setExamDate('examBlack3DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label><input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack3DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />{(beltCertFiles.examBlack3DanCertFile || student?.examBlack3DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack3DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}</div>
                     </div>
                   </div>
                 )}
@@ -1299,9 +1420,10 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black4 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack4Dan" value={examDates.examBlack4Dan} onChange={e => setExamDate('examBlack4Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label><input type="date" name="examBlack4Dan" value={examDates.examBlack4Dan} onChange={e => setExamDate('examBlack4Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label><input type="text" value={examDates.examBlack4DanCertCode} onChange={e => setExamDate('examBlack4DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label><input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack4DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />{(beltCertFiles.examBlack4DanCertFile || student?.examBlack4DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack4DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}</div>
                     </div>
                   </div>
                 )}
@@ -1318,9 +1440,10 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black5 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack5Dan" value={examDates.examBlack5Dan} onChange={e => setExamDate('examBlack5Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label><input type="date" name="examBlack5Dan" value={examDates.examBlack5Dan} onChange={e => setExamDate('examBlack5Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label><input type="text" value={examDates.examBlack5DanCertCode} onChange={e => setExamDate('examBlack5DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label><input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack5DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />{(beltCertFiles.examBlack5DanCertFile || student?.examBlack5DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack5DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}</div>
                     </div>
                   </div>
                 )}
@@ -1337,9 +1460,10 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black6 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack6Dan" value={examDates.examBlack6Dan} onChange={e => setExamDate('examBlack6Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label><input type="date" name="examBlack6Dan" value={examDates.examBlack6Dan} onChange={e => setExamDate('examBlack6Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label><input type="text" value={examDates.examBlack6DanCertCode} onChange={e => setExamDate('examBlack6DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label><input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack6DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />{(beltCertFiles.examBlack6DanCertFile || student?.examBlack6DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack6DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}</div>
                     </div>
                   </div>
                 )}
@@ -1356,9 +1480,10 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black7 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack7Dan" value={examDates.examBlack7Dan} onChange={e => setExamDate('examBlack7Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label><input type="date" name="examBlack7Dan" value={examDates.examBlack7Dan} onChange={e => setExamDate('examBlack7Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label><input type="text" value={examDates.examBlack7DanCertCode} onChange={e => setExamDate('examBlack7DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label><input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack7DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />{(beltCertFiles.examBlack7DanCertFile || student?.examBlack7DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack7DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}</div>
                     </div>
                   </div>
                 )}
@@ -1375,9 +1500,10 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black8 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack8Dan" value={examDates.examBlack8Dan} onChange={e => setExamDate('examBlack8Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label><input type="date" name="examBlack8Dan" value={examDates.examBlack8Dan} onChange={e => setExamDate('examBlack8Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label><input type="text" value={examDates.examBlack8DanCertCode} onChange={e => setExamDate('examBlack8DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label><input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack8DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />{(beltCertFiles.examBlack8DanCertFile || student?.examBlack8DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack8DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}</div>
                     </div>
                   </div>
                 )}
@@ -1394,9 +1520,10 @@ export const StudentFormModal = ({
                 </button>
                 {expandedBelts.black9 && (
                   <div className="px-4 pb-4 pt-2 border-t border-gray-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label>
-                      <input type="date" name="examBlack9Dan" value={examDates.examBlack9Dan} onChange={e => setExamDate('examBlack9Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Belt Date</label><input type="date" name="examBlack9Dan" value={examDates.examBlack9Dan} onChange={e => setExamDate('examBlack9Dan', e.target.value)} className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate Code</label><input type="text" value={examDates.examBlack9DanCertCode} onChange={e => setExamDate('examBlack9DanCertCode', e.target.value)} placeholder="Enter code" className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent" /></div>
+                      <div><label className="block text-xs font-semibold text-slate-600 mb-1">Certificate File</label><input type="file" accept="*" onChange={e => e.target.files[0] && setBeltCertFiles(p => ({ ...p, examBlack9DanCertFile: e.target.files[0] }))} className="w-full px-2 py-1.5 text-xs border-2 border-slate-200 rounded-lg" />{(beltCertFiles.examBlack9DanCertFile || student?.examBlack9DanCertFile) && <p className="text-xs text-green-600 mt-1">✓ {beltCertFiles.examBlack9DanCertFile ? 'New file selected' : 'Certificate uploaded'}</p>}</div>
                     </div>
                   </div>
                 )}

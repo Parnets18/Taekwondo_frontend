@@ -9,14 +9,23 @@ const CertificateVerification = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginTab, setLoginTab] = useState("email"); // 'email' | 'phone'
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
+  // Phone OTP state
+  const [loginPhone, setLoginPhone] = useState("");
+  const [loginOtp, setLoginOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [generatedOtp, setGeneratedOtp] = useState(null);
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [phoneError, setPhoneError] = useState("");
+  const otpTimerRef = React.useRef(null);
 
   // API base URL
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
 
   useEffect(() => {
     if (urlCode) {
@@ -741,6 +750,7 @@ const CertificateVerification = () => {
         {showLoginModal && (
           <div
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
             onClick={() => setShowLoginModal(false)}
           >
             <div
@@ -772,32 +782,117 @@ const CertificateVerification = () => {
                   <div
                     className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3"
                     style={{
-                      backgroundColor: "#fef2f2",
-                      border: "2px solid rgba(239, 68, 68, 0.1)",
+                      backgroundColor: "#eff6ff",
+                      border: "2px solid #006CB5",
                     }}
                   >
                     <svg
                       className="w-8 h-8"
-                      style={{ color: "#ef4444" }}
+                      style={{ color: "#006CB5" }}
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                  <h3 className="text-2xl font-bold mb-1" style={{ color: "#006CB5" }}>
                     Student Login
                   </h3>
-                  <p className="text-sm text-gray-600">
-                    Enter your email and password
+                  <p className="text-sm text-gray-500">
+                    Sign in to access your portal
                   </p>
+                </div>
+              </div>
+
+              {/* Tab Switcher */}
+              <div className="px-6 pt-4">
+                <div className="flex bg-gray-100 rounded-xl p-1">
+                  <button type="button" onClick={() => { setLoginTab("email"); setPhoneError(""); setError(""); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={loginTab === "email" ? { backgroundColor: "#006CB5", color: "#fff" } : { color: "#006CB5" }}>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    Email
+                  </button>
+                  <button type="button" onClick={() => { setLoginTab("phone"); setError(""); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={loginTab === "phone" ? { backgroundColor: "#006CB5", color: "#fff" } : { color: "#006CB5" }}>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    Phone OTP
+                  </button>
                 </div>
               </div>
 
               {/* Modal Body */}
               <div className="p-6">
-                <form
-                  onSubmit={async (e) => {
+                {loginTab === "phone" ? (
+                  <div>
+                    {phoneError && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{phoneError}</div>}
+                    <div className="mb-4">
+                      <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl px-4 py-3">
+                        <svg className="w-5 h-5 mr-3" style={{ color: "#006CB5" }} fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                        <input type="tel" value={loginPhone} onChange={(e) => { setLoginPhone(e.target.value); setPhoneError(""); }} placeholder="Enter 10-digit phone number" maxLength={10} disabled={otpSent} className="flex-1 bg-transparent outline-none text-gray-900 placeholder-gray-400" />
+                      </div>
+                    </div>
+                    {generatedOtp && (
+                      <div className="mb-4 p-3 rounded-xl flex items-center gap-3" style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe" }}>
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Your OTP</span>
+                        <span className="flex-1 text-center text-2xl font-black tracking-widest" style={{ color: "#006CB5" }}>{generatedOtp}</span>
+                        <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: "#dbeafe", color: "#3b82f6" }}>
+                          {Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, "0")}
+                        </span>
+                      </div>
+                    )}
+                    {otpSent && (
+                      <div className="mb-4">
+                        <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl px-4 py-3">
+                          <svg className="w-5 h-5 mr-3" style={{ color: "#006CB5" }} fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                          <input type="number" value={loginOtp} onChange={(e) => setLoginOtp(e.target.value)} placeholder="Enter 6-digit OTP" maxLength={6} className="flex-1 bg-transparent outline-none text-gray-900 placeholder-gray-400" />
+                        </div>
+                      </div>
+                    )}
+                    {!otpSent ? (
+                      <button type="button" disabled={loginLoading} onClick={async () => {
+                        if (!loginPhone || loginPhone.length < 10) { setPhoneError("Please enter a valid 10-digit phone number"); return; }
+                        setLoginLoading(true); setPhoneError("");
+                        try {
+                          const res = await axios.post(`${API_BASE_URL}/auth/check-phone`, { phone: loginPhone });
+                          if (res.data.status === "success") {
+                            const newOtp = String(Math.floor(100000 + Math.random() * 900000));
+                            setGeneratedOtp(newOtp); setOtpSent(true); setOtpTimer(300);
+                            otpTimerRef.current = setInterval(() => {
+                              setOtpTimer(prev => { if (prev <= 1) { clearInterval(otpTimerRef.current); setGeneratedOtp(null); return 0; } return prev - 1; });
+                            }, 1000);
+                          } else { setPhoneError("This number is not registered. Please contact your instructor."); }
+                        } catch { setPhoneError("This number is not registered. Please contact your instructor."); }
+                        finally { setLoginLoading(false); }
+                      }} className="w-full text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2" style={{ backgroundColor: "#006CB5" }}>
+                        {loginLoading ? <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div><span>Sending...</span></> : <span>Send OTP</span>}
+                      </button>
+                    ) : (
+                      <>
+                        <button type="button" disabled={loginLoading} onClick={async () => {
+                          if (!loginOtp || loginOtp.length !== 6) { setPhoneError("Please enter the 6-digit OTP"); return; }
+                          if (loginOtp !== generatedOtp) { setPhoneError("Incorrect OTP. Please try again."); return; }
+                          setLoginLoading(true); setPhoneError("");
+                          try {
+                            const res = await axios.post(`${API_BASE_URL}/auth/login-phone`, { phone: loginPhone });
+                            if (res.data.status === "success") {
+                              localStorage.setItem("studentToken", res.data.data.token);
+                              localStorage.setItem("studentData", JSON.stringify(res.data.data.user));
+                              window.location.href = "/student/dashboard";
+                            } else { setPhoneError("Login failed. Please try again."); setLoginLoading(false); }
+                          } catch { setPhoneError("Login failed. Could not connect to server."); setLoginLoading(false); }
+                        }} className="w-full text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 mb-3" style={{ backgroundColor: "#006CB5" }}>
+                          {loginLoading ? <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div><span>Verifying...</span></> : <span>Verify & Login</span>}
+                        </button>
+                        <button type="button" onClick={() => { setOtpSent(false); setLoginOtp(""); setGeneratedOtp(null); clearInterval(otpTimerRef.current); }} className="w-full text-center text-sm font-semibold py-2" style={{ color: "#006CB5" }}>
+                          Change number / Resend OTP
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <form onSubmit={async (e) => {
                     e.preventDefault();
                     setLoginLoading(true);
 
@@ -854,7 +949,7 @@ const CertificateVerification = () => {
                     <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl px-4 py-3">
                       <svg
                         className="w-5 h-5 mr-3"
-                        style={{ color: "#ef4444" }}
+                        style={{ color: "#006CB5" }}
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -876,7 +971,7 @@ const CertificateVerification = () => {
                     <div className="flex items-center bg-gray-50 border border-gray-300 rounded-xl px-4 py-3">
                       <svg
                         className="w-5 h-5 mr-3"
-                        style={{ color: "#ef4444" }}
+                        style={{ color: "#006CB5" }}
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -915,7 +1010,7 @@ const CertificateVerification = () => {
                     type="submit"
                     disabled={loginLoading}
                     className="w-full text-white px-6 py-3 rounded-xl text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-2"
-                    style={{ backgroundColor: "#ef4444" }}
+                    style={{ backgroundColor: "#006CB5" }}
                   >
                     {loginLoading ? (
                       <>
@@ -923,13 +1018,11 @@ const CertificateVerification = () => {
                         <span>Signing in...</span>
                       </>
                     ) : (
-                      <>
-                        <span>Login</span>
-                        <span>✨</span>
-                      </>
+                      <span>Login</span>
                     )}
                   </button>
                 </form>
+                )}
               </div>
             </div>
           </div>

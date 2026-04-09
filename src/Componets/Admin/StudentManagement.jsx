@@ -17,6 +17,7 @@ function StudentManagement() {
   const [aadharFile, setAadharFile] = useState(null);
   const [birthCertificatePreview, setBirthCertificatePreview] = useState(null);
   const [birthCertificateFile, setBirthCertificateFile] = useState(null);
+  const [fileViewer, setFileViewer] = useState(null); // { url, filename, type }
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -35,13 +36,42 @@ function StudentManagement() {
 
   // API base URL
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000"; // For static files like images
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:9000"; // For static files like images
 
   const getPhotoUrl = (photo) => {
     if (!photo) return '';
     if (photo.startsWith('http')) return photo;
     return `${BASE_URL}/${photo.replace(/^\//, '')}`;
+  };
+
+  const openFileViewer = (filePath) => {
+    const filename = filePath.split('/').pop();
+    const ext = filename.split('.').pop().toLowerCase();
+    // inline URL (no ?download) — browser renders it
+    const url = `${BASE_URL}/api/students/certificate/download/${filename}`;
+    const type = ext === 'pdf' ? 'pdf' : 'image';
+    setFileViewer({ url, filename, type });
+  };
+
+  const downloadFile = async (filePath) => {
+    const filename = filePath.includes('/') ? filePath.split('/').pop() : filePath;
+    const url = `${BASE_URL}/api/students/certificate/download/${filename}?download=1`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('File not found');
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename; // preserves original extension
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+    } catch {
+      alert('Failed to download file. Please try again.');
+    }
   };
 
   // Helper function to calculate age
@@ -280,7 +310,12 @@ function StudentManagement() {
     }
 
     try {
-      // Send FormData directly (includes photo file if uploaded)
+      // Log what's being sent
+      const entries = [...formData.entries()];
+      console.log('📤 Sending FormData entries:', entries.map(([k, v]) => 
+        v instanceof File ? `${k}: File(${v.name}, ${v.size}b)` : `${k}: ${String(v).substring(0, 50)}`
+      ));
+
       const response = await fetch(`${API_BASE_URL}/students/${studentId}`, {
         method: "PUT",
         headers: {
@@ -615,30 +650,15 @@ function StudentManagement() {
   const handleEditStudent = (formData) => {
     if (!selectedStudent) return;
 
-    // Clean up FormData - remove empty values for optional fields
-    const cleanedFormData = new FormData();
-
+    // Log all entries including files
     for (let [key, value] of formData.entries()) {
-      // Skip empty values for optional fields (but keep required fields even if empty)
-      if (value && value !== "" && value !== "null" && value !== "undefined") {
-        cleanedFormData.append(key, value);
-      } else if (
-        [
-          "fullName",
-          "phone",
-          "email",
-          "address",
-          "admissionNumber",
-          "joiningDate",
-        ].includes(key)
-      ) {
-        // Keep required fields even if empty (will be validated by backend)
-        // Note: password is intentionally not in this list - empty password means "don't update"
-        cleanedFormData.append(key, value);
+      if (value instanceof File) {
+        console.log(`📎 File in formData: ${key} = ${value.name} (${value.size}b)`);
       }
     }
 
-    updateStudent(selectedStudent.id, cleanedFormData);
+    // Send formData directly — don't rebuild it, files get lost when iterating
+    updateStudent(selectedStudent.id, formData);
   };
 
   if (loading) {
@@ -2050,16 +2070,7 @@ function StudentManagement() {
                                       {tp.certificateFile ? (
                                         <button
                                           onClick={() => {
-                                            const filename = tp.certificateFile
-                                              .split("/")
-                                              .pop();
-                                            const link =
-                                              document.createElement("a");
-                                            link.href = `${BASE_URL}/api/students/certificate/download/${filename}`;
-                                            link.download = filename;
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            document.body.removeChild(link);
+                                            downloadFile(tp.certificateFile);
                                           }}
                                           className="inline-flex items-center gap-1 text-xs text-white px-3 py-1.5 rounded hover:opacity-90 w-full justify-center"
                                           style={{ backgroundColor: "#006CB5" }}
@@ -2096,43 +2107,61 @@ function StudentManagement() {
               {/* Exam Dates */}
               <div className="bg-slate-50 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-slate-800 mb-4">
-                  Exam Dates
+                  Exam Dates & Certificates
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="space-y-2">
                   {[
-                    { label: 'White Belt', field: 'examWhiteBelt', color: '#ffffff', border: true },
-                    { label: 'White / Yellow Stripe', field: 'examWhiteYellowStripe', gradient: 'conic-gradient(#ffffff 0% 70%, #facc15 70% 100%)', border: true },
-                    { label: 'Yellow Belt', field: 'examYellowBelt', color: '#facc15' },
-                    { label: 'Yellow / Green Stripe', field: 'examYellowStripe', gradient: 'conic-gradient(#facc15 0% 70%, #22c55e 70% 100%)' },
-                    { label: 'Green Belt', field: 'examGreenBelt', color: '#22c55e' },
-                    { label: 'Green / Blue Stripe', field: 'examGreenStripe', gradient: 'conic-gradient(#22c55e 0% 70%, #3b82f6 70% 100%)' },
-                    { label: 'Blue Belt', field: 'examBlueBelt', color: '#3b82f6' },
-                    { label: 'Blue / Red Stripe', field: 'examBlueStripe', gradient: 'conic-gradient(#3b82f6 0% 70%, #ef4444 70% 100%)' },
-                    { label: 'Red Belt', field: 'examRedBelt', color: '#ef4444' },
-                    { label: 'Red / Black Stripe', field: 'examRedStripe', gradient: 'conic-gradient(#ef4444 0% 70%, #1f2937 70% 100%)' },
-                    { label: 'Black Belt 1st Dan (Stripe)', field: 'examBlackStripe', gradient: 'conic-gradient(#1f2937 0% 70%, #ef4444 70% 100%)' },
-                    { label: 'Black Belt 1st Dan', field: 'examBlackBelt', color: '#1f2937' },
-                    { label: 'Black Belt 2nd Dan', field: 'examBlack2Dan', color: '#1f2937' },
-                    { label: 'Black Belt 3rd Dan', field: 'examBlack3Dan', color: '#1f2937' },
-                    { label: 'Black Belt 4th Dan', field: 'examBlack4Dan', color: '#1f2937' },
-                    { label: 'Black Belt 5th Dan', field: 'examBlack5Dan', color: '#1f2937' },
-                    { label: 'Black Belt 6th Dan', field: 'examBlack6Dan', color: '#1f2937' },
-                    { label: 'Black Belt 7th Dan', field: 'examBlack7Dan', color: '#1f2937' },
-                    { label: 'Black Belt 8th Dan', field: 'examBlack8Dan', color: '#1f2937' },
-                    { label: 'Black Belt 9th Dan', field: 'examBlack9Dan', color: '#1f2937' },
-                  ].filter(({ field }) => selectedStudent[field])
-                  .map(({ label, field, color, gradient, border }) => (
-                    <div key={field} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-slate-200">
-                      <span
-                        className="w-4 h-4 rounded-full flex-shrink-0"
-                        style={{ background: gradient || color, border: border ? '1px solid #d1d5db' : 'none' }}
-                      />
-                      <div className="min-w-0">
+                    { label: 'White Belt', dateField: 'examWhiteBelt', certCodeField: 'examWhiteBeltCertCode', certFileField: 'examWhiteBeltCertFile', color: '#ffffff', border: true },
+                    { label: 'White / Yellow Stripe', dateField: 'examWhiteYellowStripe', certCodeField: 'examWhiteYellowStripeCertCode', certFileField: 'examWhiteYellowStripeCertFile', gradient: 'conic-gradient(#ffffff 0% 70%, #facc15 70% 100%)', border: true },
+                    { label: 'Yellow Belt', dateField: 'examYellowBelt', certCodeField: 'examYellowBeltCertCode', certFileField: 'examYellowBeltCertFile', color: '#facc15' },
+                    { label: 'Yellow / Green Stripe', dateField: 'examYellowStripe', certCodeField: 'examYellowStripeCertCode', certFileField: 'examYellowStripeCertFile', gradient: 'conic-gradient(#facc15 0% 70%, #22c55e 70% 100%)' },
+                    { label: 'Green Belt', dateField: 'examGreenBelt', certCodeField: 'examGreenBeltCertCode', certFileField: 'examGreenBeltCertFile', color: '#22c55e' },
+                    { label: 'Green / Blue Stripe', dateField: 'examGreenStripe', certCodeField: 'examGreenStripeCertCode', certFileField: 'examGreenStripeCertFile', gradient: 'conic-gradient(#22c55e 0% 70%, #3b82f6 70% 100%)' },
+                    { label: 'Blue Belt', dateField: 'examBlueBelt', certCodeField: 'examBlueBeltCertCode', certFileField: 'examBlueBeltCertFile', color: '#3b82f6' },
+                    { label: 'Blue / Red Stripe', dateField: 'examBlueStripe', certCodeField: 'examBlueStripeCertCode', certFileField: 'examBlueStripeCertFile', gradient: 'conic-gradient(#3b82f6 0% 70%, #ef4444 70% 100%)' },
+                    { label: 'Red Belt', dateField: 'examRedBelt', certCodeField: 'examRedBeltCertCode', certFileField: 'examRedBeltCertFile', color: '#ef4444' },
+                    { label: 'Red / Black Stripe', dateField: 'examRedStripe', certCodeField: 'examRedStripeCertCode', certFileField: 'examRedStripeCertFile', gradient: 'conic-gradient(#ef4444 0% 70%, #1f2937 70% 100%)' },
+                    { label: 'Black Belt 1st Dan (Stripe)', dateField: 'examBlackStripe', certCodeField: 'examBlackStripeCertCode', certFileField: 'examBlackStripeCertFile', gradient: 'conic-gradient(#1f2937 0% 70%, #ef4444 70% 100%)' },
+                    { label: 'Black Belt 1st Dan', dateField: 'examBlackBelt', certCodeField: 'examBlackBeltCertCode', certFileField: 'examBlackBeltCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 2nd Dan', dateField: 'examBlack2Dan', certCodeField: 'examBlack2DanCertCode', certFileField: 'examBlack2DanCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 3rd Dan', dateField: 'examBlack3Dan', certCodeField: 'examBlack3DanCertCode', certFileField: 'examBlack3DanCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 4th Dan', dateField: 'examBlack4Dan', certCodeField: 'examBlack4DanCertCode', certFileField: 'examBlack4DanCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 5th Dan', dateField: 'examBlack5Dan', certCodeField: 'examBlack5DanCertCode', certFileField: 'examBlack5DanCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 6th Dan', dateField: 'examBlack6Dan', certCodeField: 'examBlack6DanCertCode', certFileField: 'examBlack6DanCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 7th Dan', dateField: 'examBlack7Dan', certCodeField: 'examBlack7DanCertCode', certFileField: 'examBlack7DanCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 8th Dan', dateField: 'examBlack8Dan', certCodeField: 'examBlack8DanCertCode', certFileField: 'examBlack8DanCertFile', color: '#1f2937' },
+                    { label: 'Black Belt 9th Dan', dateField: 'examBlack9Dan', certCodeField: 'examBlack9DanCertCode', certFileField: 'examBlack9DanCertFile', color: '#1f2937' },
+                  ].filter(({ dateField, certCodeField, certFileField }) =>
+                    selectedStudent[dateField] || selectedStudent[certCodeField] || selectedStudent[certFileField]
+                  ).map(({ label, dateField, certCodeField, certFileField, color, gradient, border }) => (
+                    <div key={dateField} className="flex items-center gap-3 bg-white rounded-lg px-3 py-2 border border-slate-200">
+                      <span className="w-4 h-4 rounded-full flex-shrink-0" style={{ background: gradient || color, border: border ? '1px solid #d1d5db' : 'none' }} />
+                      <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-slate-500">{label}</p>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {new Date(selectedStudent[field]).toLocaleDateString()}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-3 mt-0.5">
+                          {selectedStudent[dateField] && (
+                            <p className="text-sm font-semibold text-slate-900">{new Date(selectedStudent[dateField]).toLocaleDateString()}</p>
+                          )}
+                          {selectedStudent[certCodeField] && (
+                            <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">#{selectedStudent[certCodeField]}</span>
+                          )}
+                        </div>
                       </div>
+                      {selectedStudent[certFileField] && (
+                        <button
+                          onClick={() => {
+                            downloadFile(selectedStudent[certFileField]);
+                          }}
+                          className="flex-shrink-0 inline-flex items-center gap-1 text-xs text-white px-3 py-1.5 rounded hover:opacity-90"
+                          style={{ backgroundColor: '#006CB5' }}
+                          title="Download Certificate"
+                        >
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                          Download
+                        </button>
+                      )}
                     </div>
                   ))}
                   {![
@@ -2142,7 +2171,7 @@ function StudentManagement() {
                     'examBlack2Dan','examBlack3Dan','examBlack4Dan','examBlack5Dan',
                     'examBlack6Dan','examBlack7Dan','examBlack8Dan','examBlack9Dan'
                   ].some(f => selectedStudent[f]) && (
-                    <p className="text-sm text-slate-400 col-span-2">No exam dates recorded yet.</p>
+                    <p className="text-sm text-slate-400">No exam dates recorded yet.</p>
                   )}
                 </div>
               </div>
@@ -2170,6 +2199,58 @@ function StudentManagement() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File Viewer Modal */}
+      {fileViewer && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[60] p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setFileViewer(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200">
+              <p className="text-sm font-semibold text-slate-700 truncate max-w-xs">{fileViewer.filename}</p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => downloadFile(fileViewer.filename)}
+                  className="inline-flex items-center gap-1 text-xs text-white px-3 py-1.5 rounded hover:opacity-90"
+                  style={{ backgroundColor: '#006CB5' }}
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                  Save
+                </button>
+                <button
+                  onClick={() => setFileViewer(null)}
+                  className="text-slate-500 hover:text-slate-800 text-xl font-bold px-2"
+                >✕</button>
+              </div>
+            </div>
+            {/* Content */}
+            <div className="flex-1 overflow-auto flex items-center justify-center bg-gray-100 p-4">
+              {fileViewer.type === 'pdf' ? (
+                <iframe
+                  src={fileViewer.url}
+                  title={fileViewer.filename}
+                  className="w-full rounded"
+                  style={{ height: '70vh', border: 'none' }}
+                />
+              ) : (
+                <img
+                  src={fileViewer.url}
+                  alt={fileViewer.filename}
+                  className="max-w-full max-h-[70vh] object-contain rounded shadow"
+                />
+              )}
             </div>
           </div>
         </div>

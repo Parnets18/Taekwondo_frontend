@@ -29,8 +29,8 @@ function Home() {
   const [aboutSection, setAboutSection] = useState(null);
   const [loadingAbout, setLoadingAbout] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:9000';
 
   // Fetch banners from API
   useEffect(() => {
@@ -243,9 +243,9 @@ function Home() {
 
       {/* Hero Section - Only show if banners are available */}
       {loadingBanners ? (
-        <section className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-gradient-to-br from-blue-50 via-white to-sky-50">
+        <section className="hero-background mobile-hero-fix relative flex items-center bg-gradient-to-br from-blue-50 via-white to-sky-50" style={{ minHeight: '80vh' }}>
           <div className="relative z-10 max-w-7xl mx-auto px-4 w-full h-full">
-            <div className="flex justify-start items-center min-h-screen pt-16">
+            <div className="flex justify-start items-start pt-16 sm:pt-20" style={{ minHeight: '80vh' }}>
               <div className="text-gray-800 text-center w-full">
                 <div className="animate-pulse">
                   <div className="h-12 bg-gray-300 bg-opacity-40 rounded w-3/4 mx-auto mb-4"></div>
@@ -258,17 +258,18 @@ function Home() {
         </section>
       ) : heroSlides.length > 0 ? (
         <section 
-          className="hero-background mobile-hero-fix relative min-h-screen flex items-center bg-cover bg-center bg-no-repeat"
+          className="hero-background mobile-hero-fix relative flex items-center bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${heroSlides[currentSlide]?.image})`,
             backgroundPosition: 'center center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'scroll'
+            backgroundAttachment: window.innerWidth <= 768 ? 'scroll' : 'scroll',
+            minHeight: '80vh'
           }}
         >
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full">
-            <div className="flex justify-start items-center min-h-screen pt-16 sm:pt-20">
+            <div className="flex justify-start items-start pt-16 sm:pt-20" style={{ minHeight: '80vh' }}>
               <div className="text-white text-left max-w-lg hero-content">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 leading-tight" style={{ color: 'white' }}>
                   {heroSlides[currentSlide].title.split(' ').map((word, index) => (
@@ -700,7 +701,9 @@ function Home() {
                       src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://play.google.com/store" 
                       alt="Android QR Code"
                       className="w-32 h-32"
+                      onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
                     />
+                    <div style={{display:'none'}} className="w-32 h-32 bg-gray-200 items-center justify-center rounded text-xs text-gray-500">QR Code</div>
                   </div>
                   <p className="text-gray-600 mb-4 text-xs">Scan to download</p>
                   <a
@@ -709,11 +712,13 @@ function Home() {
                     rel="noopener noreferrer"
                     className="inline-block transform hover:scale-105 transition-transform"
                   >
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                    <img
+                      src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
                       alt="Get it on Google Play"
-                      className="h-12"
+                      className="h-14"
+                      onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='inline-flex'; }}
                     />
+                    <span style={{display:'none', backgroundColor: '#006CB5'}} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold">Get it on Google Play</span>
                   </a>
                 </div>
               </div>
@@ -727,7 +732,9 @@ function Home() {
                       src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://apps.apple.com" 
                       alt="iOS QR Code"
                       className="w-32 h-32"
+                      onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
                     />
+                    <div style={{display:'none'}} className="w-32 h-32 bg-gray-200 items-center justify-center rounded text-xs text-gray-500">QR Code</div>
                   </div>
                   <p className="text-gray-600 mb-4 text-xs">Scan to download</p>
                   <a
@@ -736,11 +743,13 @@ function Home() {
                     rel="noopener noreferrer"
                     className="inline-block transform hover:scale-105 transition-transform"
                   >
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
+                    <img
+                      src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg"
                       alt="Download on the App Store"
-                      className="h-12"
+                      className="h-14"
+                      onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='inline-flex'; }}
                     />
+                    <span style={{display:'none', backgroundColor: '#1a1a1a'}} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold">Download on the App Store</span>
                   </a>
                 </div>
               </div>
@@ -757,7 +766,7 @@ function RecentPromotions() {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -918,7 +927,7 @@ function MembersBirthdaysCard() {
   const [birthdays, setBirthdays] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
 
   useEffect(() => {
     const fetchBirthdays = async () => {

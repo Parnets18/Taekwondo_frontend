@@ -8,8 +8,8 @@ function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:9000';
 
   const categories = [
     'All', 
@@ -49,9 +49,11 @@ function Gallery() {
     setSelectedPhoto(null);
   };
 
+  const getPhotoCategory = (photo) => photo.category || 'Our Memories';
+
   const filteredPhotos = selectedCategory === 'All' 
     ? photos 
-    : photos.filter(photo => photo.category === selectedCategory);
+    : photos.filter(photo => getPhotoCategory(photo) === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,19 +88,23 @@ function Gallery() {
 
         {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
-                selectedCategory === category
-                  ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          {categories.map((category) => {
+            const count = category === 'All' ? photos.length : photos.filter(p => getPhotoCategory(p) === category).length;
+            return (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+                  selectedCategory === category
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200'
+                }`}
+              >
+                {category}
+                <span className="ml-2 text-xs opacity-75">({count})</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -133,11 +139,13 @@ function Gallery() {
                   />
                 </div>
                 {/* Category Badge */}
-                <div className="absolute top-3 right-3">
-                  <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-lg">
-                    {photo.category || 'All'}
-                  </span>
-                </div>
+                {photo.category && (
+                  <div className="absolute top-3 right-3">
+                    <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-lg">
+                      {getPhotoCategory(photo)}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
