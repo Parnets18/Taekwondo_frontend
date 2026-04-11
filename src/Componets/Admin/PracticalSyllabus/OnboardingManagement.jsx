@@ -30,7 +30,32 @@ export default function OnboardingManagement() {
     try {
       setLoading(true);
       const res = await axios.get(`${API_BASE_URL}/onboarding`, { headers: getAuthHeaders() });
-      setSlides(res.data || []);
+      
+      // Process slides to ensure proper image URLs
+      const processedSlides = (res.data || []).map(slide => {
+        let imageUrl = null;
+        if (slide.image) {
+          if (slide.image.startsWith('http')) {
+            // Already a full URL
+            imageUrl = slide.image;
+          } else if (slide.image.includes('uploads')) {
+            // Extract relative path from absolute path
+            const uploadsIndex = slide.image.indexOf('uploads');
+            const relativePath = slide.image.substring(uploadsIndex);
+            imageUrl = `${API_BASE_URL.replace('/api', '')}/${relativePath}`;
+          } else {
+            // Assume it's already a relative path
+            imageUrl = `${API_BASE_URL.replace('/api', '')}/${slide.image}`;
+          }
+        }
+        
+        return {
+          ...slide,
+          image: imageUrl
+        };
+      });
+      
+      setSlides(processedSlides);
     } catch {
       // If endpoint doesn't exist yet, start with empty
       setSlides([]);
@@ -59,7 +84,22 @@ export default function OnboardingManagement() {
       : [''],
       image: slide.image || null,
     });
-    setImagePreview(slide.image ? slide.image : null);
+    
+    // Set image preview with proper URL construction
+    let imagePreviewUrl = null;
+    if (slide.image) {
+      if (slide.image.startsWith('http')) {
+        imagePreviewUrl = slide.image;
+      } else if (slide.image.includes('uploads')) {
+        const uploadsIndex = slide.image.indexOf('uploads');
+        const relativePath = slide.image.substring(uploadsIndex);
+        imagePreviewUrl = `${API_BASE_URL.replace('/api', '')}/${relativePath}`;
+      } else {
+        imagePreviewUrl = `${API_BASE_URL.replace('/api', '')}/${slide.image}`;
+      }
+    }
+    
+    setImagePreview(imagePreviewUrl);
     setImageFile(null);
     setShowForm(true);
     setError('');
