@@ -31,7 +31,7 @@ export default function PracticeSuitManagement() {
   const [deleteId, setDeleteId] = useState(null);
   const [viewItem, setViewItem] = useState(null);
   const [form, setForm] = useState(EMPTY);
-  const [points, setPoints] = useState(['']);
+  const [headingPointGroups, setHeadingPointGroups] = useState([{ heading: '', points: [''] }]);
   const [imgFiles, setImgFiles] = useState([]);
   const [imgPreviews, setImgPreviews] = useState([]);
 
@@ -48,7 +48,7 @@ export default function PracticeSuitManagement() {
   const openAdd = () => {
     setEditing(null);
     setForm({ ...EMPTY, order: items.length });
-    setPoints(['']);
+    setHeadingPointGroups([{ heading: '', points: [''] }]);
     setImgFiles([]); setImgPreviews([]);
     setShowModal(true);
   };
@@ -56,7 +56,7 @@ export default function PracticeSuitManagement() {
   const openEdit = (item) => {
     setEditing(item);
     setForm({ title: item.title || '', subtitle: item.subtitle || '', description: item.description || '', order: item.order });
-    setPoints(item.points?.length ? item.points : ['']);
+    setHeadingPointGroups(item.headingPointGroups?.length ? item.headingPointGroups : [{ heading: '', points: [''] }]);
     setImgFiles([]);
     setImgPreviews((item.images || []).map(url => ({ url: `${BASE_URL}${url}`, isExisting: true, path: url })));
     setShowModal(true);
@@ -65,7 +65,7 @@ export default function PracticeSuitManagement() {
   const save = async () => {
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-    fd.append('points', JSON.stringify(points.filter(Boolean)));
+    fd.append('headingPointGroups', JSON.stringify(headingPointGroups.filter(group => group.heading || group.points.some(Boolean))));
     const existingPaths = imgPreviews.filter(p => p.isExisting).map(p => p.path);
     fd.append('existingImages', JSON.stringify(existingPaths));
     imgFiles.forEach(f => fd.append('images', f));
@@ -112,7 +112,7 @@ export default function PracticeSuitManagement() {
               <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">Title</th>
               <th className="px-4 py-3">Subtitle</th>
-              <th className="px-4 py-3">Points</th>
+              <th className="px-4 py-3">Groups</th>
               <th className="px-4 py-3">Images</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr></thead>
@@ -122,7 +122,7 @@ export default function PracticeSuitManagement() {
                   <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                   <td className="px-4 py-3 font-semibold text-gray-800">{item.title || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{item.subtitle || '—'}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{(item.points || []).length}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{(item.headingPointGroups || []).length}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{(item.images || []).length}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-1.5 justify-end items-center">
@@ -170,15 +170,53 @@ export default function PracticeSuitManagement() {
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Points</label>
-                  <button onClick={() => setPoints([...points, ''])} className="text-xs text-blue-600 hover:underline">+ Add Point</button>
+                  <label className="text-sm font-semibold text-gray-700">Heading & Points Groups</label>
+                  <button onClick={() => setHeadingPointGroups([...headingPointGroups, { heading: '', points: [''] }])} 
+                    className="text-xs text-blue-600 hover:underline">+ Add Group</button>
                 </div>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-2">
-                  {points.map((p, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder={`Point ${i + 1}`}
-                        value={p} onChange={e => setPoints(points.map((v, j) => j === i ? e.target.value : v))} />
-                      {points.length > 1 && <button onClick={() => setPoints(points.filter((_, j) => j !== i))} className="text-red-400 text-xs px-1">✕</button>}
+                <div className="space-y-4">
+                  {headingPointGroups.map((group, groupIdx) => (
+                    <div key={groupIdx} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold text-gray-600">Group {groupIdx + 1}</span>
+                        {headingPointGroups.length > 1 && (
+                          <button onClick={() => setHeadingPointGroups(headingPointGroups.filter((_, i) => i !== groupIdx))}
+                            className="text-red-400 text-xs px-1">Remove Group</button>
+                        )}
+                      </div>
+                      <div className="mb-3">
+                        <input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" 
+                          placeholder="Heading (optional)"
+                          value={group.heading} 
+                          onChange={e => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                            i === groupIdx ? { ...g, heading: e.target.value } : g
+                          ))} />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs text-gray-500">Points</span>
+                          <button onClick={() => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                            i === groupIdx ? { ...g, points: [...g.points, ''] } : g
+                          ))} className="text-xs text-blue-600 hover:underline">+ Add Point</button>
+                        </div>
+                        <div className="space-y-2">
+                          {group.points.map((point, pointIdx) => (
+                            <div key={pointIdx} className="flex gap-2">
+                              <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" 
+                                placeholder={`Point ${pointIdx + 1}`}
+                                value={point} 
+                                onChange={e => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                                  i === groupIdx ? { ...g, points: g.points.map((p, j) => j === pointIdx ? e.target.value : p) } : g
+                                ))} />
+                              {group.points.length > 1 && (
+                                <button onClick={() => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                                  i === groupIdx ? { ...g, points: g.points.filter((_, j) => j !== pointIdx) } : g
+                                ))} className="text-red-400 text-xs px-1">✕</button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -186,15 +224,19 @@ export default function PracticeSuitManagement() {
 
               <div>
                 <label className="text-sm font-semibold text-gray-700 block mb-2">Images</label>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   {imgPreviews.map((p, i) => (
-                    <div key={i} className="relative">
-                      <img src={p.url} className="w-full h-36 object-contain rounded-lg border border-gray-200 bg-gray-50" />
-                      <button onClick={() => setImgPreviews(imgPreviews.filter((_, j) => j !== i))}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">×</button>
+                    <div key={i} className="relative border border-gray-200 rounded-lg p-3 bg-gray-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold text-gray-600">Image {i + 1}</span>
+                        <button onClick={() => setImgPreviews(imgPreviews.filter((_, j) => j !== i))}
+                          className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">×</button>
+                      </div>
+                      <img src={p.url} className="w-full h-48 object-contain rounded-lg border border-gray-200 bg-white" alt={`Image ${i + 1}`} />
+                      <p className="text-xs text-gray-500 mt-2 text-center">Image {i + 1}</p>
                     </div>
                   ))}
-                  <label className="cursor-pointer px-3 py-2 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 text-xs text-center block hover:border-[#006CB5] hover:text-[#006CB5]">
+                  <label className="cursor-pointer px-4 py-3 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 text-sm text-center block hover:border-[#006CB5] hover:text-[#006CB5] transition-colors">
                     + Add Image
                     <input type="file" accept="image/*" multiple className="hidden" onChange={e => {
                       const files = Array.from(e.target.files);
@@ -236,24 +278,28 @@ export default function PracticeSuitManagement() {
                 <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Description</p>
                 <p className="text-sm text-gray-800 whitespace-pre-wrap">{viewItem.description || '—'}</p>
               </div>
-              {(viewItem.points || []).length > 0 && (
+              {viewItem.headingPointGroups?.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Points</p>
-                  <ul className="space-y-1">
-                    {viewItem.points.map((pt, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-gray-700">
-                        <span className="text-gray-400">{i + 1}.</span> {pt}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Content Groups</p>
+                  {viewItem.headingPointGroups.map((group, i) => (
+                    <div key={i} className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      {group.heading && <p className="text-sm font-bold text-gray-700 mb-2">{group.heading}</p>}
+                      {group.points?.map((point, j) => (
+                        <p key={j} className="text-sm text-gray-600 mb-1">• {point}</p>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               )}
               {(viewItem.images || []).length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Images</p>
-                  <div className="flex flex-col gap-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Images ({viewItem.images.length})</p>
+                  <div className="space-y-3">
                     {viewItem.images.map((url, i) => (
-                      <img key={i} src={`${BASE_URL}${url}`} className="w-full h-40 object-contain rounded-lg border border-gray-200 bg-gray-50" />
+                      <div key={i} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <p className="text-sm font-semibold text-gray-600 mb-2">Image {i + 1}</p>
+                        <img src={`${BASE_URL}${url}`} className="w-full h-48 object-contain rounded-lg border border-gray-200 bg-white" alt={`Image ${i + 1}`} />
+                      </div>
                     ))}
                   </div>
                 </div>

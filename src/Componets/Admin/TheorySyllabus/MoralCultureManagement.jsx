@@ -31,7 +31,7 @@ export default function MoralCultureManagement() {
   const [deleteId, setDeleteId] = useState(null);
   const [viewItem, setViewItem] = useState(null);
   const [form, setForm] = useState(EMPTY);
-  const [points, setPoints] = useState(['']);
+  const [headingPointGroups, setHeadingPointGroups] = useState([{ heading: '', points: [''] }]);
   const [imgFiles, setImgFiles] = useState([]);
   const [imgPreviews, setImgPreviews] = useState([]);
 
@@ -70,7 +70,7 @@ export default function MoralCultureManagement() {
   const openAdd = () => {
     setEditing(null);
     setForm({ ...EMPTY, order: items.length, tab: tabs[0] || '' });
-    setPoints(['']);
+    setHeadingPointGroups([{ heading: '', points: [''] }]);
     setImgFiles([]); setImgPreviews([]);
     setShowModal(true);
   };
@@ -78,7 +78,7 @@ export default function MoralCultureManagement() {
   const openEdit = (item) => {
     setEditing(item);
     setForm({ tab: item.tab || '', title: item.title || '', subtitle: item.subtitle || '', description: item.description || '', order: item.order });
-    setPoints(item.points?.length ? item.points : ['']);
+    setHeadingPointGroups(item.headingPointGroups?.length ? item.headingPointGroups : [{ heading: '', points: [''] }]);
     setImgFiles([]);
     setImgPreviews((item.images || []).map(url => ({ url: `${BASE_URL}${url}`, isExisting: true, path: url })));
     setShowModal(true);
@@ -87,7 +87,7 @@ export default function MoralCultureManagement() {
   const save = async () => {
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-    fd.append('points', JSON.stringify(points.filter(Boolean)));
+    fd.append('headingPointGroups', JSON.stringify(headingPointGroups.filter(group => group.heading || group.points.some(Boolean))));
     const existingPaths = imgPreviews.filter(p => p.isExisting).map(p => p.path);
     fd.append('existingImages', JSON.stringify(existingPaths));
     imgFiles.forEach(f => fd.append('images', f));
@@ -163,7 +163,7 @@ export default function MoralCultureManagement() {
               <th className="px-4 py-3">Tab</th>
               <th className="px-4 py-3">Title</th>
               <th className="px-4 py-3">Subtitle</th>
-              <th className="px-4 py-3">Points</th>
+              <th className="px-4 py-3">Groups</th>
               <th className="px-4 py-3">Images</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr></thead>
@@ -178,7 +178,7 @@ export default function MoralCultureManagement() {
                   </td>
                   <td className="px-4 py-3 font-semibold text-gray-800">{item.title || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{item.subtitle || '—'}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{(item.points || []).length}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">{(item.headingPointGroups || []).length}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{(item.images || []).length}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-1.5 justify-end items-center">
@@ -271,15 +271,53 @@ export default function MoralCultureManagement() {
               </div>
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Points</label>
-                  <button onClick={() => setPoints([...points, ''])} className="text-xs text-blue-600 hover:underline">+ Add Point</button>
+                  <label className="text-sm font-semibold text-gray-700">Heading & Points Groups</label>
+                  <button onClick={() => setHeadingPointGroups([...headingPointGroups, { heading: '', points: [''] }])} 
+                    className="text-xs text-blue-600 hover:underline">+ Add Group</button>
                 </div>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-2">
-                  {points.map((p, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder={`Point ${i + 1}`}
-                        value={p} onChange={e => setPoints(points.map((v, j) => j === i ? e.target.value : v))} />
-                      {points.length > 1 && <button onClick={() => setPoints(points.filter((_, j) => j !== i))} className="text-red-400 text-xs px-1">✕</button>}
+                <div className="space-y-4">
+                  {headingPointGroups.map((group, groupIdx) => (
+                    <div key={groupIdx} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold text-gray-600">Group {groupIdx + 1}</span>
+                        {headingPointGroups.length > 1 && (
+                          <button onClick={() => setHeadingPointGroups(headingPointGroups.filter((_, i) => i !== groupIdx))}
+                            className="text-red-400 text-xs px-1">Remove Group</button>
+                        )}
+                      </div>
+                      <div className="mb-3">
+                        <input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" 
+                          placeholder="Heading (optional)"
+                          value={group.heading} 
+                          onChange={e => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                            i === groupIdx ? { ...g, heading: e.target.value } : g
+                          ))} />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs text-gray-500">Points</span>
+                          <button onClick={() => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                            i === groupIdx ? { ...g, points: [...g.points, ''] } : g
+                          ))} className="text-xs text-blue-600 hover:underline">+ Add Point</button>
+                        </div>
+                        <div className="space-y-2">
+                          {group.points.map((point, pointIdx) => (
+                            <div key={pointIdx} className="flex gap-2">
+                              <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" 
+                                placeholder={`Point ${pointIdx + 1}`}
+                                value={point} 
+                                onChange={e => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                                  i === groupIdx ? { ...g, points: g.points.map((p, j) => j === pointIdx ? e.target.value : p) } : g
+                                ))} />
+                              {group.points.length > 1 && (
+                                <button onClick={() => setHeadingPointGroups(headingPointGroups.map((g, i) => 
+                                  i === groupIdx ? { ...g, points: g.points.filter((_, j) => j !== pointIdx) } : g
+                                ))} className="text-red-400 text-xs px-1">✕</button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -329,10 +367,17 @@ export default function MoralCultureManagement() {
               {viewItem.title    && <p className="text-xl font-bold text-gray-800">{viewItem.title}</p>}
               {viewItem.subtitle && <p className="text-base font-semibold text-[#006CB5]">{viewItem.subtitle}</p>}
               {viewItem.description && <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{viewItem.description}</p>}
-              {viewItem.points?.length > 0 && (
+              {viewItem.headingPointGroups?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase mb-2">Points</p>
-                  {viewItem.points.map((p, i) => <p key={i} className="text-sm text-gray-600 mb-1">• {p}</p>)}
+                  <p className="text-xs font-bold text-gray-500 uppercase mb-3">Content Groups</p>
+                  {viewItem.headingPointGroups.map((group, i) => (
+                    <div key={i} className="mb-4">
+                      {group.heading && <p className="text-sm font-bold text-gray-700 mb-2">{group.heading}</p>}
+                      {group.points?.map((point, j) => (
+                        <p key={j} className="text-sm text-gray-600 mb-1">• {point}</p>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               )}
               {viewItem.images?.length > 0 && (

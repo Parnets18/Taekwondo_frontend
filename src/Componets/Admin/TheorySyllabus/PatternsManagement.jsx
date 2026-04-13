@@ -90,7 +90,9 @@ export default function PatternsManagement() {
   // ── Pattern CRUD ─────────────────────────────────────────────────────────
   const openAddPattern = () => {
     setEditingPattern(null);
-    setPatternForm({ name: '', moves: '', order: patterns.length });
+    // Set order to be higher than the highest existing order
+    const maxOrder = patterns.length > 0 ? Math.max(...patterns.map(p => p.order || 0)) : -1;
+    setPatternForm({ name: '', moves: '', order: maxOrder + 1 });
     setPatternImgFile(null); setPatternImgPreview(null);
     setShowPatternModal(true);
   };
@@ -127,14 +129,22 @@ export default function PatternsManagement() {
     const idx = sorted.findIndex(x => x._id === p._id);
     const swapIdx = idx + dir;
     if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    
+    // Get the actual order values to swap
+    const currentOrder = sorted[idx].order ?? idx;
+    const swapOrder = sorted[swapIdx].order ?? swapIdx;
+    
+    // Update local state immediately for better UX
     setPatterns(prev => prev.map(x => {
-      if (x._id === sorted[idx]._id) return { ...x, order: swapIdx };
-      if (x._id === sorted[swapIdx]._id) return { ...x, order: idx };
+      if (x._id === sorted[idx]._id) return { ...x, order: swapOrder };
+      if (x._id === sorted[swapIdx]._id) return { ...x, order: currentOrder };
       return x;
     }));
+    
+    // Update backend
     await Promise.all([
-      fetch(`${API_BASE}/patterns/${sorted[idx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: swapIdx }) }),
-      fetch(`${API_BASE}/patterns/${sorted[swapIdx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: idx }) }),
+      fetch(`${API_BASE}/patterns/${sorted[idx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: swapOrder }) }),
+      fetch(`${API_BASE}/patterns/${sorted[swapIdx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: currentOrder }) }),
     ]);
     fetchPatterns();
   };
@@ -766,7 +776,9 @@ function SlideSection({ slideKey }) {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ title: '', subtitle: '', description: '', name: '', moves: '' });
+    // Set order to be higher than the highest existing order
+    const maxOrder = items.length > 0 ? Math.max(...items.map(i => i.order || 0)) : -1;
+    setForm({ title: '', subtitle: '', description: '', name: '', moves: '', order: maxOrder + 1 });
     setHeadings([]); setPoints([]);
     setImgFiles([]); setImgPreviews([]);
     setShowModal(true);
@@ -806,14 +818,22 @@ function SlideSection({ slideKey }) {
     const idx = sorted.findIndex(x => x._id === item._id);
     const swapIdx = idx + dir;
     if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    
+    // Get the actual order values to swap
+    const currentOrder = sorted[idx].order ?? idx;
+    const swapOrder = sorted[swapIdx].order ?? swapIdx;
+    
+    // Update local state immediately for better UX
     setItems(prev => prev.map(x => {
-      if (x._id === sorted[idx]._id) return { ...x, order: swapIdx };
-      if (x._id === sorted[swapIdx]._id) return { ...x, order: idx };
+      if (x._id === sorted[idx]._id) return { ...x, order: swapOrder };
+      if (x._id === sorted[swapIdx]._id) return { ...x, order: currentOrder };
       return x;
     }));
+    
+    // Update backend
     await Promise.all([
-      fetch(`${API_BASE}/pattern-slides/${sorted[idx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: swapIdx }) }),
-      fetch(`${API_BASE}/pattern-slides/${sorted[swapIdx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: idx }) }),
+      fetch(`${API_BASE}/pattern-slides/${sorted[idx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: swapOrder }) }),
+      fetch(`${API_BASE}/pattern-slides/${sorted[swapIdx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: currentOrder }) }),
     ]);
     fetchItems();
   };

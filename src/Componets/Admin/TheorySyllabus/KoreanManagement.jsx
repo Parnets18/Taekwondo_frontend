@@ -162,7 +162,16 @@ function TermsTab({ sections }) {
     setLoading(true);
     const res = await fetch(`${API_BASE}/korean`);
     const d = await res.json();
-    setItems(d.data || []);
+    const data = d.data || [];
+    
+    // Sort by creation date (oldest first - creation order)
+    const sortedData = data.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.created_at || 0);
+      const dateB = new Date(b.createdAt || b.created_at || 0);
+      return dateA - dateB; // Oldest first (creation order)
+    });
+    
+    setItems(sortedData);
     setLoading(false);
   };
 
