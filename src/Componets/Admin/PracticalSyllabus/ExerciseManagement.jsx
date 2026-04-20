@@ -4,7 +4,7 @@ import axios from 'axios';
 import { API_BASE_URL, getAuthHeaders, getAuthHeadersMultipart } from '../../../config/api';
 import { FaEdit, FaTrash, FaImage, FaSave, FaTimes, FaEye } from 'react-icons/fa';
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:9000';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
 const SECTIONS = ['warmUp', 'training', 'stretching'];
 const SECTION_LABELS = { warmUp: 'Warm-Up', training: 'Training', stretching: 'Stretching' };
 const EQUIPMENT = ['all', 'chair', 'noChair'];

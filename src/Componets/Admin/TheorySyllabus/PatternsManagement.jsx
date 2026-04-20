@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye, FaArrowUp, FaArrowDown, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:9000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
 const getToken = () => localStorage.getItem('token');
 const authH = () => ({ Authorization: `Bearer ${getToken()}` });
 const jsonH = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` });
@@ -45,6 +45,12 @@ export default function PatternsManagement() {
   const [expandedId, setExpandedId] = useState(null);
   const [patternTabs, setPatternTabs] = useState({});
   const [viewItem, setViewItem] = useState(null);
+
+  // Pattern Group Manager state
+  const [showPatternGroupManager, setShowPatternGroupManager] = useState(false);
+  const [managingPointIndex, setManagingPointIndex] = useState(null);
+  const [managingPoint, setManagingPoint] = useState(null);
+  const [patternGroups, setPatternGroups] = useState([]);
 
   // Item modal
   const [showItemModal, setShowItemModal] = useState(false);
@@ -90,9 +96,7 @@ export default function PatternsManagement() {
   // ── Pattern CRUD ─────────────────────────────────────────────────────────
   const openAddPattern = () => {
     setEditingPattern(null);
-    // Set order to be higher than the highest existing order
-    const maxOrder = patterns.length > 0 ? Math.max(...patterns.map(p => p.order || 0)) : -1;
-    setPatternForm({ name: '', moves: '', order: maxOrder + 1 });
+    setPatternForm({ name: '', moves: '', order: patterns.length });
     setPatternImgFile(null); setPatternImgPreview(null);
     setShowPatternModal(true);
   };
@@ -129,22 +133,14 @@ export default function PatternsManagement() {
     const idx = sorted.findIndex(x => x._id === p._id);
     const swapIdx = idx + dir;
     if (swapIdx < 0 || swapIdx >= sorted.length) return;
-    
-    // Get the actual order values to swap
-    const currentOrder = sorted[idx].order ?? idx;
-    const swapOrder = sorted[swapIdx].order ?? swapIdx;
-    
-    // Update local state immediately for better UX
     setPatterns(prev => prev.map(x => {
-      if (x._id === sorted[idx]._id) return { ...x, order: swapOrder };
-      if (x._id === sorted[swapIdx]._id) return { ...x, order: currentOrder };
+      if (x._id === sorted[idx]._id) return { ...x, order: swapIdx };
+      if (x._id === sorted[swapIdx]._id) return { ...x, order: idx };
       return x;
     }));
-    
-    // Update backend
     await Promise.all([
-      fetch(`${API_BASE}/patterns/${sorted[idx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: swapOrder }) }),
-      fetch(`${API_BASE}/patterns/${sorted[swapIdx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: currentOrder }) }),
+      fetch(`${API_BASE}/patterns/${sorted[idx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: swapIdx }) }),
+      fetch(`${API_BASE}/patterns/${sorted[swapIdx]._id}/order`, { method: 'PATCH', headers: jsonH(), body: JSON.stringify({ order: idx }) }),
     ]);
     fetchPatterns();
   };
@@ -761,6 +757,80 @@ function SlideSection({ slideKey }) {
   const [imgFiles, setImgFiles] = useState([]);
   const [imgPreviews, setImgPreviews] = useState([]);
 
+  // Pattern Group Manager state
+  const [showPatternGroupManager, setShowPatternGroupManager] = useState(false);
+  const [managingPointIndex, setManagingPointIndex] = useState(null);
+  const [managingPoint, setManagingPoint] = useState(null);
+  const [patternGroups, setPatternGroups] = useState([]);
+
+  // Single Pattern Entry form state (embedded in Pattern Group Manager)
+  const [patternEntryForm, setPatternEntryForm] = useState({
+    patternName: '',
+    entries: [{ number: '', koreanTerm: '', description: '' }]
+  });
+
+  // Single entry editing state
+  const [editingEntryIndex, setEditingEntryIndex] = useState(null);
+  const [editingEntryData, setEditingEntryData] = useState({
+    patternName: '',
+    number: '',
+    koreanTerm: '',
+    description: ''
+  });
+
+  // Single entry editing functions
+  const startEditingEntry = (entry, originalIndex) => {
+    const number = entry.number || '';
+    const koreanTerm = entry.rows?.[0]?.koreanTerm || entry.koreanTerm || '';
+    const description = entry.rows?.[0]?.description || entry.description || '';
+    const patternName = entry.patternName || '';
+    
+    setEditingEntryIndex(originalIndex);
+    setEditingEntryData({
+      patternName,
+      number: number.toString().replace('.', ''),
+      koreanTerm,
+      description
+    });
+  };
+
+  const saveEditingEntry = () => {
+    // Update the entry in patternGroups
+    setPatternGroups(prev => prev.map((group, index) => {
+      if (index === editingEntryIndex) {
+        return {
+          ...group,
+          patternName: editingEntryData.patternName,
+          number: editingEntryData.number,
+          rows: [{
+            koreanTerm: editingEntryData.koreanTerm,
+            description: editingEntryData.description
+          }]
+        };
+      }
+      return group;
+    }));
+    
+    // Reset editing state
+    setEditingEntryIndex(null);
+    setEditingEntryData({
+      patternName: '',
+      number: '',
+      koreanTerm: '',
+      description: ''
+    });
+  };
+
+  const cancelEditingEntry = () => {
+    setEditingEntryIndex(null);
+    setEditingEntryData({
+      patternName: '',
+      number: '',
+      koreanTerm: '',
+      description: ''
+    });
+  };
+
   const isListType = ['non-standard-list', 'number-of-movements'].includes(slideKey);
 
   useEffect(() => { fetchItems(); }, [slideKey]);
@@ -777,8 +847,12 @@ function SlideSection({ slideKey }) {
   const openAdd = () => {
     setEditing(null);
     // Set order to be higher than the highest existing order
-    const maxOrder = items.length > 0 ? Math.max(...items.map(i => i.order || 0)) : -1;
-    setForm({ title: '', subtitle: '', description: '', name: '', moves: '', order: maxOrder + 1 });
+    let maxOrder = 0;
+    if (items.length > 0) {
+      const orders = items.map(i => i.order || 0).filter(o => typeof o === 'number');
+      maxOrder = orders.length > 0 ? Math.max(...orders) : 0;
+    }
+    setForm({ title: '', subtitle: '', description: '', name: '', moves: '', number: '', order: maxOrder + 1 });
     setHeadings([]); setPoints([]);
     setImgFiles([]); setImgPreviews([]);
     setShowModal(true);
@@ -788,7 +862,27 @@ function SlideSection({ slideKey }) {
     setEditing(item);
     setForm({ title: item.title || '', subtitle: item.subtitle || '', description: item.description || '', name: item.name || '', moves: item.moves || '', number: item.number || '' });
     setHeadings([...(item.headings || [])]);
-    setPoints(JSON.parse(JSON.stringify(item.points || [])));
+    
+    // Convert old kickEntries structure to new patternEntries structure for non-standard-list
+    let processedPoints = JSON.parse(JSON.stringify(item.points || []));
+    if (slideKey === 'non-standard-list') {
+      processedPoints = processedPoints.map(point => {
+        if (point.kickEntries && !point.patternEntries) {
+          // Convert old kickEntries to new patternEntries structure
+          return {
+            ...point,
+            patternEntries: point.kickEntries.map(entry => ({
+              number: entry.number || '',
+              koreanTerm: entry.rows?.[0]?.koreanTerm || '',
+              description: entry.rows?.[0]?.description || ''
+            }))
+          };
+        }
+        return point;
+      });
+    }
+    
+    setPoints(processedPoints);
     setImgFiles([]);
     setImgPreviews((item.images || []).map(url => ({ url: `${BASE_URL}${url}`, isExisting: true, path: url })));
     setShowModal(true);
@@ -844,6 +938,109 @@ function SlideSection({ slideKey }) {
   const addSub = (i) => setPoints(p => p.map((pt, idx) => idx === i ? { ...pt, subPoints: [...(pt.subPoints || []), { text: '' }] } : pt));
   const updSub = (i, si, v) => setPoints(p => p.map((pt, idx) => idx !== i ? pt : { ...pt, subPoints: pt.subPoints.map((sp, sidx) => sidx === si ? { ...sp, text: v } : sp) }));
   const remSub = (i, si) => setPoints(p => p.map((pt, idx) => idx !== i ? pt : { ...pt, subPoints: pt.subPoints.filter((_, sidx) => sidx !== si) }));
+
+  // Pattern Group Manager functions
+  const openPatternGroupManager = (pointIndex, point) => {
+    setManagingPointIndex(pointIndex);
+    setManagingPoint(point);
+    // Convert kickEntries or patternEntries to the admin format
+    let entries = [];
+    if (point.kickEntries && point.kickEntries.length > 0) {
+      entries = point.kickEntries.map(entry => ({
+        patternName: entry.patternName || '',
+        number: entry.number || '',
+        rows: entry.rows || []
+      }));
+    } else if (point.patternEntries && point.patternEntries.length > 0) {
+      // Convert old patternEntries to new format
+      entries = point.patternEntries.map(entry => ({
+        patternName: '', // Will need to be filled manually
+        number: entry.number || '',
+        rows: [{
+          koreanTerm: entry.koreanTerm || '',
+          description: entry.description || ''
+        }]
+      }));
+    }
+    setPatternGroups(entries);
+    setShowPatternGroupManager(true);
+  };
+
+  const savePatternGroups = () => {
+    // Convert the pattern groups to kickEntries format for backend compatibility
+    const kickEntries = patternGroups.map(group => ({
+      patternName: group.patternName || '',
+      number: group.number || '',
+      rows: group.rows || []
+    }));
+    
+    setPoints(p => p.map((pt, idx) => idx === managingPointIndex ? { ...pt, kickEntries: kickEntries } : pt));
+    setShowPatternGroupManager(false);
+  };
+
+  const addPatternGroup = () => {
+    setPatternGroups(prev => [...prev, { patternName: '', number: '', rows: [] }]);
+  };
+
+  const updatePatternGroup = (index, field, value) => {
+    setPatternGroups(prev => prev.map((group, i) => i === index ? { ...group, [field]: value } : group));
+  };
+
+  const removePatternGroup = (index) => {
+    setPatternGroups(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Single Pattern Entry form functions
+  const addPatternEntryRow = () => {
+    setPatternEntryForm(prev => ({
+      ...prev,
+      entries: [...prev.entries, { number: '', koreanTerm: '', description: '' }]
+    }));
+  };
+
+  const updatePatternEntryRow = (index, field, value) => {
+    setPatternEntryForm(prev => ({
+      ...prev,
+      entries: prev.entries.map((entry, i) => 
+        i === index ? { ...entry, [field]: value } : entry
+      )
+    }));
+  };
+
+  const removePatternEntryRow = (index) => {
+    if (patternEntryForm.entries.length > 1) {
+      setPatternEntryForm(prev => ({
+        ...prev,
+        entries: prev.entries.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const savePatternEntry = () => {
+    // Validate pattern name is provided
+    if (!patternEntryForm.patternName.trim()) {
+      return; // Don't save if pattern name is empty
+    }
+
+    // Convert all entries to kickEntries format
+    const newEntries = patternEntryForm.entries
+      .filter(entry => entry.number.trim() || entry.koreanTerm.trim()) // Only include entries with at least number or korean term
+      .map(entry => ({
+        patternName: patternEntryForm.patternName,
+        number: entry.number,
+        rows: [{ koreanTerm: entry.koreanTerm, description: entry.description }]
+      }));
+
+    if (newEntries.length > 0) {
+      setPatternGroups(prev => [...prev, ...newEntries]);
+    }
+    
+    // Reset form
+    setPatternEntryForm({
+      patternName: '',
+      entries: [{ number: '', koreanTerm: '', description: '' }]
+    });
+  };
 
   const sorted = [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -953,88 +1150,39 @@ function SlideSection({ slideKey }) {
               {/* List types */}
               {isListType && (
                 slideKey === 'non-standard-list' ? (
-                  /* Non-standard speeds list: same structure as kicks-in-patterns */
+                  /* Non-standard speeds list: simple title and points structure */
                   <>
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-1">Title</label>
-                      <input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="e.g. Normal Motion"
+                      <label className="text-sm font-semibold text-gray-700 block mb-1">Section Title</label>
+                      <input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="e.g. Sort by patterns"
                         value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-semibold text-gray-700">Points <span className="text-gray-400 font-normal text-xs">(+ to add entries)</span></label>
-                        <button type="button" onClick={() => setPoints(p => [...p, { text: '', kickEntries: [] }])}
+                        <label className="text-sm font-semibold text-gray-700">Points <span className="text-gray-400 font-normal text-xs">(clickable items in the list)</span></label>
+                        <button type="button" onClick={() => setPoints(p => [...p, { text: '', patternEntries: [] }])}
                           className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-xs font-semibold" style={{ backgroundColor: '#006CB5' }}>
                           <FaPlus size={10} /> Add Point
                         </button>
                       </div>
                       {points.length === 0 && <p className="text-gray-400 text-xs">No points yet.</p>}
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {points.map((pt, i) => (
-                          <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
-                            <div className="flex items-center gap-2 p-3 bg-gray-50">
+                          <div key={i} className="border border-gray-200 rounded-lg p-3">
+                            <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-[#006CB5] flex-shrink-0">• {i + 1}</span>
-                              <input className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-semibold bg-white"
-                                placeholder="Point label (shown in list)"
+                              <input className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                                placeholder="Point name (e.g. Dan-Gun, Continuous motion)"
                                 value={pt.text}
                                 onChange={e => setPoints(arr => arr.map((p, idx) => idx === i ? { ...p, text: e.target.value } : p))} />
-                              <button type="button" title="Add entry"
-                                onClick={() => setPoints(arr => arr.map((p, idx) => idx === i
-                                  ? { ...p, kickEntries: [...(p.kickEntries || []), { patternName: '', number: '', rows: [] }] }
-                                  : p))}
-                                className="p-1.5 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex-shrink-0"><FaPlus size={10} /></button>
+                              <button type="button" title="Manage pattern groups for this point"
+                                onClick={() => openPatternGroupManager(i, pt)}
+                                className="px-3 py-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 text-xs font-semibold">
+                                Manage Groups ({(pt.kickEntries || pt.patternEntries || []).length})
+                              </button>
                               <button type="button" onClick={() => setPoints(arr => arr.filter((_, idx) => idx !== i))}
                                 className="p-1.5 rounded-lg bg-red-50 text-red-500 flex-shrink-0"><FaTimes size={10} /></button>
                             </div>
-                            {(pt.kickEntries || []).map((ke, ki) => (
-                              <div key={ki} className="border-t border-gray-100 p-3 space-y-2 bg-white">
-                                <div className="flex justify-between items-center">
-                                  <p className="text-xs text-[#006CB5] font-bold uppercase tracking-wide">Entry {ki + 1}</p>
-                                  <button type="button"
-                                    onClick={() => setPoints(arr => arr.map((p, idx) => idx !== i ? p : { ...p, kickEntries: p.kickEntries.filter((_, j) => j !== ki) }))}
-                                    className="text-xs text-red-400 hover:text-red-600">Remove</button>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div>
-                                    <label className="text-xs text-gray-500 block mb-1">Pattern Name</label>
-                                    <input className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm" placeholder="e.g. Do-San"
-                                      value={ke.patternName}
-                                      onChange={e => setPoints(arr => arr.map((p, idx) => idx !== i ? p : { ...p, kickEntries: p.kickEntries.map((k, j) => j === ki ? { ...k, patternName: e.target.value } : k) }))} />
-                                  </div>
-                                  <div>
-                                    <label className="text-xs text-gray-500 block mb-1">Number</label>
-                                    <input className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm" placeholder="e.g. 14."
-                                      value={ke.number}
-                                      onChange={e => setPoints(arr => arr.map((p, idx) => idx !== i ? p : { ...p, kickEntries: p.kickEntries.map((k, j) => j === ki ? { ...k, number: e.target.value } : k) }))} />
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="flex justify-between items-center mb-1">
-                                    <span className="text-xs text-gray-500 font-semibold">Korean Term + Description rows</span>
-                                    <button type="button"
-                                      onClick={() => setPoints(arr => arr.map((p, idx) => idx !== i ? p : { ...p, kickEntries: p.kickEntries.map((k, j) => j !== ki ? k : { ...k, rows: [...(k.rows || []), { koreanTerm: '', description: '' }] }) }))}
-                                      className="text-xs text-[#006CB5] hover:underline">+ Add Row</button>
-                                  </div>
-                                  {(ke.rows || []).length === 0 && <p className="text-gray-400 text-xs">No rows yet. Click + Add Row.</p>}
-                                  {(ke.rows || []).map((row, ri) => (
-                                    <div key={ri} className="border border-gray-100 rounded-lg p-2 mb-2 bg-gray-50 space-y-1">
-                                      <div className="flex justify-between items-center">
-                                        <span className="text-xs text-gray-400">Row {ri + 1}</span>
-                                        <button type="button"
-                                          onClick={() => setPoints(arr => arr.map((p, idx) => idx !== i ? p : { ...p, kickEntries: p.kickEntries.map((k, j) => j !== ki ? k : { ...k, rows: k.rows.filter((_, r) => r !== ri) }) }))}
-                                          className="text-xs text-red-400">Remove</button>
-                                      </div>
-                                      <input className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs" placeholder="Korean term"
-                                        value={row.koreanTerm}
-                                        onChange={e => setPoints(arr => arr.map((p, idx) => idx !== i ? p : { ...p, kickEntries: p.kickEntries.map((k, j) => j !== ki ? k : { ...k, rows: k.rows.map((r, ri2) => ri2 === ri ? { ...r, koreanTerm: e.target.value } : r) }) }))} />
-                                      <textarea rows={2} className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs" placeholder="Description"
-                                        value={row.description}
-                                        onChange={e => setPoints(arr => arr.map((p, idx) => idx !== i ? p : { ...p, kickEntries: p.kickEntries.map((k, j) => j !== ki ? k : { ...k, rows: k.rows.map((r, ri2) => ri2 === ri ? { ...r, description: e.target.value } : r) }) }))} />
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
                           </div>
                         ))}
                       </div>
@@ -1255,6 +1403,266 @@ function SlideSection({ slideKey }) {
                 <FaEdit size={12} /> Edit
               </button>
               <button onClick={() => setViewItem(null)} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pattern Group Manager Modal */}
+      {showPatternGroupManager && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <div>
+                <h4 className="font-bold text-gray-800 text-xl">Manage Pattern Entries</h4>
+                <p className="text-sm text-gray-500 mt-1">Point: "{managingPoint?.text}"</p>
+              </div>
+              <button onClick={() => setShowPatternGroupManager(false)}><FaTimes className="text-gray-500 text-lg" /></button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Add New Entry Form - At Top */}
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                <h5 className="font-semibold text-gray-700 text-lg mb-4">Add New Entry</h5>
+                
+                <div className="mb-4">
+                  <label className="text-sm font-semibold text-gray-700 block mb-2">Pattern Name</label>
+                  <input 
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base" 
+                    placeholder="e.g. Dan-Gun"
+                    value={patternEntryForm.patternName}
+                    onChange={e => setPatternEntryForm(prev => ({ ...prev, patternName: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-semibold text-gray-700">Entries for this pattern</label>
+                    <button 
+                      type="button"
+                      onClick={addPatternEntryRow}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold" 
+                      style={{ backgroundColor: '#006CB5' }}
+                    >
+                      <FaPlus size={12} /> Add More
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {patternEntryForm.entries.map((entry, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-sm font-bold text-[#006CB5]">Entry {index + 1}</span>
+                          {patternEntryForm.entries.length > 1 && (
+                            <button 
+                              type="button"
+                              onClick={() => removePatternEntryRow(index)}
+                              className="text-sm text-red-400 hover:text-red-600"
+                            >
+                              <FaTimes size={14} />
+                            </button>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-sm text-gray-500 block mb-2">Number</label>
+                            <input 
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                              placeholder="e.g. 13."
+                              value={entry.number}
+                              onChange={e => updatePatternEntryRow(index, 'number', e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm text-gray-500 block mb-2">Korean Term</label>
+                            <input 
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                              placeholder="e.g. Ap Chagi"
+                              value={entry.koreanTerm}
+                              onChange={e => updatePatternEntryRow(index, 'koreanTerm', e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm text-gray-500 block mb-2">English Description</label>
+                            <input 
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                              placeholder="e.g. Front snap kick"
+                              value={entry.description}
+                              onChange={e => updatePatternEntryRow(index, 'description', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={savePatternEntry} 
+                  className="w-full py-3 rounded-lg text-white text-base font-semibold" 
+                  style={{ backgroundColor: '#006CB5' }}
+                >
+                  Add All Entries ({patternEntryForm.entries.length})
+                </button>
+              </div>
+
+              {/* Current Entries - Below Form with Separate Scroll */}
+              {patternGroups.length > 0 && (
+                <div>
+                  <h5 className="font-semibold text-gray-700 text-lg mb-4">Current Entries ({patternGroups.length})</h5>
+                  <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg bg-gray-50 p-2"
+                       style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 #f1f5f9' }}>
+                    <div className="space-y-3">
+                      {(() => {
+                        // Group entries by pattern name
+                        const groupedEntries = {};
+                        patternGroups.forEach((group, index) => {
+                          // Handle different possible data structures
+                          const patternName = group.patternName || 'Unnamed Pattern';
+                          if (!groupedEntries[patternName]) {
+                            groupedEntries[patternName] = [];
+                          }
+                          groupedEntries[patternName].push({ ...group, originalIndex: index });
+                        });
+
+                        return Object.keys(groupedEntries).map((patternName, groupIndex) => (
+                          <div key={groupIndex} className="border border-gray-200 rounded-lg overflow-hidden mb-3 bg-white shadow-sm">
+                            {/* Pattern Name Header */}
+                            <div className="bg-blue-50 px-4 py-3 border-b">
+                              <div className="flex justify-between items-center">
+                                <h6 className="font-bold text-gray-800 text-base">{patternName}</h6>
+                                <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                                  {groupedEntries[patternName].length} entries
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {/* Individual Entries with Edit/Delete */}
+                            <div className="bg-white">
+                              {groupedEntries[patternName].map((entry, entryIndex) => {
+                                // Handle different data structures
+                                const number = entry.number || (entryIndex + 1);
+                                const koreanTerm = entry.rows?.[0]?.koreanTerm || entry.koreanTerm || '';
+                                const description = entry.rows?.[0]?.description || entry.description || '';
+                                
+                                return (
+                                  <div key={entryIndex} className="border-b border-gray-100 last:border-b-0 p-3 hover:bg-gray-50">
+                                    {editingEntryIndex === entry.originalIndex ? (
+                                      // Inline Edit Form
+                                      <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                          <span className="text-sm font-semibold text-blue-600">Editing Entry</span>
+                                          <div className="flex gap-2">
+                                            <button 
+                                              onClick={saveEditingEntry}
+                                              className="px-3 py-1 rounded bg-green-50 text-green-600 hover:bg-green-100 text-xs font-semibold"
+                                            >
+                                              Save
+                                            </button>
+                                            <button 
+                                              onClick={cancelEditingEntry}
+                                              className="px-3 py-1 rounded bg-gray-50 text-gray-600 hover:bg-gray-100 text-xs font-semibold"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                          <div>
+                                            <label className="text-sm font-semibold text-gray-700 block mb-2">Pattern Name</label>
+                                            <input 
+                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                                              value={editingEntryData.patternName}
+                                              onChange={e => setEditingEntryData(prev => ({ ...prev, patternName: e.target.value }))}
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="text-sm font-semibold text-gray-700 block mb-2">Number</label>
+                                            <input 
+                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                                              value={editingEntryData.number}
+                                              onChange={e => setEditingEntryData(prev => ({ ...prev, number: e.target.value }))}
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="text-sm font-semibold text-gray-700 block mb-2">Korean Term</label>
+                                            <input 
+                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                                              value={editingEntryData.koreanTerm}
+                                              onChange={e => setEditingEntryData(prev => ({ ...prev, koreanTerm: e.target.value }))}
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="text-sm font-semibold text-gray-700 block mb-2">English Description</label>
+                                            <textarea 
+                                              rows={2}
+                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                                              value={editingEntryData.description}
+                                              onChange={e => setEditingEntryData(prev => ({ ...prev, description: e.target.value }))}
+                                            />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      // Normal Display
+                                      <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-3 mb-1">
+                                            <span className="font-bold text-blue-600 text-lg min-w-[40px]">{number}.</span>
+                                            <span className="font-semibold text-gray-800 text-sm">{koreanTerm}</span>
+                                          </div>
+                                          {description && (
+                                            <div className="ml-12">
+                                              <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
+                                            </div>
+                                          )}
+                                        </div>
+                                        
+                                        {/* Individual Entry Actions */}
+                                        <div className="flex items-center gap-2 ml-4">
+                                          <button 
+                                            onClick={() => startEditingEntry(entry, entry.originalIndex)}
+                                            className="p-1.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                            title="Edit this entry"
+                                          >
+                                            <FaEdit size={12} />
+                                          </button>
+                                          <button 
+                                            onClick={() => {
+                                              if (confirm(`Delete entry "${number} ${koreanTerm}"?`)) {
+                                                removePatternGroup(entry.originalIndex);
+                                              }
+                                            }}
+                                            className="p-1.5 rounded bg-red-50 text-red-600 hover:bg-red-100"
+                                            title="Delete this entry"
+                                          >
+                                            <FaTrash size={12} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex gap-3 p-4 border-t">
+              <button onClick={() => setShowPatternGroupManager(false)} 
+                className="flex-1 py-2 rounded border border-gray-300 text-gray-600 text-sm">Cancel</button>
+              <button onClick={savePatternGroups} 
+                className="flex-1 py-2 rounded text-white text-sm font-semibold" style={{ backgroundColor: '#006CB5' }}>
+                Save All Entries ({patternGroups.length})
+              </button>
             </div>
           </div>
         </div>

@@ -113,7 +113,7 @@ function BeltManagement() {
 
   // API base URL - using direct backend URL to bypass proxy issues
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
+    import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api";
 
   // Log API URL on component mount
   useEffect(() => {

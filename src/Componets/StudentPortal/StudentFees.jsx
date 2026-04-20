@@ -22,7 +22,7 @@ const StudentFees = () => {
   });
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
+    import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api";
 
   useEffect(() => {
     const token = localStorage.getItem("studentToken");

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:9000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
 const getToken = () => localStorage.getItem('token');
 const authH = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` });
 
@@ -95,7 +95,14 @@ export default function SparringManagement() {
       attackingIntro: item.attackingIntro || '',
       attacks: (item.attacks || []).map(a => ({ num: a.num, text: a.text })),
       defending: item.defending || '',
-      routines: (item.routines || []).map(r => ({ num: r.num, title: r.title, details: (r.details || []).join('\n') })),
+      routines: (item.routines || []).map(r => ({
+        num: r.num,
+        title: r.title,
+        titleDetailPairs: r.titleDetailPairs || [{ 
+          title: '', 
+          details: Array.isArray(r.details) ? r.details.join('\n') : (r.details || '') 
+        }]
+      })),
       sections: (item.sections || []).map(s => ({
         title: s.title,
         content: s.content || '',
@@ -123,9 +130,12 @@ export default function SparringManagement() {
       (form.routines || []).map((r, i) => ({
         num: r.num || i + 1,
         title: r.title,
-        details: typeof r.details === 'string'
-          ? r.details.split('\n').map(d => d.trim()).filter(Boolean)
-          : r.details,
+        titleDetailPairs: (r.titleDetailPairs || []).map(pair => ({
+          title: pair.title || '',
+          details: typeof pair.details === 'string'
+            ? pair.details.split('\n').map(d => d.trim()).filter(Boolean)
+            : pair.details || []
+        }))
       }))
     ));
     // Sections — strip client-only fields before sending
@@ -168,11 +178,44 @@ export default function SparringManagement() {
   const removeAttack = (i) => updateForm('attacks', form.attacks.filter((_, idx) => idx !== i));
 
   // ── Routines helpers ─────────────────────────────────────────────────────
-  const addRoutine = () => updateForm('routines', [...form.routines, { num: form.routines.length + 1, title: '', details: '' }]);
+  const addRoutine = () => updateForm('routines', [...form.routines, { 
+    num: form.routines.length + 1, 
+    title: '', 
+    titleDetailPairs: [{ title: '', details: '' }] 
+  }]);
+  
   const updateRoutine = (i, field, val) => {
-    const arr = [...form.routines]; arr[i] = { ...arr[i], [field]: val }; updateForm('routines', arr);
+    const arr = [...form.routines]; 
+    arr[i] = { ...arr[i], [field]: val }; 
+    updateForm('routines', arr);
   };
+  
   const removeRoutine = (i) => updateForm('routines', form.routines.filter((_, idx) => idx !== i));
+
+  // Title-Detail pairs helpers
+  const addTitleDetailPair = (routineIndex) => {
+    const arr = [...form.routines];
+    if (!arr[routineIndex].titleDetailPairs) {
+      arr[routineIndex].titleDetailPairs = [];
+    }
+    arr[routineIndex].titleDetailPairs.push({ title: '', details: '' });
+    updateForm('routines', arr);
+  };
+
+  const updateTitleDetailPair = (routineIndex, pairIndex, field, val) => {
+    const arr = [...form.routines];
+    arr[routineIndex].titleDetailPairs[pairIndex] = { 
+      ...arr[routineIndex].titleDetailPairs[pairIndex], 
+      [field]: val 
+    };
+    updateForm('routines', arr);
+  };
+
+  const removeTitleDetailPair = (routineIndex, pairIndex) => {
+    const arr = [...form.routines];
+    arr[routineIndex].titleDetailPairs = arr[routineIndex].titleDetailPairs.filter((_, idx) => idx !== pairIndex);
+    updateForm('routines', arr);
+  };
 
   // ── Sections helpers ─────────────────────────────────────────────────────
   const addSection = () => updateForm('sections', [...form.sections, { title: '', content: '', points: '', image: '', _imagePreview: '', _imageFile: null }]);
@@ -370,7 +413,7 @@ export default function SparringManagement() {
                   </button>
                 </div>
                 {form.routines.length === 0 && <p className="text-gray-400 text-xs py-1">No routines yet.</p>}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {form.routines.map((r, i) => (
                     <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
                       <div className="flex items-center gap-2 p-3 bg-gray-50">
@@ -380,11 +423,50 @@ export default function SparringManagement() {
                           value={r.title} onChange={e => updateRoutine(i, 'title', e.target.value)} />
                         <button type="button" onClick={() => removeRoutine(i)} className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex-shrink-0"><FaTimes size={10} /></button>
                       </div>
-                      <div className="p-3">
-                        <label className="text-xs text-gray-500 block mb-1">Details (one per line)</label>
-                        <textarea rows={4} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                          placeholder={"i. Left Walking Stance, left inner forearm middle block.\nii. Right Walking Stance..."}
-                          value={r.details} onChange={e => updateRoutine(i, 'details', e.target.value)} />
+                      
+                      {/* Title-Detail Pairs */}
+                      <div className="p-3 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <label className="text-xs font-semibold text-gray-600">Title & Details Sections</label>
+                          <button type="button" onClick={() => addTitleDetailPair(i)}
+                            className="flex items-center gap-1 px-2 py-1 rounded text-white text-xs font-semibold" style={{ backgroundColor: '#006CB5' }}>
+                            <FaPlus size={8} /> Add Section
+                          </button>
+                        </div>
+                        
+                        {(!r.titleDetailPairs || r.titleDetailPairs.length === 0) && (
+                          <p className="text-gray-400 text-xs py-2">No sections yet. Click "Add Section" to add title and details.</p>
+                        )}
+                        
+                        {(r.titleDetailPairs || []).map((pair, pairIndex) => (
+                          <div key={pairIndex} className="border border-gray-100 rounded-lg p-3 bg-gray-50">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-xs font-bold text-blue-600">Section {pairIndex + 1}</span>
+                              <button type="button" onClick={() => removeTitleDetailPair(i, pairIndex)} 
+                                className="p-1 rounded bg-red-50 text-red-400 hover:bg-red-100">
+                                <FaTimes size={8} />
+                              </button>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <div>
+                                <label className="text-xs text-gray-500 block mb-1">Title</label>
+                                <input className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
+                                  placeholder="e.g. Defending Techniques"
+                                  value={pair.title || ''} 
+                                  onChange={e => updateTitleDetailPair(i, pairIndex, 'title', e.target.value)} />
+                              </div>
+                              
+                              <div>
+                                <label className="text-xs text-gray-500 block mb-1">Details (one per line)</label>
+                                <textarea rows={3} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
+                                  placeholder={"i. Left Walking Stance, left inner forearm middle block.\nii. Right Walking Stance..."}
+                                  value={pair.details || ''} 
+                                  onChange={e => updateTitleDetailPair(i, pairIndex, 'details', e.target.value)} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
@@ -522,8 +604,32 @@ export default function SparringManagement() {
                   <p className="text-xs font-bold text-gray-500 uppercase mb-2">Routines ({viewItem.routines.length})</p>
                   {viewItem.routines.map((r, i) => (
                     <div key={i} className="border border-gray-100 rounded-lg p-3 mb-2">
-                      <p className="font-semibold text-sm text-gray-800">No. {r.num} — {r.title}</p>
-                      {r.details?.map((d, j) => <p key={j} className="text-xs text-gray-500 mt-1">• {d}</p>)}
+                      <p className="font-semibold text-sm text-gray-800 mb-2">No. {r.num} — {r.title}</p>
+                      
+                      {/* Show title-detail pairs if available */}
+                      {r.titleDetailPairs && r.titleDetailPairs.length > 0 ? (
+                        r.titleDetailPairs.map((pair, pairIndex) => (
+                          <div key={pairIndex} className="ml-2 mb-3 border-l-2 border-blue-200 pl-3">
+                            {pair.title && <p className="font-medium text-sm text-blue-700 mb-1">{pair.title}</p>}
+                            {Array.isArray(pair.details) ? (
+                              pair.details.map((d, j) => <p key={j} className="text-xs text-gray-500 mt-1">• {d}</p>)
+                            ) : (
+                              pair.details && pair.details.split('\n').map((d, j) => (
+                                d.trim() && <p key={j} className="text-xs text-gray-500 mt-1">• {d.trim()}</p>
+                              ))
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        /* Fallback for old structure */
+                        r.details && (Array.isArray(r.details) ? (
+                          r.details.map((d, j) => <p key={j} className="text-xs text-gray-500 mt-1">• {d}</p>)
+                        ) : (
+                          r.details.split('\n').map((d, j) => (
+                            d.trim() && <p key={j} className="text-xs text-gray-500 mt-1">• {d.trim()}</p>
+                          ))
+                        ))
+                      )}
                     </div>
                   ))}
                 </div>

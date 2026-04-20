@@ -23,7 +23,7 @@ function CourseManagement() {
 
   // API base URL
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api/api";
+    import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api/api";
 
   // Get auth headers using the existing admin token
   const getAuthHeaders = () => {

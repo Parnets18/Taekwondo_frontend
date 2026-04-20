@@ -22,7 +22,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
+    import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api";
 
   useEffect(() => {
     // Check if user is logged in
@@ -54,7 +54,7 @@ const StudentDashboard = () => {
             profileData.data.fullName || profileData.data.name || "Student",
           );
           setCurrentBeltLevel(profileData.data.currentBeltLevel || "N/A");
-          const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:9000";
+          const BASE_URL = import.meta.env.VITE_BASE_URL || "https://cwtakarnataka.com";
           const photo = profileData.data.photo;
           if (photo) {
             setStudentPhoto(photo.startsWith("http") ? photo : `${BASE_URL}/${photo}`);

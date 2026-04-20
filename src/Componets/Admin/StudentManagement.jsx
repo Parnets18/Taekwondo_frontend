@@ -36,8 +36,8 @@ function StudentManagement() {
 
   // API base URL
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:9000"; // For static files like images
+    import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api";
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "https://cwtakarnataka.com"; // For static files like images
 
   const getPhotoUrl = (photo) => {
     if (!photo) return '';

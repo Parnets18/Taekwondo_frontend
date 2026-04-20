@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye } from 'react-icons/fa';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:9000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
 const getToken = () => localStorage.getItem('token');
 const authH = () => ({ Authorization: `Bearer ${getToken()}` });
 
@@ -199,9 +199,17 @@ function BlockingTab() {
   const [deleteId, setDeleteId] = useState(null);
   const [viewItem, setViewItem] = useState(null);
   const [form, setForm] = useState({ name: '', order: 0 });
-  const [directions, setDirections] = useState(['']);
-  // parts: [{ part, methods: [{ method, tools: [''] }] }]
-  const [parts, setParts] = useState([{ part: '', methods: [{ method: '', tools: [''] }] }]);
+  // Hierarchical structure: directions -> parts -> methods -> tools
+  const [hierarchicalData, setHierarchicalData] = useState([{
+    direction: '',
+    parts: [{
+      part: '',
+      methods: [{
+        method: '',
+        tools: ['']
+      }]
+    }]
+  }]);
 
   useEffect(() => { fetch_(); }, []);
   const fetch_ = async () => {
@@ -212,42 +220,157 @@ function BlockingTab() {
 
   const openAdd = () => {
     setEditing(null); setForm({ name: '', order: items.length });
-    setDirections(['']);
-    setParts([{ part: '', methods: [{ method: '', tools: [''] }] }]); setShowModal(true);
+    setHierarchicalData([{
+      direction: '',
+      parts: [{
+        part: '',
+        methods: [{
+          method: '',
+          tools: ['']
+        }]
+      }]
+    }]);
+    setShowModal(true);
   };
+
   const openEdit = (item) => {
     setEditing(item);
     setForm({ name: item.name, order: item.order });
-    setDirections(item.directions?.length ? item.directions : ['']);
-    setParts(item.parts?.length ? item.parts.map(p => ({ part: p.part, methods: p.methods.map(m => ({ method: m.method, tools: m.tools?.length ? m.tools : [''] })) })) : [{ part: '', methods: [{ method: '', tools: [''] }] }]);
+    
+    // Convert old format to new hierarchical format if needed
+    if (item.hierarchicalData) {
+      setHierarchicalData(item.hierarchicalData);
+    } else {
+      // Convert legacy format
+      const directions = item.directions || [''];
+      const parts = item.parts || [{ part: '', methods: [{ method: '', tools: [''] }] }];
+      
+      const converted = directions.map(direction => ({
+        direction: direction || '',
+        parts: parts.map(p => ({
+          part: p.part || '',
+          methods: (p.methods || [{ method: '', tools: [''] }]).map(m => ({
+            method: m.method || '',
+            tools: Array.isArray(m.tools) ? m.tools.filter(Boolean) : (m.tools ? [m.tools] : [''])
+          }))
+        }))
+      }));
+      
+      setHierarchicalData(converted.length ? converted : [{
+        direction: '',
+        parts: [{
+          part: '',
+          methods: [{
+            method: '',
+            tools: ['']
+          }]
+        }]
+      }]);
+    }
     setShowModal(true);
   };
+
   const save = async () => {
     const fd = new FormData();
-    fd.append('name', form.name); fd.append('order', form.order); fd.append('category', 'blocking');
-    fd.append('directions', JSON.stringify(directions.filter(Boolean)));
-    const parsedParts = parts.map(p => ({ part: p.part, methods: p.methods.map(m => ({ method: m.method, tools: m.tools.filter(Boolean) })) }));
-    fd.append('parts', JSON.stringify(parsedParts));
+    fd.append('name', form.name); 
+    fd.append('order', form.order); 
+    fd.append('category', 'blocking');
+    
+    // Save hierarchical data
+    const cleanedData = hierarchicalData.map(dir => ({
+      direction: dir.direction,
+      parts: dir.parts.map(part => ({
+        part: part.part,
+        methods: part.methods.map(method => ({
+          method: method.method,
+          tools: method.tools.filter(Boolean)
+        }))
+      }))
+    })).filter(dir => dir.direction || dir.parts.some(p => p.part || p.methods.some(m => m.method || m.tools.length)));
+    
+    fd.append('hierarchicalData', JSON.stringify(cleanedData));
+    
+    // Also maintain backward compatibility
+    const directions = [...new Set(cleanedData.map(d => d.direction).filter(Boolean))];
+    const allParts = cleanedData.flatMap(d => d.parts);
+    fd.append('directions', JSON.stringify(directions));
+    fd.append('parts', JSON.stringify(allParts));
+    
     const url = editing ? `${API_BASE}/body-parts/${editing._id}` : `${API_BASE}/body-parts`;
     await fetch(url, { method: editing ? 'PUT' : 'POST', headers: authH(), body: fd });
     setShowModal(false); fetch_();
   };
+
   const del = async () => {
     await fetch(`${API_BASE}/body-parts/${deleteId}`, { method: 'DELETE', headers: authH() });
     setDeleteId(null); fetch_();
   };
 
-  const addPart = () => setParts([...parts, { part: '', methods: [{ method: '', tools: '' }] }]);
-  const removePart = (pi) => setParts(parts.filter((_, i) => i !== pi));
-  const updatePart = (pi, val) => setParts(parts.map((p, i) => i === pi ? { ...p, part: val } : p));
-  const addMethod = (pi) => setParts(parts.map((p, i) => i === pi ? { ...p, methods: [...p.methods, { method: '', tools: '' }] } : p));
-  const removeMethod = (pi, mi) => setParts(parts.map((p, i) => i === pi ? { ...p, methods: p.methods.filter((_, j) => j !== mi) } : p));
-  const updateMethod = (pi, mi, field, val) => setParts(parts.map((p, i) => i === pi ? { ...p, methods: p.methods.map((m, j) => j === mi ? { ...m, [field]: val } : m) } : p));
+  // Direction management
+  const addDirection = () => setHierarchicalData([...hierarchicalData, {
+    direction: '',
+    parts: [{ part: '', methods: [{ method: '', tools: [''] }] }]
+  }]);
+  const removeDirection = (di) => setHierarchicalData(hierarchicalData.filter((_, i) => i !== di));
+  const updateDirection = (di, value) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, direction: value } : d
+  ));
+
+  // Part management
+  const addPart = (di) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: [...d.parts, { part: '', methods: [{ method: '', tools: [''] }] }] } : d
+  ));
+  const removePart = (di, pi) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.filter((_, j) => j !== pi) } : d
+  ));
+  const updatePart = (di, pi, value) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.map((p, j) => j === pi ? { ...p, part: value } : p) } : d
+  ));
+
+  // Method management
+  const addMethod = (di, pi) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.map((p, j) => 
+      j === pi ? { ...p, methods: [...p.methods, { method: '', tools: [''] }] } : p
+    ) } : d
+  ));
+  const removeMethod = (di, pi, mi) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.map((p, j) => 
+      j === pi ? { ...p, methods: p.methods.filter((_, k) => k !== mi) } : p
+    ) } : d
+  ));
+  const updateMethod = (di, pi, mi, value) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.map((p, j) => 
+      j === pi ? { ...p, methods: p.methods.map((m, k) => k === mi ? { ...m, method: value } : m) } : p
+    ) } : d
+  ));
+
+  // Tool management
+  const addTool = (di, pi, mi) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.map((p, j) => 
+      j === pi ? { ...p, methods: p.methods.map((m, k) => 
+        k === mi ? { ...m, tools: [...m.tools, ''] } : m
+      ) } : p
+    ) } : d
+  ));
+  const removeTool = (di, pi, mi, ti) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.map((p, j) => 
+      j === pi ? { ...p, methods: p.methods.map((m, k) => 
+        k === mi ? { ...m, tools: m.tools.filter((_, l) => l !== ti) } : m
+      ) } : p
+    ) } : d
+  ));
+  const updateTool = (di, pi, mi, ti, value) => setHierarchicalData(hierarchicalData.map((d, i) => 
+    i === di ? { ...d, parts: d.parts.map((p, j) => 
+      j === pi ? { ...p, methods: p.methods.map((m, k) => 
+        k === mi ? { ...m, tools: m.tools.map((t, l) => l === ti ? value : t) } : m
+      ) } : p
+    ) } : d
+  ));
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <p className="text-sm text-gray-500">Manage blocking tools with directions, parts blocked, and attacking methods.</p>
+        <p className="text-sm text-gray-500">Manage blocking tools with hierarchical structure: Tool → Direction → Part → Method → Tool.</p>
         <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold" style={{ backgroundColor: '#006CB5' }}><FaPlus /> Add Tool</button>
       </div>
       {loading ? <p className="text-gray-400 text-center py-8 text-sm">Loading...</p> : (
@@ -255,23 +378,31 @@ function BlockingTab() {
           <table className="w-full text-sm">
             <thead><tr className="text-left text-gray-500 text-xs uppercase bg-gray-50 border-b">
               <th className="px-4 py-3">#</th><th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Directions</th><th className="px-4 py-3">Parts</th>
+              <th className="px-4 py-3">Directions</th><th className="px-4 py-3">Structure</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr></thead>
             <tbody>
-              {items.map((item, i) => (
-                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
-                  <td className="px-4 py-3 font-semibold text-gray-800">{item.name}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{(item.directions || []).join(', ') || '—'}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{(item.parts || []).length} part(s)</td>
-                  <td className="px-4 py-3 text-right"><div className="flex gap-1.5 justify-end">
-                    <button onClick={() => setViewItem(item)} className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100"><FaEye size={13} /></button>
-                    <button onClick={() => openEdit(item)} className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"><FaEdit size={13} /></button>
-                    <button onClick={() => setDeleteId(item._id)} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><FaTrash size={13} /></button>
-                  </div></td>
-                </tr>
-              ))}
+              {items.map((item, i) => {
+                const hierarchical = item.hierarchicalData || [];
+                const totalDirections = hierarchical.length;
+                const totalParts = hierarchical.reduce((sum, d) => sum + d.parts.length, 0);
+                const totalMethods = hierarchical.reduce((sum, d) => sum + d.parts.reduce((pSum, p) => pSum + p.methods.length, 0), 0);
+                const totalTools = hierarchical.reduce((sum, d) => sum + d.parts.reduce((pSum, p) => pSum + p.methods.reduce((mSum, m) => mSum + m.tools.length, 0), 0), 0);
+                
+                return (
+                  <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-800">{item.name}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">{totalDirections} direction(s)</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">{totalParts} parts, {totalMethods} methods, {totalTools} tools</td>
+                    <td className="px-4 py-3 text-right"><div className="flex gap-1.5 justify-end">
+                      <button onClick={() => setViewItem(item)} className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100"><FaEye size={13} /></button>
+                      <button onClick={() => openEdit(item)} className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"><FaEdit size={13} /></button>
+                      <button onClick={() => setDeleteId(item._id)} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><FaTrash size={13} /></button>
+                    </div></td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           {items.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No items yet.</p>}
@@ -280,76 +411,129 @@ function BlockingTab() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-5 border-b">
               <h4 className="font-bold text-gray-800">{editing ? 'Edit' : 'Add'} Blocking Tool</h4>
               <button onClick={() => setShowModal(false)}><FaTimes className="text-gray-500" /></button>
             </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1">Blocking Tool Name *</label>
-                <input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="e.g. Knifehand" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Direction</label>
-                  <button onClick={() => setDirections([...directions, ''])} className="text-xs text-blue-600 hover:underline">+ Add Direction</button>
+            <div className="p-5 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Blocking Tool Name *</label>
+                  <input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="e.g. Knifehand" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                 </div>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-2">
-                  {directions.map((d, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder="e.g. Inward"
-                        value={d} onChange={e => setDirections(directions.map((v, j) => j === i ? e.target.value : v))} />
-                      {directions.length > 1 && <button onClick={() => setDirections(directions.filter((_, j) => j !== i))} className="text-red-400 text-xs px-1">✕</button>}
-                    </div>
-                  ))}
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Order</label>
+                  <input type="number" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" value={form.order} onChange={e => setForm({ ...form, order: e.target.value })} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Part Blocked</label>
-                  <button onClick={addPart} className="text-xs text-blue-600 hover:underline">+ Add Part</button>
+                <div className="flex justify-between items-center mb-3">
+                  <label className="text-sm font-semibold text-gray-700">Hierarchical Structure</label>
+                  <button onClick={addDirection} className="text-xs text-blue-600 hover:underline">+ Add Direction</button>
                 </div>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-2">
-                  {parts.map((p, pi) => (
-                    <div key={pi} className="flex gap-2">
-                      <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder="e.g. Outer Forearm"
-                        value={p.part} onChange={e => updatePart(pi, e.target.value)} />
-                      {parts.length > 1 && <button onClick={() => removePart(pi)} className="text-red-400 text-xs px-1">✕</button>}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                
+                <div className="space-y-4">
+                  {hierarchicalData.map((direction, di) => (
+                    <div key={di} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      {/* Direction Level */}
+                      <div className="flex gap-2 items-center mb-3">
+                        <div className="flex-1">
+                          <label className="text-xs font-semibold text-gray-600 block mb-1">Direction {di + 1}</label>
+                          <input 
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" 
+                            placeholder="e.g. Inward, Outward, Rising" 
+                            value={direction.direction} 
+                            onChange={e => updateDirection(di, e.target.value)} 
+                          />
+                        </div>
+                        {hierarchicalData.length > 1 && (
+                          <button onClick={() => removeDirection(di)} className="text-red-400 text-xs px-2 py-1 mt-5">Remove Direction</button>
+                        )}
+                      </div>
 
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Attacking Method</label>
-                  <button onClick={() => addMethod(0)} className="text-xs text-blue-600 hover:underline">+ Add Method</button>
-                </div>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-2">
-                  {parts[0]?.methods.map((m, mi) => (
-                    <div key={mi} className="flex gap-2">
-                      <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder="e.g. Punch"
-                        value={m.method} onChange={e => updateMethod(0, mi, 'method', e.target.value)} />
-                      {parts[0].methods.length > 1 && <button onClick={() => removeMethod(0, mi)} className="text-red-400 text-xs px-1">✕</button>}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                      {/* Parts Level */}
+                      <div className="ml-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-xs font-semibold text-gray-600">Parts Blocked</label>
+                          <button onClick={() => addPart(di)} className="text-xs text-blue-600 hover:underline">+ Add Part</button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {direction.parts.map((part, pi) => (
+                            <div key={pi} className="border border-gray-300 rounded-lg p-3 bg-white">
+                              <div className="flex gap-2 items-center mb-3">
+                                <div className="flex-1">
+                                  <label className="text-xs font-semibold text-gray-500 block mb-1">Part {pi + 1}</label>
+                                  <input 
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
+                                    placeholder="e.g. Outer Forearm, Inner Forearm" 
+                                    value={part.part} 
+                                    onChange={e => updatePart(di, pi, e.target.value)} 
+                                  />
+                                </div>
+                                {direction.parts.length > 1 && (
+                                  <button onClick={() => removePart(di, pi)} className="text-red-400 text-xs px-2 py-1 mt-5">Remove Part</button>
+                                )}
+                              </div>
 
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Attacking Tools</label>
-                  <button onClick={() => updateMethod(0, 0, 'tools', [...(parts[0]?.methods[0]?.tools || []), ''])} className="text-xs text-blue-600 hover:underline">+ Add Tool</button>
-                </div>
-                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-2">
-                  {(parts[0]?.methods[0]?.tools || ['']).map((t, ti) => (
-                    <div key={ti} className="flex gap-2">
-                      <input className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder="e.g. Forefist"
-                        value={t} onChange={e => updateMethod(0, 0, 'tools', (parts[0]?.methods[0]?.tools || ['']).map((v, j) => j === ti ? e.target.value : v))} />
-                      {(parts[0]?.methods[0]?.tools || []).length > 1 && <button onClick={() => updateMethod(0, 0, 'tools', parts[0].methods[0].tools.filter((_, j) => j !== ti))} className="text-red-400 text-xs px-1">✕</button>}
+                              {/* Methods Level */}
+                              <div className="ml-4">
+                                <div className="flex justify-between items-center mb-2">
+                                  <label className="text-xs font-semibold text-gray-500">Attacking Methods</label>
+                                  <button onClick={() => addMethod(di, pi)} className="text-xs text-blue-600 hover:underline">+ Add Method</button>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  {part.methods.map((method, mi) => (
+                                    <div key={mi} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                      <div className="flex gap-2 items-center mb-2">
+                                        <div className="flex-1">
+                                          <label className="text-xs font-semibold text-gray-400 block mb-1">Method {mi + 1}</label>
+                                          <input 
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" 
+                                            placeholder="e.g. Punch, Kick, Strike" 
+                                            value={method.method} 
+                                            onChange={e => updateMethod(di, pi, mi, e.target.value)} 
+                                          />
+                                        </div>
+                                        {part.methods.length > 1 && (
+                                          <button onClick={() => removeMethod(di, pi, mi)} className="text-red-400 text-xs px-2 py-1 mt-5">Remove Method</button>
+                                        )}
+                                      </div>
+
+                                      {/* Tools Level */}
+                                      <div className="ml-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                          <label className="text-xs font-semibold text-gray-400">Attacking Tools</label>
+                                          <button onClick={() => addTool(di, pi, mi)} className="text-xs text-blue-600 hover:underline">+ Add Tool</button>
+                                        </div>
+                                        
+                                        <div className="space-y-1">
+                                          {method.tools.map((tool, ti) => (
+                                            <div key={ti} className="flex gap-2">
+                                              <input 
+                                                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white" 
+                                                placeholder="e.g. Forefist, Backfist, Knife-hand" 
+                                                value={tool} 
+                                                onChange={e => updateTool(di, pi, mi, ti, e.target.value)} 
+                                              />
+                                              {method.tools.length > 1 && (
+                                                <button onClick={() => removeTool(di, pi, mi, ti)} className="text-red-400 text-xs px-2 py-1">✕</button>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -364,7 +548,7 @@ function BlockingTab() {
       )}
       {viewItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-5 border-b">
               <h4 className="font-bold text-gray-800">View Blocking Tool</h4>
               <button onClick={() => setViewItem(null)}><FaTimes className="text-gray-500" /></button>
@@ -374,21 +558,67 @@ function BlockingTab() {
                 <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Name</p>
                 <p className="text-sm text-gray-800">{viewItem.name || '—'}</p>
               </div>
-              {(viewItem.directions || []).length > 0 && (
+              
+              {viewItem.hierarchicalData && viewItem.hierarchicalData.length > 0 ? (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Directions</p>
-                  <p className="text-sm text-gray-800">{viewItem.directions.join(', ')}</p>
-                </div>
-              )}
-              {(viewItem.parts || []).length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Parts Blocked</p>
-                  <ul className="space-y-1">
-                    {viewItem.parts.map((p, i) => (
-                      <li key={i} className="text-sm text-gray-700">{p.part}</li>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Hierarchical Structure</p>
+                  <div className="space-y-3">
+                    {viewItem.hierarchicalData.map((direction, di) => (
+                      <div key={di} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <div className="font-semibold text-sm text-gray-700 mb-2">
+                          Direction: {direction.direction || 'Unnamed'}
+                        </div>
+                        
+                        {direction.parts.map((part, pi) => (
+                          <div key={pi} className="ml-4 mb-3 border-l-2 border-blue-200 pl-3">
+                            <div className="font-medium text-sm text-gray-600 mb-1">
+                              Part: {part.part || 'Unnamed'}
+                            </div>
+                            
+                            {part.methods.map((method, mi) => (
+                              <div key={mi} className="ml-4 mb-2 border-l-2 border-green-200 pl-3">
+                                <div className="font-medium text-xs text-gray-500 mb-1">
+                                  Method: {method.method || 'Unnamed'}
+                                </div>
+                                
+                                {method.tools.length > 0 && (
+                                  <div className="ml-4">
+                                    <div className="text-xs text-gray-400 mb-1">Tools:</div>
+                                    <ul className="list-disc list-inside text-xs text-gray-600">
+                                      {method.tools.map((tool, ti) => (
+                                        <li key={ti}>{tool || 'Unnamed'}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
+              ) : (
+                // Fallback for legacy data
+                <>
+                  {(viewItem.directions || []).length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Directions</p>
+                      <p className="text-sm text-gray-800">{viewItem.directions.join(', ')}</p>
+                    </div>
+                  )}
+                  {(viewItem.parts || []).length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Parts Blocked</p>
+                      <ul className="space-y-1">
+                        {viewItem.parts.map((p, i) => (
+                          <li key={i} className="text-sm text-gray-700">{p.part}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <div className="flex gap-3 p-5 border-t">
@@ -602,7 +832,7 @@ function LevelsTab() {
     setLevelPoints(['']); setImgFiles([]); setImgPreviews([]); setShowModal(true);
   };
   const openEdit = (item) => {
-    setEditing(item); setForm({ name: item.tab || 'Vertical', tab: item.tab || 'Vertical', title: item.title || '', subtitle: item.subtitle || '', description: item.description || '', order: item.order });
+    setEditing(item); setForm({ name: item.name || '', tab: item.tab || 'Vertical', title: item.title || '', subtitle: item.subtitle || '', description: item.description || '', order: item.order });
     setLevelPoints(item.points?.length ? item.points.map(p => p.label || p) : ['']);
     setImgFiles([]);
     setImgPreviews((item.images || []).map(url => ({ url: `${BASE_URL}${url}`, isExisting: true, path: url })));
@@ -610,8 +840,13 @@ function LevelsTab() {
   };
   const save = async () => {
     const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-    fd.append('name', form.tab); // use tab as name
+    // Don't use Object.entries to avoid conflicts, set fields explicitly
+    fd.append('name', form.tab); // use tab as name for levels
+    fd.append('tab', form.tab);
+    fd.append('title', form.title);
+    fd.append('subtitle', form.subtitle);
+    fd.append('description', form.description);
+    fd.append('order', form.order);
     fd.append('category', 'levels');
     fd.append('points', JSON.stringify(levelPoints.filter(Boolean).map((p, i) => ({ n: i + 1, label: p }))));
     const existingPaths = imgPreviews.filter(p => p.isExisting).map(p => p.path);

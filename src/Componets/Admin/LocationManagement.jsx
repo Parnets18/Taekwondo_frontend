@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:9000";
+const BASE_URL = import.meta.env.VITE_BASE_URL || "https://cwtakarnataka.com";
 
 function LocationManagement() {
   const [locations, setLocations] = useState([]);

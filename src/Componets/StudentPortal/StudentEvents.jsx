@@ -20,7 +20,7 @@ const StudentEvents = () => {
   const [viewMode, setViewMode] = useState("All Events");
 
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api";
+    import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api";
 
   // Generate years from 2015 to 2040
   const years = Array.from({ length: 26 }, (_, i) => 2015 + i);

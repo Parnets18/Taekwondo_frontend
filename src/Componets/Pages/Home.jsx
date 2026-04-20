@@ -29,8 +29,8 @@ function Home() {
   const [aboutSection, setAboutSection] = useState(null);
   const [loadingAbout, setLoadingAbout] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
-  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:9000';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
 
   // Fetch banners from API
   useEffect(() => {
@@ -766,7 +766,7 @@ function RecentPromotions() {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -927,7 +927,7 @@ function MembersBirthdaysCard() {
   const [birthdays, setBirthdays] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 
   useEffect(() => {
     const fetchBirthdays = async () => {

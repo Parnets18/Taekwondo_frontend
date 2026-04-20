@@ -17,12 +17,12 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:9000",
+        target: "https://cwtakarnataka.com",
         changeOrigin: true,
         secure: false,
       },
       "/uploads": {
-        target: "http://localhost:9000",
+        target: "https://cwtakarnataka.com",
         changeOrigin: true,
         secure: false,
       },

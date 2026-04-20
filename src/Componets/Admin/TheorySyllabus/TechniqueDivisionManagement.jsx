@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 const getToken = () => localStorage.getItem('token');
 const authH = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` });
 

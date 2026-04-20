@@ -24,7 +24,7 @@ function AdmissionManagement() {
         const token = localStorage.getItem("token");
 
         const API_BASE_URL =
-          import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api/api";
+          import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api/api";
         const response = await fetch(`${API_BASE_URL}/admin/admissions`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -115,7 +115,7 @@ function AdmissionManagement() {
       const token = localStorage.getItem("token");
 
       const API_BASE_URL =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api/api";
+        import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api/api";
       const response = await fetch(
         `${API_BASE_URL}/admin/admissions/${admissionId}/status`,
         {
@@ -208,7 +208,7 @@ function AdmissionManagement() {
         const token = localStorage.getItem("token");
 
         const API_BASE_URL =
-          import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/api/api";
+          import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api/api";
         const response = await fetch(
           `${API_BASE_URL}/admin/admissions/${admissionId}`,
           {
@@ -518,7 +518,7 @@ function AdmissionManagement() {
                           <td className="px-6 py-4">
                             {admission.photo ? (
                               <img
-                                src={`http://localhost:9000/${admission.photo.replace(/\\/g, "/").replace(/^.*uploads/, "uploads")}`}
+                                src={`https://cwtakarnataka.com/${admission.photo.replace(/\\/g, "/").replace(/^.*uploads/, "uploads")}`}
                                 alt={admission.name}
                                 className="w-12 h-12 rounded-full object-cover border-2 border-slate-300"
                                 onError={(e) => {
@@ -809,7 +809,7 @@ function AdmissionManagement() {
                           Upload Photo
                         </label>
                         <img
-                          src={`http://localhost:9000/${selectedAdmission.photo.replace(/\\/g, "/").replace(/^.*uploads/, "uploads")}`}
+                          src={`https://cwtakarnataka.com/${selectedAdmission.photo.replace(/\\/g, "/").replace(/^.*uploads/, "uploads")}`}
                           alt="Student"
                           className="w-32 h-32 object-cover rounded-lg border-2 border-slate-300"
                           onError={(e) => {

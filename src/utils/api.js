@@ -1,6 +1,6 @@
 // API Configuration
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:9000/api";
+  import.meta.env.VITE_API_URL || "https://cwtakarnataka.com/api";
 
 // Helper function to get API URL
 export const getApiUrl = (endpoint) => {
