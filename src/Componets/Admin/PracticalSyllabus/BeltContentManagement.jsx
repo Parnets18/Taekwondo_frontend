@@ -17,7 +17,57 @@ const getImageUrl = (img) => {
 };
 
 const EMPTY_BELT = { beltName: '' };
-const EMPTY_EX = { name: '', section: 'warmUp', equipment: 'chair', level: 'Easy', duration: '25 sec', videoFile: null, videoName: '', steps: [''], tips: [''] };
+const EMPTY_EX = { name: '', section: 'warmUp', equipment: 'chair', level: [], beltNames: [], duration: '25 sec', videoFile: null, videoName: '', steps: [''], tips: [''] };
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, total, onPage }) {
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (totalPages <= 1 && total <= PAGE_SIZE) return null;
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) pages.push(i);
+
+  return (
+    <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
+      <span className="text-xs text-gray-500">
+        Page {page} of {totalPages}
+      </span>
+      <div className="flex gap-1 items-center">
+        <button
+          onClick={() => onPage(page - 1)}
+          disabled={page === 1}
+          className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ borderColor: '#006CB5', color: page === 1 ? '#9ca3af' : '#006CB5' }}
+        >
+          Previous
+        </button>
+        {pages.map(p => (
+          <button
+            key={p}
+            onClick={() => onPage(p)}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium border transition"
+            style={
+              p === page
+                ? { backgroundColor: '#006CB5', borderColor: '#006CB5', color: '#fff' }
+                : { borderColor: '#d1d5db', color: '#374151' }
+            }
+          >
+            {p}
+          </button>
+        ))}
+        <button
+          onClick={() => onPage(page + 1)}
+          disabled={page === totalPages}
+          className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ borderColor: '#006CB5', color: page === totalPages ? '#9ca3af' : '#006CB5' }}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function BeltContentManagement() {
   const [activeTab, setActiveTab] = useState('belts');
@@ -44,9 +94,38 @@ export default function BeltContentManagement() {
   const [exImagePreview, setExImagePreview] = useState(null);
   const [filterBelt, setFilterBelt] = useState('All');
   const [filterSection, setFilterSection] = useState('All');
+  const [filterLevel, setFilterLevel] = useState('All');
   const [viewItem, setViewItem] = useState(null);
+  const [showLevelDropdown, setShowLevelDropdown] = useState(false);
+  const [showBeltDropdown, setShowBeltDropdown] = useState(false);
+
+  // Search + pagination
+  const [beltSearch, setBeltSearch] = useState('');
+  const [beltPage, setBeltPage] = useState(1);
+  const [exSearch, setExSearch] = useState('');
+  const [exPage, setExPage] = useState(1);
 
   useEffect(() => { fetchAll(); }, []);
+
+  // Close level dropdown when clicking outside
+  useEffect(() => {
+    if (!showLevelDropdown) return;
+    const handler = (e) => {
+      if (!e.target.closest('[data-level-dropdown]')) setShowLevelDropdown(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showLevelDropdown]);
+
+  // Close belt dropdown when clicking outside
+  useEffect(() => {
+    if (!showBeltDropdown) return;
+    const handler = (e) => {
+      if (!e.target.closest('[data-belt-dropdown]')) setShowBeltDropdown(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showBeltDropdown]);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -102,8 +181,34 @@ export default function BeltContentManagement() {
   };
 
   // ── Exercise CRUD ──────────────────────────────────────────
-  const openAddEx = (beltName = '') => { setEditingEx(null); setExForm({ ...EMPTY_EX, beltName }); setExImageFile(null); setExImagePreview(null); setError(''); setShowExForm(true); };
-  const openEditEx = (ex) => { setEditingEx(ex); setExForm({ name: ex.name, section: ex.section, equipment: ex.equipment, level: ex.level || 'Easy', duration: ex.duration || '25 sec', beltName: ex.beltName || '', videoFile: null, videoName: ex.videoUrl ? 'Existing video uploaded' : '', steps: ex.steps?.length ? ex.steps : [''], tips: ex.tips?.length ? ex.tips : [''] }); setExImagePreview(ex.image ? getImageUrl(ex.image) : null); setExImageFile(null); setError(''); setShowExForm(true); };
+  const openAddEx = (beltName = '') => { setEditingEx(null); setExForm({ ...EMPTY_EX, beltNames: beltName ? [beltName] : [] }); setExImageFile(null); setExImagePreview(null); setError(''); setShowExForm(true); };
+  const openEditEx = (ex) => {
+    // Normalize level to always be an array
+    const levelVal = ex.level
+      ? (Array.isArray(ex.level) ? ex.level : [ex.level])
+      : [];
+    // Normalize beltNames to always be an array — migrate legacy beltName string
+    const beltNamesVal = (Array.isArray(ex.beltNames) && ex.beltNames.length > 0)
+      ? ex.beltNames
+      : (ex.beltName ? [ex.beltName] : []);
+    setEditingEx(ex);
+    setExForm({
+      name: ex.name,
+      section: ex.section,
+      equipment: ex.equipment,
+      level: levelVal,
+      beltNames: beltNamesVal,
+      duration: ex.duration || '25 sec',
+      videoFile: null,
+      videoName: ex.videoUrl ? 'Existing video uploaded' : '',
+      steps: ex.steps?.length ? ex.steps : [''],
+      tips: ex.tips?.length ? ex.tips : [''],
+    });
+    setExImagePreview(ex.image ? getImageUrl(ex.image) : null);
+    setExImageFile(null);
+    setError('');
+    setShowExForm(true);
+  };
   const closeExForm = () => { setShowExForm(false); setEditingEx(null); setExForm(EMPTY_EX); setExImageFile(null); setExImagePreview(null); setError(''); };
 
   const handleExImageChange = (e) => {
@@ -122,8 +227,8 @@ export default function BeltContentManagement() {
       fd.append('name', exForm.name);
       fd.append('section', exForm.section);
       fd.append('equipment', exForm.equipment);
-      fd.append('level', exForm.level || 'Easy');
-      fd.append('beltName', exForm.beltName || '');
+      fd.append('levelJson', JSON.stringify(exForm.level || [])); // Send as JSON array
+      fd.append('beltNamesJson', JSON.stringify(exForm.beltNames || [])); // Send as JSON array
       // Send steps and tips as JSON strings — avoids multipart array parsing issues
       const cleanSteps = exForm.steps.filter(s => s && s.trim());
       const cleanTips = exForm.tips.filter(t => t && t.trim());
@@ -161,11 +266,50 @@ export default function BeltContentManagement() {
     catch { setError('Failed to delete.'); }
   };
 
+  const toggleLevel = (lvl) => {
+    setExForm(f => {
+      const current = f.level || [];
+      return {
+        ...f,
+        level: current.includes(lvl) ? current.filter(l => l !== lvl) : [...current, lvl],
+      };
+    });
+  };
+
+  const toggleBelt = (beltName) => {
+    setExForm(f => {
+      const current = f.beltNames || [];
+      return {
+        ...f,
+        beltNames: current.includes(beltName) ? current.filter(b => b !== beltName) : [...current, beltName],
+      };
+    });
+  };
+
   const filteredExercises = exercises.filter(ex => {
-    const matchBelt = filterBelt === 'All' || ex.beltName === filterBelt;
+    // Support both old beltName string and new beltNames array
+    const exBelts = Array.isArray(ex.beltNames) && ex.beltNames.length ? ex.beltNames : (ex.beltName ? [ex.beltName] : []);
+    const matchBelt = filterBelt === 'All' || exBelts.includes(filterBelt);
     const matchSection = filterSection === 'All' || ex.section === filterSection;
-    return matchBelt && matchSection;
+    const exLevels = Array.isArray(ex.level) ? ex.level : (ex.level ? [ex.level] : []);
+    const matchLevel = filterLevel === 'All' || exLevels.length === 0 || exLevels.includes(filterLevel);
+    const matchSearch = exSearch.trim() === '' ||
+      ex.name?.toLowerCase().includes(exSearch.toLowerCase()) ||
+      exBelts.some(b => b.toLowerCase().includes(exSearch.toLowerCase()));
+    return matchBelt && matchSection && matchLevel && matchSearch;
   });
+
+  const filteredBelts = belts.filter(b =>
+    beltSearch.trim() === '' || b.beltName?.toLowerCase().includes(beltSearch.toLowerCase())
+  );
+
+  const beltPageSafe = Math.min(beltPage, Math.max(1, Math.ceil(filteredBelts.length / PAGE_SIZE)));
+  const beltStart = (beltPageSafe - 1) * PAGE_SIZE;
+  const beltPageItems = filteredBelts.slice(beltStart, beltStart + PAGE_SIZE);
+
+  const exPageSafe = Math.min(exPage, Math.max(1, Math.ceil(filteredExercises.length / PAGE_SIZE)));
+  const exStart = (exPageSafe - 1) * PAGE_SIZE;
+  const exPageItems = filteredExercises.slice(exStart, exStart + PAGE_SIZE);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -219,52 +363,113 @@ export default function BeltContentManagement() {
       ) : activeTab === 'belts' ? (
         /* ── BELTS TAB ── */
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          {belts.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">No belts yet. Click "Add Belt" to start.</div>
+          {/* Search */}
+          <div className="px-4 pt-4 pb-2">
+            <div className="relative w-full max-w-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={beltSearch}
+                onChange={e => { setBeltSearch(e.target.value); setBeltPage(1); }}
+                placeholder="Search..."
+                className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
+          {filteredBelts.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              {beltSearch ? 'No belts match your search.' : 'No belts yet. Click "Add Belt" to start.'}
+            </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600 w-20">Image</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Belt Name</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {belts.map((belt, idx) => (
-                  <tr key={belt._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
-                    <td className="px-4 py-3">
-                      <div className="w-14 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
-                        {belt.image
-                          ? <img src={getImageUrl(belt.image)} alt={belt.beltName} className="w-full h-full object-cover" />
-                          : <FaImage className="w-4 h-4 text-gray-300" />}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-gray-900">{belt.beltName}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openEditBelt(belt)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition">
-                          <FaEdit className="w-3 h-3" /> Edit
-                        </button>
-                        <button onClick={() => deleteBelt(belt)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition">
-                          <FaTrash className="w-3 h-3" /> Delete
-                        </button>
-                      </div>
-                    </td>
+            <>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-20">Image</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Belt Name</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {beltPageItems.map((belt, idx) => (
+                    <tr key={belt._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                      <td className="px-4 py-3 text-gray-500">{beltStart + idx + 1}</td>
+                      <td className="px-4 py-3">
+                        <div className="w-14 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
+                          {belt.image
+                            ? <img src={getImageUrl(belt.image)} alt={belt.beltName} className="w-full h-full object-cover" />
+                            : <FaImage className="w-4 h-4 text-gray-300" />}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-gray-900">{belt.beltName}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => openEditBelt(belt)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition">
+                            <FaEdit className="w-3 h-3" /> Edit
+                          </button>
+                          <button onClick={() => deleteBelt(belt)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition">
+                            <FaTrash className="w-3 h-3" /> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="px-4 pb-4">
+                <div className="text-xs text-gray-500 mt-3">
+                  Showing {filteredBelts.length === 0 ? 0 : beltStart + 1}–{Math.min(beltStart + PAGE_SIZE, filteredBelts.length)} of {filteredBelts.length}
+                </div>
+                <Pagination page={beltPageSafe} total={filteredBelts.length} onPage={setBeltPage} />
+              </div>
+            </>
           )}
         </div>
       ) : (
         /* ── EXERCISES TAB ── */
         <div>
+          {/* Filters + Search row */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={exSearch}
+                onChange={e => { setExSearch(e.target.value); setExPage(1); }}
+                placeholder="Search..."
+                className="border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <select value={filterBelt} onChange={e => { setFilterBelt(e.target.value); setExPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="All">All Belts</option>
+              {belts.map(b => <option key={b._id} value={b.beltName}>{b.beltName}</option>)}
+            </select>
+            <select value={filterSection} onChange={e => { setFilterSection(e.target.value); setExPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="All">All Sections</option>
+              {SECTIONS.map(s => <option key={s} value={s}>{SECTION_LABELS[s]}</option>)}
+            </select>
+            <select value={filterLevel} onChange={e => { setFilterLevel(e.target.value); setExPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="All">All Levels</option>
+              {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
           {filteredExercises.length === 0 ? (
             <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">
-              No exercises yet. Click "Add Exercise" to start.
+              {exSearch || filterBelt !== 'All' || filterSection !== 'All' || filterLevel !== 'All'
+                ? 'No exercises match your search/filters.'
+                : 'No exercises yet. Click "Add Exercise" to start.'}
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -276,14 +481,15 @@ export default function BeltContentManagement() {
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Name</th>
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Belt</th>
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Section</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Level</th>
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Equipment</th>
                     <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredExercises.map((ex, idx) => (
+                  {exPageItems.map((ex, idx) => (
                     <tr key={ex._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
+                      <td className="px-4 py-3 text-gray-500">{exStart + idx + 1}</td>
                       <td className="px-4 py-3">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
                           {ex.image ? <img src={getImageUrl(ex.image)} alt={ex.name} className="w-full h-full object-cover" /> : <FaImage className="w-4 h-4 text-gray-300" />}
@@ -291,12 +497,26 @@ export default function BeltContentManagement() {
                       </td>
                       <td className="px-4 py-3 font-semibold text-gray-900">{ex.name}</td>
                       <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">{ex.beltName || '—'}</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                          {Array.isArray(ex.beltNames) && ex.beltNames.length ? ex.beltNames.join(', ') : (ex.beltName || '—')}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ex.section === 'warmUp' ? 'bg-orange-50 text-orange-700' : ex.section === 'training' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>
                           {SECTION_LABELS[ex.section]}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const lvls = Array.isArray(ex.level) ? ex.level : (ex.level ? [ex.level] : []);
+                          return lvls.length ? (
+                            <div className="flex flex-wrap gap-1">
+                              {lvls.map(l => (
+                                <span key={l} className={`px-2 py-0.5 rounded-full text-xs font-medium ${l === 'Easy' ? 'bg-green-50 text-green-700' : l === 'Advance' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>{l}</span>
+                              ))}
+                            </div>
+                          ) : <span className="text-gray-300 text-xs">—</span>;
+                        })()}
                       </td>
                       <td className="px-4 py-3 text-gray-500">{EQUIPMENT_LABELS[ex.equipment]}</td>
                       <td className="px-4 py-3">
@@ -316,6 +536,12 @@ export default function BeltContentManagement() {
                   ))}
                 </tbody>
               </table>
+              <div className="px-4 pb-4">
+                <div className="text-xs text-gray-500 mt-3">
+                  Showing {filteredExercises.length === 0 ? 0 : exStart + 1}–{Math.min(exStart + PAGE_SIZE, filteredExercises.length)} of {filteredExercises.length}
+                </div>
+                <Pagination page={exPageSafe} total={filteredExercises.length} onPage={setExPage} />
+              </div>
             </div>
           )}
         </div>
@@ -401,11 +627,33 @@ export default function BeltContentManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Belt</label>
-                  <select value={exForm.beltName} onChange={e => setExForm(f => ({ ...f, beltName: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    <option value="">Select belt</option>
-                    {belts.map(b => <option key={b._id} value={b.beltName}>{b.beltName}</option>)}
-                  </select>
+                  <div className="relative" data-belt-dropdown>
+                    <button
+                      type="button"
+                      onClick={() => setShowBeltDropdown(v => !v)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      <span className={exForm.beltNames?.length ? 'text-gray-800 truncate pr-2' : 'text-gray-400'}>
+                        {exForm.beltNames?.length ? exForm.beltNames.join(', ') : 'Select belts'}
+                      </span>
+                      <svg className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${showBeltDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    {showBeltDropdown && (
+                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto">
+                        {belts.map(b => (
+                          <label key={b._id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={(exForm.beltNames || []).includes(b.beltName)}
+                              onChange={() => toggleBelt(b.beltName)}
+                              className="w-4 h-4 rounded accent-blue-600"
+                            />
+                            <span className="text-sm text-gray-700">{b.beltName}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Section</label>
@@ -423,10 +671,33 @@ export default function BeltContentManagement() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Level</label>
-                  <select value={exForm.level} onChange={e => setExForm(f => ({ ...f, level: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                  </select>
+                  <div className="relative" data-level-dropdown>
+                    <button
+                      type="button"
+                      onClick={() => setShowLevelDropdown(v => !v)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      <span className={exForm.level?.length ? 'text-gray-800' : 'text-gray-400'}>
+                        {exForm.level?.length ? exForm.level.join(', ') : 'Select levels'}
+                      </span>
+                      <svg className={`w-4 h-4 text-gray-400 transition-transform ${showLevelDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    {showLevelDropdown && (
+                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                        {LEVELS.map(lvl => (
+                          <label key={lvl} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={(exForm.level || []).includes(lvl)}
+                              onChange={() => toggleLevel(lvl)}
+                              className="w-4 h-4 rounded accent-blue-600"
+                            />
+                            <span className="text-sm text-gray-700">{lvl}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -529,10 +800,10 @@ export default function BeltContentManagement() {
               <div className="divide-y divide-gray-100">
                 {[
                   ['Name', viewItem.name],
-                  ['Belt', viewItem.beltName || '—'],
+                  ['Belt', (() => { const b = Array.isArray(viewItem.beltNames) && viewItem.beltNames.length ? viewItem.beltNames : (viewItem.beltName ? [viewItem.beltName] : []); return b.length ? b.join(', ') : '—'; })()],
                   ['Section', SECTION_LABELS[viewItem.section]],
                   ['Equipment', EQUIPMENT_LABELS[viewItem.equipment]],
-                  ['Level', viewItem.level || '—'],
+                  ['Level', Array.isArray(viewItem.level) ? (viewItem.level.join(', ') || '—') : (viewItem.level || '—')],
                   ['Video', viewItem.videoUrl ? '✅ Uploaded' : '❌ Not uploaded'],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between py-2">

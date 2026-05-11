@@ -10,12 +10,61 @@ const SECTION_LABELS = { warmUp: 'Warm-Up', training: 'Training', stretching: 'S
 const EQUIPMENT = ['all', 'chair', 'noChair'];
 const EQUIPMENT_LABELS = { all: 'All', chair: 'With Chair', noChair: 'No Chair' };
 const EMPTY = { name: '', section: 'warmUp', equipment: 'all', duration: '25 sec' };
+const PAGE_SIZE = 10;
 
 const getImageUrl = (img) => {
   if (!img) return null;
   if (img.startsWith('http')) return img;
   return `${BASE_URL}/${img.replace(/^\//, '')}`;
 };
+
+function Pagination({ page, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
+
+  return (
+    <div className="flex gap-1 items-center justify-between mt-4">
+      <button
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 1}
+        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={page === 1 ? { borderColor: '#d1d5db', color: '#9ca3af' } : { borderColor: '#006CB5', color: '#006CB5', backgroundColor: '#fff' }}
+      >
+        Previous
+      </button>
+
+      <div className="flex gap-1 items-center">
+        {pages.map((p) => (
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
+            className="w-8 h-8 rounded-lg text-sm font-medium border transition"
+            style={
+              p === page
+                ? { backgroundColor: '#006CB5', color: '#fff', borderColor: '#006CB5' }
+                : { backgroundColor: '#fff', color: '#374151', borderColor: '#d1d5db' }
+            }
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={() => onPageChange(page + 1)}
+        disabled={page === totalPages}
+        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={page === totalPages ? { borderColor: '#d1d5db', color: '#9ca3af' } : { borderColor: '#006CB5', color: '#006CB5', backgroundColor: '#fff' }}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
 
 export default function ExerciseManagement() {
   const [searchParams] = useSearchParams();
@@ -32,8 +81,13 @@ export default function ExerciseManagement() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [filterSection, setFilterSection] = useState('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => { fetchExercises(); }, []);
+
+  // Reset page when search or filterSection changes
+  useEffect(() => { setPage(1); }, [search, filterSection]);
 
   const fetchExercises = async () => {
     try {
@@ -105,7 +159,21 @@ export default function ExerciseManagement() {
     } catch { alert('Failed to delete'); }
   };
 
-  const filtered = filterSection ? exercises.filter(e => e.section === filterSection) : exercises;
+  // Filter by section, then by search
+  const sectionFiltered = filterSection ? exercises.filter(e => e.section === filterSection) : exercises;
+  const filtered = search.trim()
+    ? sectionFiltered.filter(e => e.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : sectionFiltered;
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const startIdx = (safePage - 1) * PAGE_SIZE;
+  const paginated = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+
+  // "Showing X-Y of Z"
+  const showingFrom = filtered.length === 0 ? 0 : startIdx + 1;
+  const showingTo = Math.min(startIdx + PAGE_SIZE, filtered.length);
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -131,8 +199,8 @@ export default function ExerciseManagement() {
         </button>
       </div>
 
-      {/* Filter */}
-      <div className="mb-4 flex gap-2">
+      {/* Filter + Search */}
+      <div className="mb-4 flex flex-wrap gap-2 items-center">
         <button onClick={() => setFilterSection('')}
           className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${!filterSection ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>
           All
@@ -143,6 +211,14 @@ export default function ExerciseManagement() {
             {SECTION_LABELS[s]}
           </button>
         ))}
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search exercises..."
+          className="ml-auto border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          style={{ minWidth: '200px' }}
+        />
       </div>
 
       {/* Table */}
@@ -161,11 +237,11 @@ export default function ExerciseManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filtered.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-12 text-center text-gray-400">No exercises yet. Click "+ Add Exercise" to get started.</td></tr>
-              ) : filtered.map((ex, idx) => (
+              {paginated.length === 0 ? (
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-gray-400">No exercises found.</td></tr>
+              ) : paginated.map((ex, idx) => (
                 <tr key={ex._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-500">{idx + 1}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{startIdx + idx + 1}</td>
                   <td className="px-6 py-4">
                     {ex.image ? (
                       <img src={getImageUrl(ex.image)} alt={ex.name} className="w-16 h-12 object-cover rounded-lg border border-gray-200" />
@@ -194,6 +270,16 @@ export default function ExerciseManagement() {
           </table>
         </div>
       </div>
+
+      {/* Showing X-Y of Z + Pagination */}
+      <div className="flex items-center justify-between mt-2 px-1">
+        <p className="text-sm text-gray-500">
+          {filtered.length === 0
+            ? 'No results'
+            : `Showing ${showingFrom}–${showingTo} of ${filtered.length}`}
+        </p>
+      </div>
+      <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
 
       {/* Add/Edit Modal */}
       {showForm && (

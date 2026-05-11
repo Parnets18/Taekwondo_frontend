@@ -3,6 +3,56 @@ import axios from 'axios';
 import { API_BASE_URL, getAuthHeaders, getAuthHeadersMultipart } from '../../../config/api';
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaImage, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
+const PAGE_SIZE = 10;
+
+function Pagination({ page, total, onPageChange }) {
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (totalPages <= 1 && total <= PAGE_SIZE) return null;
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) pages.push(i);
+
+  return (
+    <div className="flex gap-1 items-center justify-between mt-4">
+      <span className="text-xs text-gray-500">
+        Showing {Math.min((page - 1) * PAGE_SIZE + 1, total)}–{Math.min(page * PAGE_SIZE, total)} of {total}
+      </span>
+      <div className="flex gap-1 items-center">
+        <button
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 1}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+          style={{ borderColor: '#006CB5', color: '#006CB5' }}
+        >
+          Previous
+        </button>
+        {pages.map(p => (
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition"
+            style={
+              p === page
+                ? { backgroundColor: '#006CB5', color: '#fff', borderColor: '#006CB5' }
+                : { borderColor: '#006CB5', color: '#006CB5' }
+            }
+          >
+            {p}
+          </button>
+        ))}
+        <button
+          onClick={() => onPageChange(page + 1)}
+          disabled={page === totalPages}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+          style={{ borderColor: '#006CB5', color: '#006CB5' }}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const EMPTY_TECHNIQUE = {
   name: '',
   category: '',
@@ -41,6 +91,12 @@ export default function TechniquesManagement() {
   const [activeTab, setActiveTab] = useState('techniques'); // 'categories' | 'techniques'
   const [filterCategory, setFilterCategory] = useState('All');
   const [expandedCats, setExpandedCats] = useState({});
+
+  // Search + pagination state
+  const [catSearch, setCatSearch] = useState('');
+  const [catPage, setCatPage] = useState(1);
+  const [techSearch, setTechSearch] = useState('');
+  const [techPage, setTechPage] = useState(1);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -189,9 +245,23 @@ export default function TechniquesManagement() {
   };
 
   // ── FILTERED TECHNIQUES ────────────────────────────────────
-  const filteredTechniques = filterCategory === 'All'
+  const filteredTechniques = (filterCategory === 'All'
     ? techniques
-    : techniques.filter(t => t.category === filterCategory);
+    : techniques.filter(t => t.category === filterCategory)
+  ).filter(t =>
+    techSearch.trim() === '' ||
+    t.name?.toLowerCase().includes(techSearch.trim().toLowerCase()) ||
+    t.category?.toLowerCase().includes(techSearch.trim().toLowerCase())
+  );
+
+  const techTotalPages = Math.ceil(filteredTechniques.length / PAGE_SIZE);
+  const pagedTechniques = filteredTechniques.slice((techPage - 1) * PAGE_SIZE, techPage * PAGE_SIZE);
+
+  const filteredCategories = categories.filter(cat =>
+    catSearch.trim() === '' || cat.name?.toLowerCase().includes(catSearch.trim().toLowerCase())
+  );
+  const catTotalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
+  const pagedCategories = filteredCategories.slice((catPage - 1) * PAGE_SIZE, catPage * PAGE_SIZE);
 
   const groupedByCategory = categories.map(cat => ({
     ...cat,
@@ -247,62 +317,86 @@ export default function TechniquesManagement() {
       ) : activeTab === 'categories' ? (
         /* ── CATEGORIES TAB ── */
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          {categories.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">No categories yet. Click "Add Category" to start.</div>
+          {/* Search */}
+          <div className="p-4 border-b border-gray-100">
+            <input
+              type="text"
+              value={catSearch}
+              onChange={e => { setCatSearch(e.target.value); setCatPage(1); }}
+              placeholder="Search..."
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+            />
+          </div>
+          {filteredCategories.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">No categories found.</div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Category Name</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Techniques</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {categories.map((cat, idx) => (
-                  <tr key={cat._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
-                    <td className="px-4 py-3 font-semibold text-gray-900">{cat.name}</td>
-                    <td className="px-4 py-3 text-gray-500">
-                      {techniques.filter(t => t.category === cat.name).length} techniques
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openEditCat(cat)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition">
-                          <FaEdit className="w-3 h-3" /> Edit
-                        </button>
-                        <button onClick={() => deleteCat(cat._id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition">
-                          <FaTrash className="w-3 h-3" /> Delete
-                        </button>
-                      </div>
-                    </td>
+            <>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Category Name</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Techniques</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {pagedCategories.map((cat, idx) => (
+                    <tr key={cat._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                      <td className="px-4 py-3 text-gray-500">{(catPage - 1) * PAGE_SIZE + idx + 1}</td>
+                      <td className="px-4 py-3 font-semibold text-gray-900">{cat.name}</td>
+                      <td className="px-4 py-3 text-gray-500">
+                        {techniques.filter(t => t.category === cat.name).length} techniques
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => openEditCat(cat)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition">
+                            <FaEdit className="w-3 h-3" /> Edit
+                          </button>
+                          <button onClick={() => deleteCat(cat._id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition">
+                            <FaTrash className="w-3 h-3" /> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="px-4 pb-4">
+                <Pagination page={catPage} total={filteredCategories.length} onPageChange={setCatPage} />
+              </div>
+            </>
           )}
         </div>
       ) : (
         /* ── TECHNIQUES TAB ── */
         <div>
-          {/* Category filter */}
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {['All', ...categories.map(c => c.name)].map(cat => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition ${filterCategory === cat ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                style={filterCategory === cat ? { backgroundColor: '#006CB5' } : {}}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Category filter + search */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="flex gap-2 flex-wrap">
+              {['All', ...categories.map(c => c.name)].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => { setFilterCategory(cat); setTechPage(1); }}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition ${filterCategory === cat ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  style={filterCategory === cat ? { backgroundColor: '#006CB5' } : {}}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={techSearch}
+              onChange={e => { setTechSearch(e.target.value); setTechPage(1); }}
+              placeholder="Search..."
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm ml-auto"
+            />
           </div>
 
           {filteredTechniques.length === 0 ? (
             <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">
-              No techniques yet. Click "Add Technique" to start.
+              No techniques found.
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -319,9 +413,9 @@ export default function TechniquesManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTechniques.map((tech, idx) => (
+                  {pagedTechniques.map((tech, idx) => (
                     <tr key={tech._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
+                      <td className="px-4 py-3 text-gray-500">{(techPage - 1) * PAGE_SIZE + idx + 1}</td>
                       <td className="px-4 py-3">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
                           {tech.image
@@ -356,6 +450,9 @@ export default function TechniquesManagement() {
                   ))}
                 </tbody>
               </table>
+              <div className="px-4 pb-4">
+                <Pagination page={techPage} total={filteredTechniques.length} onPageChange={setTechPage} />
+              </div>
             </div>
           )}
         </div>

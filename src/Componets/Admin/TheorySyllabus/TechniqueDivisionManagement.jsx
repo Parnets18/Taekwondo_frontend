@@ -5,7 +5,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com
 const getToken = () => localStorage.getItem('token');
 const authH = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` });
 
-const EMPTY_FORM = { category: '', title: '', subtitle: '', description: '', headings: [], points: [], order: 0 };
+const EMPTY_FORM = { category: '', title: '', subtitle: '', description: '', sections: [], order: 0 };
+const emptySection = () => ({ heading: '', points: [] });
 const emptyPoint = () => ({ text: '', subPoints: [] });
 const emptySubPoint = () => ({ text: '', subPoints: [] });
 
@@ -71,13 +72,25 @@ export default function TechniqueDivisionManagement() {
 
   const openEdit = (item) => {
     setEditing(item);
+    // Migrate old headings+points format to new sections format if needed
+    let sections = item.sections ? JSON.parse(JSON.stringify(item.sections)) : [];
+    if (sections.length === 0 && ((item.headings && item.headings.length > 0) || (item.points && item.points.length > 0))) {
+      // Legacy: convert old headings/points into sections
+      const headings = item.headings || [];
+      const points = item.points || [];
+      if (headings.length > 0) {
+        headings.forEach(h => sections.push({ heading: h, points: [] }));
+      }
+      if (points.length > 0) {
+        sections.push({ heading: '', points: JSON.parse(JSON.stringify(points)) });
+      }
+    }
     setForm({
       category: item.category,
       title: item.title,
       subtitle: item.subtitle || '',
       description: item.description || '',
-      headings: [...(item.headings || [])],
-      points: JSON.parse(JSON.stringify(item.points || [])),
+      sections,
       order: item.order || 0,
     });
     setShowModal(true);
@@ -99,52 +112,62 @@ export default function TechniqueDivisionManagement() {
 
   const upd = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
-  // ── Headings (simple string array) ──────────────────────────────────────
-  const addHeading = () => upd('headings', [...form.headings, '']);
-  const updHeading = (i, val) => {
-    const arr = [...form.headings]; arr[i] = val; upd('headings', arr);
+  // ── Sections ──────────────────────────────────────────────────────────────
+  const addSection = () => upd('sections', [...form.sections, emptySection()]);
+  const updSectionHeading = (si, val) => {
+    const arr = [...form.sections]; arr[si] = { ...arr[si], heading: val }; upd('sections', arr);
   };
-  const removeHeading = (i) => upd('headings', form.headings.filter((_, idx) => idx !== i));
+  const removeSection = (si) => upd('sections', form.sections.filter((_, idx) => idx !== si));
 
-  // ── Points ────────────────────────────────────────────────────────────────
-  const addPoint = () => upd('points', [...form.points, emptyPoint()]);
-  const updPoint = (i, val) => {
-    const arr = [...form.points]; arr[i] = { ...arr[i], text: val }; upd('points', arr);
+  // ── Points inside a section ───────────────────────────────────────────────
+  const addPoint = (si) => {
+    const arr = [...form.sections];
+    arr[si].points = [...(arr[si].points || []), emptyPoint()];
+    upd('sections', arr);
   };
-  const removePoint = (i) => upd('points', form.points.filter((_, idx) => idx !== i));
+  const updPoint = (si, pi, val) => {
+    const arr = [...form.sections];
+    arr[si].points[pi] = { ...arr[si].points[pi], text: val };
+    upd('sections', arr);
+  };
+  const removePoint = (si, pi) => {
+    const arr = [...form.sections];
+    arr[si].points = arr[si].points.filter((_, idx) => idx !== pi);
+    upd('sections', arr);
+  };
 
   // ── Sub-points ────────────────────────────────────────────────────────────
-  const addSubPoint = (pi) => {
-    const arr = [...form.points];
-    arr[pi].subPoints = [...(arr[pi].subPoints || []), emptySubPoint()];
-    upd('points', arr);
+  const addSubPoint = (si, pi) => {
+    const arr = [...form.sections];
+    arr[si].points[pi].subPoints = [...(arr[si].points[pi].subPoints || []), emptySubPoint()];
+    upd('sections', arr);
   };
-  const updSubPoint = (pi, si, val) => {
-    const arr = [...form.points];
-    arr[pi].subPoints[si] = { ...arr[pi].subPoints[si], text: val };
-    upd('points', arr);
+  const updSubPoint = (si, pi, spi, val) => {
+    const arr = [...form.sections];
+    arr[si].points[pi].subPoints[spi] = { ...arr[si].points[pi].subPoints[spi], text: val };
+    upd('sections', arr);
   };
-  const removeSubPoint = (pi, si) => {
-    const arr = [...form.points];
-    arr[pi].subPoints = arr[pi].subPoints.filter((_, idx) => idx !== si);
-    upd('points', arr);
+  const removeSubPoint = (si, pi, spi) => {
+    const arr = [...form.sections];
+    arr[si].points[pi].subPoints = arr[si].points[pi].subPoints.filter((_, idx) => idx !== spi);
+    upd('sections', arr);
   };
 
   // ── Sub-sub-points ────────────────────────────────────────────────────────
-  const addSubSubPoint = (pi, si) => {
-    const arr = [...form.points];
-    arr[pi].subPoints[si].subPoints = [...(arr[pi].subPoints[si].subPoints || []), emptySubPoint()];
-    upd('points', arr);
+  const addSubSubPoint = (si, pi, spi) => {
+    const arr = [...form.sections];
+    arr[si].points[pi].subPoints[spi].subPoints = [...(arr[si].points[pi].subPoints[spi].subPoints || []), emptySubPoint()];
+    upd('sections', arr);
   };
-  const updSubSubPoint = (pi, si, ssi, val) => {
-    const arr = [...form.points];
-    arr[pi].subPoints[si].subPoints[ssi] = { ...arr[pi].subPoints[si].subPoints[ssi], text: val };
-    upd('points', arr);
+  const updSubSubPoint = (si, pi, spi, sspi, val) => {
+    const arr = [...form.sections];
+    arr[si].points[pi].subPoints[spi].subPoints[sspi] = { ...arr[si].points[pi].subPoints[spi].subPoints[sspi], text: val };
+    upd('sections', arr);
   };
-  const removeSubSubPoint = (pi, si, ssi) => {
-    const arr = [...form.points];
-    arr[pi].subPoints[si].subPoints = arr[pi].subPoints[si].subPoints.filter((_, idx) => idx !== ssi);
-    upd('points', arr);
+  const removeSubSubPoint = (si, pi, spi, sspi) => {
+    const arr = [...form.sections];
+    arr[si].points[pi].subPoints[spi].subPoints = arr[si].points[pi].subPoints[spi].subPoints.filter((_, idx) => idx !== sspi);
+    upd('sections', arr);
   };
 
   // Group items by category for display
@@ -225,7 +248,7 @@ export default function TechniqueDivisionManagement() {
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Subtitle</th>
-                <th className="px-4 py-3">Headings</th>
+                <th className="px-4 py-3">Sections</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -239,8 +262,8 @@ export default function TechniqueDivisionManagement() {
                   <td className="px-4 py-3 font-semibold text-gray-800">{item.title}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{item.subtitle || '—'}</td>
                   <td className="px-4 py-3 text-center">
-                    {item.headings?.length > 0
-                      ? <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-50 text-orange-600">{item.headings.length}</span>
+                    {item.sections?.length > 0
+                      ? <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-50 text-orange-600">{item.sections.length}</span>
                       : <span className="text-gray-300 text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -305,87 +328,89 @@ export default function TechniqueDivisionManagement() {
                   value={form.description} onChange={e => upd('description', e.target.value)} />
               </div>
 
-              {/* Headings + Points */}
+              {/* Sections (heading optional + points) */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-semibold text-gray-700">Headings & Points</label>
-                  <button type="button" onClick={addHeading}
+                  <button type="button" onClick={addSection}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-xs font-semibold" style={{ backgroundColor: '#006CB5' }}>
-                    <FaPlus size={10} /> Add Heading
+                    <FaPlus size={10} /> Add
                   </button>
                 </div>
-                {form.headings.length === 0 && <p className="text-gray-400 text-xs py-1">No headings yet.</p>}
+                {form.sections.length === 0 && <p className="text-gray-400 text-xs py-1">No sections yet. Click "Add" to create one.</p>}
                 <div className="space-y-4">
-                  {form.headings.map((h, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <input
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold bg-white"
-                        placeholder="e.g. Types of hand attacks..."
-                        value={h}
-                        onChange={e => updHeading(i, e.target.value)}
-                      />
-                      <button type="button" onClick={() => removeHeading(i)}
-                        className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex-shrink-0"><FaTimes size={10} /></button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Points — separate from headings */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-semibold text-gray-700">Points</label>
-                  <button type="button" onClick={addPoint}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-xs font-semibold" style={{ backgroundColor: '#006CB5' }}>
-                    <FaPlus size={10} /> Add Point
-                  </button>
-                </div>
-                {form.points.length === 0 && <p className="text-gray-400 text-xs py-1">No points yet.</p>}
-                <div className="space-y-2">
-                  {form.points.map((pt, pi) => (
-                    <div key={pi} className="space-y-1">
+                  {form.sections.map((sec, si) => (
+                    <div key={si} className="border border-gray-200 rounded-xl p-3 bg-gray-50 space-y-2">
+                      {/* Section header row */}
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-xs w-3 flex-shrink-0">•</span>
-                        <input className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white"
-                          placeholder="Point text..."
-                          value={pt.text} onChange={e => updPoint(pi, e.target.value)} />
-                        <button type="button" onClick={() => addSubPoint(pi)}
-                          className="p-1.5 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex-shrink-0" title="Add sub-point">
-                          <FaPlus size={9} />
+                        <input
+                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold bg-white"
+                          placeholder="Heading (optional)..."
+                          value={sec.heading}
+                          onChange={e => updSectionHeading(si, e.target.value)}
+                        />
+                        <button type="button" onClick={() => addPoint(si)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-semibold flex-shrink-0">
+                          <FaPlus size={9} /> Point
                         </button>
-                        <button type="button" onClick={() => removePoint(pi)}
-                          className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex-shrink-0"><FaTimes size={9} /></button>
+                        <button type="button" onClick={() => removeSection(si)}
+                          className="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex-shrink-0">
+                          <FaTimes size={10} />
+                        </button>
                       </div>
 
-                      {/* Sub-points */}
-                      {(pt.subPoints || []).map((sp, si) => (
-                        <div key={si} className="space-y-1 ml-6">
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-300 text-xs w-3 flex-shrink-0">◦</span>
-                            <input className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-gray-50"
-                              placeholder="Sub-point text..."
-                              value={sp.text} onChange={e => updSubPoint(pi, si, e.target.value)} />
-                            <button type="button" onClick={() => addSubSubPoint(pi, si)}
-                              className="p-1.5 rounded-lg bg-blue-50 text-blue-400 hover:bg-blue-100 flex-shrink-0" title="Add nested point">
-                              <FaPlus size={8} />
-                            </button>
-                            <button type="button" onClick={() => removeSubPoint(pi, si)}
-                              className="p-1.5 rounded-lg bg-red-50 text-red-300 hover:bg-red-100 flex-shrink-0"><FaTimes size={8} /></button>
-                          </div>
-
-                          {/* Sub-sub-points */}
-                          {(sp.subPoints || []).map((ssp, ssi) => (
-                            <div key={ssi} className="flex items-center gap-2 ml-6">
-                              <span className="text-gray-200 text-xs w-3 flex-shrink-0">▸</span>
-                              <input className="flex-1 border border-gray-100 rounded-lg px-3 py-1.5 text-sm bg-gray-50"
-                                placeholder="Nested point text..."
-                                value={ssp.text} onChange={e => updSubSubPoint(pi, si, ssi, e.target.value)} />
-                              <button type="button" onClick={() => removeSubSubPoint(pi, si, ssi)}
-                                className="p-1.5 rounded-lg bg-red-50 text-red-200 hover:bg-red-100 flex-shrink-0"><FaTimes size={8} /></button>
+                      {/* Points inside this section */}
+                      {(sec.points || []).length === 0 && (
+                        <p className="text-gray-400 text-xs pl-1">No points yet.</p>
+                      )}
+                      <div className="space-y-1.5 pl-1">
+                        {(sec.points || []).map((pt, pi) => (
+                          <div key={pi} className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-400 text-xs w-3 flex-shrink-0">•</span>
+                              <input className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white"
+                                placeholder="Point text..."
+                                value={pt.text} onChange={e => updPoint(si, pi, e.target.value)} />
+                              <button type="button" onClick={() => addSubPoint(si, pi)}
+                                className="p-1.5 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 flex-shrink-0" title="Add sub-point">
+                                <FaPlus size={9} />
+                              </button>
+                              <button type="button" onClick={() => removePoint(si, pi)}
+                                className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex-shrink-0"><FaTimes size={9} /></button>
                             </div>
-                          ))}
-                        </div>
-                      ))}
+
+                            {/* Sub-points */}
+                            {(pt.subPoints || []).map((sp, spi) => (
+                              <div key={spi} className="space-y-1 ml-6">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-300 text-xs w-3 flex-shrink-0">◦</span>
+                                  <input className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-gray-50"
+                                    placeholder="Sub-point text..."
+                                    value={sp.text} onChange={e => updSubPoint(si, pi, spi, e.target.value)} />
+                                  <button type="button" onClick={() => addSubSubPoint(si, pi, spi)}
+                                    className="p-1.5 rounded-lg bg-blue-50 text-blue-400 hover:bg-blue-100 flex-shrink-0" title="Add nested point">
+                                    <FaPlus size={8} />
+                                  </button>
+                                  <button type="button" onClick={() => removeSubPoint(si, pi, spi)}
+                                    className="p-1.5 rounded-lg bg-red-50 text-red-300 hover:bg-red-100 flex-shrink-0"><FaTimes size={8} /></button>
+                                </div>
+
+                                {/* Sub-sub-points */}
+                                {(sp.subPoints || []).map((ssp, sspi) => (
+                                  <div key={sspi} className="flex items-center gap-2 ml-6">
+                                    <span className="text-gray-200 text-xs w-3 flex-shrink-0">▸</span>
+                                    <input className="flex-1 border border-gray-100 rounded-lg px-3 py-1.5 text-sm bg-gray-50"
+                                      placeholder="Nested point text..."
+                                      value={ssp.text} onChange={e => updSubSubPoint(si, pi, spi, sspi, e.target.value)} />
+                                    <button type="button" onClick={() => removeSubSubPoint(si, pi, spi, sspi)}
+                                      className="p-1.5 rounded-lg bg-red-50 text-red-200 hover:bg-red-100 flex-shrink-0"><FaTimes size={8} /></button>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -422,25 +447,23 @@ export default function TechniqueDivisionManagement() {
               <p className="text-xl font-bold text-gray-800">{viewItem.title}</p>
               {viewItem.subtitle && <p className="text-gray-500 text-sm">{viewItem.subtitle}</p>}
               {viewItem.description && <p className="text-gray-600 text-sm leading-relaxed">{viewItem.description}</p>}
-              {(viewItem.headings || []).length > 0 && (
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Headings</p>
-                  {viewItem.headings.map((h, i) => (
-                    <p key={i} className="text-sm font-semibold text-gray-800">• {h}</p>
-                  ))}
-                </div>
-              )}
-              {(viewItem.points || []).length > 0 && (
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Points</p>
-                  {viewItem.points.map((pt, pi) => (
-                    <div key={pi} className="ml-2 mt-1">
-                      <p className="text-sm text-gray-600">• {pt.text}</p>
-                      {(pt.subPoints || []).map((sp, si) => (
-                        <div key={si} className="ml-4">
-                          <p className="text-xs text-gray-500">◦ {sp.text}</p>
-                          {(sp.subPoints || []).map((ssp, ssi) => (
-                            <p key={ssi} className="text-xs text-gray-400 ml-4">▸ {ssp.text}</p>
+              {(viewItem.sections || []).length > 0 && (
+                <div className="space-y-3">
+                  {viewItem.sections.map((sec, si) => (
+                    <div key={si}>
+                      {sec.heading ? (
+                        <p className="text-sm font-bold text-gray-800 mt-2">{sec.heading}</p>
+                      ) : null}
+                      {(sec.points || []).map((pt, pi) => (
+                        <div key={pi} className="ml-2 mt-1">
+                          <p className="text-sm text-gray-600">• {pt.text}</p>
+                          {(pt.subPoints || []).map((sp, spi) => (
+                            <div key={spi} className="ml-4">
+                              <p className="text-xs text-gray-500">◦ {sp.text}</p>
+                              {(sp.subPoints || []).map((ssp, sspi) => (
+                                <p key={sspi} className="text-xs text-gray-400 ml-4">▸ {ssp.text}</p>
+                              ))}
+                            </div>
                           ))}
                         </div>
                       ))}

@@ -15,8 +15,51 @@ const getImageUrl = (img) => {
   return `${BASE_URL}/${img.replace(/^\//, '')}`;
 };
 
+const PAGE_SIZE = 10;
+
 const EMPTY_PROG = { title: '', category: '' };
 const EMPTY_EX = { name: '', section: 'warmUp', equipment: 'chair', level: 'Easy', programId: '', programTitle: '', videoFile: null, videoName: '', steps: [''], tips: [''] };
+
+function Pagination({ page, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  return (
+    <div className="flex gap-1 items-center justify-between mt-4">
+      <button
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 1}
+        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ borderColor: '#006CB5', color: page === 1 ? '#006CB5' : '#006CB5' }}
+      >
+        Previous
+      </button>
+      <div className="flex gap-1">
+        {pages.map(p => (
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
+            className="w-8 h-8 rounded-lg text-sm font-medium transition"
+            style={
+              p === page
+                ? { backgroundColor: '#006CB5', color: '#fff' }
+                : { border: '1px solid #d1d5db', color: '#374151' }
+            }
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={() => onPageChange(page + 1)}
+        disabled={page === totalPages}
+        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ borderColor: '#006CB5', color: '#006CB5' }}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
 
 export default function ProgramManagement() {
   const [activeTab, setActiveTab] = useState('programs');
@@ -44,6 +87,12 @@ export default function ProgramManagement() {
   const [filterProgram, setFilterProgram] = useState('All');
   const [filterSection, setFilterSection] = useState('All');
   const [viewItem, setViewItem] = useState(null);
+
+  // Search & pagination
+  const [progSearch, setProgSearch] = useState('');
+  const [progPage, setProgPage] = useState(1);
+  const [exSearch, setExSearch] = useState('');
+  const [exPage, setExPage] = useState(1);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -154,8 +203,28 @@ export default function ProgramManagement() {
   const filteredExercises = exercises.filter(ex => {
     const matchProg = filterProgram === 'All' || ex.programTitle === filterProgram;
     const matchSection = filterSection === 'All' || ex.section === filterSection;
-    return matchProg && matchSection;
+    const matchSearch = !exSearch.trim() ||
+      ex.name?.toLowerCase().includes(exSearch.toLowerCase()) ||
+      ex.programTitle?.toLowerCase().includes(exSearch.toLowerCase());
+    return matchProg && matchSection && matchSearch;
   });
+
+  // Programs search + pagination
+  const filteredPrograms = programs.filter(p =>
+    !progSearch.trim() ||
+    p.title?.toLowerCase().includes(progSearch.toLowerCase()) ||
+    p.category?.toLowerCase().includes(progSearch.toLowerCase())
+  );
+  const progTotalPages = Math.max(1, Math.ceil(filteredPrograms.length / PAGE_SIZE));
+  const progPageSafe = Math.min(progPage, progTotalPages);
+  const progStart = (progPageSafe - 1) * PAGE_SIZE;
+  const progPageItems = filteredPrograms.slice(progStart, progStart + PAGE_SIZE);
+
+  // Exercises pagination
+  const exTotalPages = Math.max(1, Math.ceil(filteredExercises.length / PAGE_SIZE));
+  const exPageSafe = Math.min(exPage, exTotalPages);
+  const exStart = (exPageSafe - 1) * PAGE_SIZE;
+  const exPageItems = filteredExercises.slice(exStart, exStart + PAGE_SIZE);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -198,48 +267,76 @@ export default function ProgramManagement() {
       ) : activeTab === 'programs' ? (
         /* ── PROGRAMS TAB ── */
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          {programs.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">No programs yet. Click "Add Program" to start.</div>
+          {/* Search */}
+          <div className="p-4 border-b border-gray-100">
+            <input
+              type="text"
+              value={progSearch}
+              onChange={e => { setProgSearch(e.target.value); setProgPage(1); }}
+              placeholder="Search..."
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+            />
+          </div>
+          {filteredPrograms.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">No programs found.</div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600 w-20">Image</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Title</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Category</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-600 w-36">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {programs.map((prog, idx) => (
-                  <tr key={prog._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
-                    <td className="px-4 py-3">
-                      <div className="w-14 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
-                        {prog.image ? <img src={getImageUrl(prog.image)} alt={prog.title} className="w-full h-full object-cover" /> : <FaImage className="w-4 h-4 text-gray-300" />}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-gray-900">{prog.title}</td>
-                    <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">{prog.category}</span></td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openEditProg(prog)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition"><FaEdit className="w-3 h-3" /> Edit</button>
-                        <button onClick={() => deleteProg(prog)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition"><FaTrash className="w-3 h-3" /> Delete</button>
-                      </div>
-                    </td>
+            <>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-20">Image</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Title</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Category</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-36">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {progPageItems.map((prog, idx) => (
+                    <tr key={prog._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                      <td className="px-4 py-3 text-gray-500">{progStart + idx + 1}</td>
+                      <td className="px-4 py-3">
+                        <div className="w-14 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
+                          {prog.image ? <img src={getImageUrl(prog.image)} alt={prog.title} className="w-full h-full object-cover" /> : <FaImage className="w-4 h-4 text-gray-300" />}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-gray-900">{prog.title}</td>
+                      <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">{prog.category}</span></td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => openEditProg(prog)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition"><FaEdit className="w-3 h-3" /> Edit</button>
+                          <button onClick={() => deleteProg(prog)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition"><FaTrash className="w-3 h-3" /> Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="px-4 pb-4">
+                <div className="text-xs text-gray-500 mt-3">
+                  Showing {filteredPrograms.length === 0 ? 0 : progStart + 1}–{Math.min(progStart + PAGE_SIZE, filteredPrograms.length)} of {filteredPrograms.length}
+                </div>
+                <Pagination page={progPageSafe} totalPages={progTotalPages} onPageChange={setProgPage} />
+              </div>
+            </>
           )}
         </div>
       ) : (
         /* ── EXERCISES TAB ── */
         <div>
+          {/* Search */}
+          <div className="mb-3">
+            <input
+              type="text"
+              value={exSearch}
+              onChange={e => { setExSearch(e.target.value); setExPage(1); }}
+              placeholder="Search..."
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+            />
+          </div>
         {/* Filters removed */}
           {filteredExercises.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">No exercises yet. Click "Add Exercise" to start.</div>
+            <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">No exercises found.</div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <table className="w-full text-sm">
@@ -256,9 +353,9 @@ export default function ProgramManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredExercises.map((ex, idx) => (
+                  {exPageItems.map((ex, idx) => (
                     <tr key={ex._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
+                      <td className="px-4 py-3 text-gray-500">{exStart + idx + 1}</td>
                       <td className="px-4 py-3">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
                           {ex.image ? <img src={getImageUrl(ex.image)} alt={ex.name} className="w-full h-full object-cover" /> : <FaImage className="w-4 h-4 text-gray-300" />}
@@ -280,6 +377,12 @@ export default function ProgramManagement() {
                   ))}
                 </tbody>
               </table>
+              <div className="px-4 pb-4">
+                <div className="text-xs text-gray-500 mt-3">
+                  Showing {filteredExercises.length === 0 ? 0 : exStart + 1}–{Math.min(exStart + PAGE_SIZE, filteredExercises.length)} of {filteredExercises.length}
+                </div>
+                <Pagination page={exPageSafe} totalPages={exTotalPages} onPageChange={setExPage} />
+              </div>
             </div>
           )}
         </div>

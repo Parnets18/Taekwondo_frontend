@@ -1,7 +1,50 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL, getAuthHeaders, getAuthHeadersMultipart } from '../../../config/api';
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaImage } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaImage, FaSearch } from 'react-icons/fa';
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  return (
+    <div className="flex gap-1 items-center justify-between mt-4">
+      <button
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 1}
+        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={page === 1 ? { borderColor: '#d1d5db', color: '#9ca3af' } : { borderColor: '#006CB5', color: '#006CB5' }}
+      >
+        Previous
+      </button>
+      <div className="flex gap-1 items-center">
+        {pages.map((p) => (
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
+            className="w-8 h-8 rounded-lg text-sm font-medium transition"
+            style={
+              p === page
+                ? { backgroundColor: '#006CB5', color: '#fff', border: '1px solid #006CB5' }
+                : { backgroundColor: 'transparent', color: '#374151', border: '1px solid #d1d5db' }
+            }
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={() => onPageChange(page + 1)}
+        disabled={page === totalPages}
+        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={page === totalPages ? { borderColor: '#d1d5db', color: '#9ca3af' } : { borderColor: '#006CB5', color: '#006CB5' }}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
 
 const EMPTY_SLIDE = {
   title: '',
@@ -21,6 +64,8 @@ export default function OnboardingManagement() {
   const [form, setForm] = useState(EMPTY_SLIDE);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchSlides();
@@ -345,74 +390,117 @@ export default function OnboardingManagement() {
           <p className="text-gray-500 font-medium">No slides yet</p>
           <p className="text-gray-400 text-sm mt-1">Click "Add Slide" to create your first onboarding screen</p>
         </div>
-      ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 w-20">Image</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Title</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Points</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {slides.map((slide, idx) => (
-                <tr key={slide._id || idx} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 text-gray-500 font-medium">{idx + 1}</td>
-                  <td className="px-4 py-3">
-                    <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
-                      {slide.image ? (
-                        <img
-                          src={slide.image}
-                          alt={slide.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <FaImage className="w-5 h-5 text-gray-300" />
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-gray-900 max-w-[140px]">
-                    <span className="line-clamp-2">{slide.title}</span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600 max-w-[200px]">
-                    {slide.points?.filter(p => p).length > 0 ? (
-                      <ul className="space-y-0.5">
-                        {slide.points.filter(p => p).map((pt, i) => (
-                          <li key={i} className="flex items-start gap-1.5 text-xs">
-                            <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#006CB5' }}></span>
-                            <span className="line-clamp-1">{pt}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span className="text-gray-300">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => openEdit(slide)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
-                      >
-                        <FaEdit className="w-3 h-3" /> Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(slide._id)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition"
-                      >
-                        <FaTrash className="w-3 h-3" /> Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      ) : (() => {
+        const filtered = slides.filter(s =>
+          s.title?.toLowerCase().includes(search.toLowerCase())
+        );
+        const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        const safePage = Math.min(page, totalPages);
+        const startIdx = (safePage - 1) * PAGE_SIZE;
+        const pageSlides = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+        const showingFrom = filtered.length === 0 ? 0 : startIdx + 1;
+        const showingTo = Math.min(startIdx + PAGE_SIZE, filtered.length);
+
+        return (
+          <>
+            {/* Search input */}
+            <div className="mb-4 relative">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                placeholder="Search slides..."
+                className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-10">#</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-20">Image</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Title</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Points</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageSlides.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-10 text-center text-gray-400 text-sm">
+                        No slides match your search.
+                      </td>
+                    </tr>
+                  ) : (
+                    pageSlides.map((slide, idx) => (
+                      <tr key={slide._id || idx} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                        <td className="px-4 py-3 text-gray-500 font-medium">{startIdx + idx + 1}</td>
+                        <td className="px-4 py-3">
+                          <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
+                            {slide.image ? (
+                              <img
+                                src={slide.image}
+                                alt={slide.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <FaImage className="w-5 h-5 text-gray-300" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 font-semibold text-gray-900 max-w-[140px]">
+                          <span className="line-clamp-2">{slide.title}</span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-600 max-w-[200px]">
+                          {slide.points?.filter(p => p).length > 0 ? (
+                            <ul className="space-y-0.5">
+                              {slide.points.filter(p => p).map((pt, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs">
+                                  <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#006CB5' }}></span>
+                                  <span className="line-clamp-1">{pt}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="text-gray-300">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => openEdit(slide)}
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
+                            >
+                              <FaEdit className="w-3 h-3" /> Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(slide._id)}
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition"
+                            >
+                              <FaTrash className="w-3 h-3" /> Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Showing X-Y of Z */}
+            <p className="text-xs text-gray-500 mt-3">
+              {filtered.length === 0
+                ? 'No results'
+                : `Showing ${showingFrom}–${showingTo} of ${filtered.length}`}
+            </p>
+
+            <Pagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
+          </>
+        );
+      })()}
     </div>
   );
 }
