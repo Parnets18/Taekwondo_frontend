@@ -18,7 +18,7 @@ const getImageUrl = (img) => {
 const PAGE_SIZE = 10;
 
 const EMPTY_PROG = { title: '', category: '' };
-const EMPTY_EX = { name: '', section: 'warmUp', equipment: 'chair', level: 'Easy', programId: '', programTitle: '', videoFile: null, videoName: '', steps: [''], tips: [''] };
+const EMPTY_EX = { name: '', section: 'warmUp', equipment: 'chair', level: [], programIds: [], programTitles: [], videoFile: null, videoName: '', steps: [''], tips: [''] };
 
 function Pagination({ page, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
@@ -86,7 +86,10 @@ export default function ProgramManagement() {
   const [exImagePreview, setExImagePreview] = useState(null);
   const [filterProgram, setFilterProgram] = useState('All');
   const [filterSection, setFilterSection] = useState('All');
+  const [filterLevel, setFilterLevel] = useState('All');
   const [viewItem, setViewItem] = useState(null);
+  const [showLevelDropdown, setShowLevelDropdown] = useState(false);
+  const [showProgramDropdown, setShowProgramDropdown] = useState(false);
 
   // Search & pagination
   const [progSearch, setProgSearch] = useState('');
@@ -95,6 +98,52 @@ export default function ProgramManagement() {
   const [exPage, setExPage] = useState(1);
 
   useEffect(() => { fetchAll(); }, []);
+
+  // Close level dropdown when clicking outside
+  useEffect(() => {
+    if (!showLevelDropdown) return;
+    const handler = (e) => {
+      if (!e.target.closest('[data-level-dropdown]')) setShowLevelDropdown(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showLevelDropdown]);
+
+  // Close program dropdown when clicking outside
+  useEffect(() => {
+    if (!showProgramDropdown) return;
+    const handler = (e) => {
+      if (!e.target.closest('[data-program-dropdown]')) setShowProgramDropdown(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showProgramDropdown]);
+
+  const toggleLevel = (lvl) => {
+    setExForm(f => {
+      const current = Array.isArray(f.level) ? f.level : [];
+      return { ...f, level: current.includes(lvl) ? current.filter(l => l !== lvl) : [...current, lvl] };
+    });
+  };
+
+  const toggleProgram = (prog) => {
+    setExForm(f => {
+      const currentIds = f.programIds || [];
+      const currentTitles = f.programTitles || [];
+      if (currentIds.includes(prog._id)) {
+        return {
+          ...f,
+          programIds: currentIds.filter(id => id !== prog._id),
+          programTitles: currentTitles.filter(t => t !== prog.title),
+        };
+      }
+      return {
+        ...f,
+        programIds: [...currentIds, prog._id],
+        programTitles: [...currentTitles, prog.title],
+      };
+    });
+  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -150,10 +199,22 @@ export default function ProgramManagement() {
   };
 
   // ── Exercise CRUD ─────────────────────────────────────────────────────────────
-  const openAddEx = (programId = '', programTitle = '') => { setEditingEx(null); setExForm({ ...EMPTY_EX, programId, programTitle }); setExImageFile(null); setExImagePreview(null); setError(''); setShowExForm(true); };
+  const openAddEx = (programId = '', programTitle = '') => {
+    setEditingEx(null);
+    setExForm({ ...EMPTY_EX, programIds: programId ? [programId] : [], programTitles: programTitle ? [programTitle] : [] });
+    setExImageFile(null); setExImagePreview(null); setError(''); setShowExForm(true);
+  };
   const openEditEx = (ex) => {
+    const levelVal = ex.level ? (Array.isArray(ex.level) ? ex.level : [ex.level]) : [];
+    // Normalize programIds — migrate legacy programId
+    const programIds = (Array.isArray(ex.programIds) && ex.programIds.length > 0)
+      ? ex.programIds
+      : (ex.programId ? [ex.programId] : []);
+    const programTitles = (Array.isArray(ex.programTitles) && ex.programTitles.length > 0)
+      ? ex.programTitles
+      : (ex.programTitle ? [ex.programTitle] : []);
     setEditingEx(ex);
-    setExForm({ name: ex.name, section: ex.section, equipment: ex.equipment, level: ex.level || 'Easy', programId: ex.programId || '', programTitle: ex.programTitle || '', videoFile: null, videoName: ex.videoUrl ? 'Existing video' : '', steps: ex.steps?.length ? ex.steps : [''], tips: ex.tips?.length ? ex.tips : [''] });
+    setExForm({ name: ex.name, section: ex.section, equipment: ex.equipment, level: levelVal, programIds, programTitles, videoFile: null, videoName: ex.videoUrl ? 'Existing video' : '', steps: ex.steps?.length ? ex.steps : [''], tips: ex.tips?.length ? ex.tips : [''] });
     setExImagePreview(ex.image ? getImageUrl(ex.image) : null); setExImageFile(null); setError(''); setShowExForm(true);
   };
   const closeExForm = () => { setShowExForm(false); setEditingEx(null); setExForm(EMPTY_EX); setExImageFile(null); setExImagePreview(null); setError(''); };
@@ -173,9 +234,9 @@ export default function ProgramManagement() {
       fd.append('name', exForm.name);
       fd.append('section', exForm.section);
       fd.append('equipment', exForm.equipment);
-      fd.append('level', exForm.level || 'Easy');
-      fd.append('programId', exForm.programId || '');
-      fd.append('programTitle', exForm.programTitle || '');
+      fd.append('levelJson', JSON.stringify(exForm.level || []));
+      fd.append('programIdsJson', JSON.stringify(exForm.programIds || []));
+      fd.append('programTitlesJson', JSON.stringify(exForm.programTitles || []));
       fd.append('stepsJson', JSON.stringify(exForm.steps.filter(s => s?.trim())));
       fd.append('tipsJson', JSON.stringify(exForm.tips.filter(t => t?.trim())));
       if (exImageFile) fd.append('image', exImageFile);
@@ -201,12 +262,17 @@ export default function ProgramManagement() {
   };
 
   const filteredExercises = exercises.filter(ex => {
-    const matchProg = filterProgram === 'All' || ex.programTitle === filterProgram;
+    // Program filter — support both legacy and new arrays
+    const exTitles = Array.isArray(ex.programTitles) && ex.programTitles.length
+      ? ex.programTitles : (ex.programTitle ? [ex.programTitle] : []);
+    const matchProg = filterProgram === 'All' || exTitles.includes(filterProgram);
     const matchSection = filterSection === 'All' || ex.section === filterSection;
+    const exLevels = Array.isArray(ex.level) ? ex.level : (ex.level ? [ex.level] : []);
+    const matchLevel = filterLevel === 'All' || exLevels.length === 0 || exLevels.includes(filterLevel);
     const matchSearch = !exSearch.trim() ||
       ex.name?.toLowerCase().includes(exSearch.toLowerCase()) ||
-      ex.programTitle?.toLowerCase().includes(exSearch.toLowerCase());
-    return matchProg && matchSection && matchSearch;
+      exTitles.some(t => t.toLowerCase().includes(exSearch.toLowerCase()));
+    return matchProg && matchSection && matchLevel && matchSearch;
   });
 
   // Programs search + pagination
@@ -324,19 +390,44 @@ export default function ProgramManagement() {
       ) : (
         /* ── EXERCISES TAB ── */
         <div>
-          {/* Search */}
-          <div className="mb-3">
-            <input
-              type="text"
-              value={exSearch}
-              onChange={e => { setExSearch(e.target.value); setExPage(1); }}
-              placeholder="Search..."
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
-            />
+          {/* Search + Filters row */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={exSearch}
+                onChange={e => { setExSearch(e.target.value); setExPage(1); }}
+                placeholder="Search..."
+                className="border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <select value={filterProgram} onChange={e => { setFilterProgram(e.target.value); setExPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="All">All Programs</option>
+              {programs.map(p => <option key={p._id} value={p.title}>{p.title}</option>)}
+            </select>
+            <select value={filterSection} onChange={e => { setFilterSection(e.target.value); setExPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="All">All Sections</option>
+              {SECTIONS.map(s => <option key={s} value={s}>{SECTION_LABELS[s]}</option>)}
+            </select>
+            <select value={filterLevel} onChange={e => { setFilterLevel(e.target.value); setExPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="All">All Levels</option>
+              {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+            </select>
           </div>
-        {/* Filters removed */}
           {filteredExercises.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">No exercises found.</div>
+            <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">
+              {exSearch || filterProgram !== 'All' || filterSection !== 'All' || filterLevel !== 'All'
+                ? 'No exercises match your search/filters.'
+                : 'No exercises yet. Click "Add Exercise" to start.'}
+            </div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <table className="w-full text-sm">
@@ -362,10 +453,32 @@ export default function ProgramManagement() {
                         </div>
                       </td>
                       <td className="px-4 py-3 font-semibold text-gray-900">{ex.name}</td>
-                      <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">{ex.programTitle || '—'}</span></td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const titles = Array.isArray(ex.programTitles) && ex.programTitles.length
+                            ? ex.programTitles
+                            : (ex.programTitle ? [ex.programTitle] : []);
+                          return titles.length ? (
+                            <div className="flex flex-wrap gap-1">
+                              {titles.map(t => <span key={t} className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">{t}</span>)}
+                            </div>
+                          ) : <span className="text-gray-300 text-xs">—</span>;
+                        })()}
+                      </td>
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ex.section === 'warmUp' ? 'bg-orange-50 text-orange-700' : ex.section === 'training' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>{SECTION_LABELS[ex.section]}</span></td>
                       <td className="px-4 py-3 text-gray-500">{EQUIPMENT_LABELS[ex.equipment]}</td>
-                      <td className="px-4 py-3 text-gray-500">{ex.level}</td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const lvls = Array.isArray(ex.level) ? ex.level : (ex.level ? [ex.level] : []);
+                          return lvls.length ? (
+                            <div className="flex flex-wrap gap-1">
+                              {lvls.map(l => (
+                                <span key={l} className={`px-2 py-0.5 rounded-full text-xs font-medium ${l === 'Easy' ? 'bg-green-50 text-green-700' : l === 'Advance' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>{l}</span>
+                              ))}
+                            </div>
+                          ) : <span className="text-gray-300 text-xs">—</span>;
+                        })()}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-2">
                           <button onClick={() => setViewItem(ex)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-green-200 text-green-600 hover:bg-green-50 transition"><FaEye className="w-3 h-3" /> View</button>
@@ -460,10 +573,33 @@ export default function ProgramManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Program</label>
-                  <select value={exForm.programId} onChange={e => { const p = programs.find(p => p._id === e.target.value); setExForm(f => ({ ...f, programId: e.target.value, programTitle: p?.title || '' })); }} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    <option value="">Select program</option>
-                    {programs.map(p => <option key={p._id} value={p._id}>{p.title}</option>)}
-                  </select>
+                  <div className="relative" data-program-dropdown>
+                    <button
+                      type="button"
+                      onClick={() => setShowProgramDropdown(v => !v)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      <span className={exForm.programTitles?.length ? 'text-gray-800 truncate pr-2' : 'text-gray-400'}>
+                        {exForm.programTitles?.length ? exForm.programTitles.join(', ') : 'Select programs'}
+                      </span>
+                      <svg className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${showProgramDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    {showProgramDropdown && (
+                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto">
+                        {programs.map(p => (
+                          <label key={p._id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={(exForm.programIds || []).includes(p._id)}
+                              onChange={() => toggleProgram(p)}
+                              className="w-4 h-4 rounded accent-blue-600"
+                            />
+                            <span className="text-sm text-gray-700">{p.title}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Section</label>
@@ -479,9 +615,33 @@ export default function ProgramManagement() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Level</label>
-                  <select value={exForm.level} onChange={e => setExForm(f => ({ ...f, level: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
-                  </select>
+                  <div className="relative" data-level-dropdown>
+                    <button
+                      type="button"
+                      onClick={() => setShowLevelDropdown(v => !v)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      <span className={Array.isArray(exForm.level) && exForm.level.length ? 'text-gray-800' : 'text-gray-400'}>
+                        {Array.isArray(exForm.level) && exForm.level.length ? exForm.level.join(', ') : 'Select levels'}
+                      </span>
+                      <svg className={`w-4 h-4 text-gray-400 transition-transform ${showLevelDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    {showLevelDropdown && (
+                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                        {LEVELS.map(lvl => (
+                          <label key={lvl} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={(Array.isArray(exForm.level) ? exForm.level : []).includes(lvl)}
+                              onChange={() => toggleLevel(lvl)}
+                              className="w-4 h-4 rounded accent-blue-600"
+                            />
+                            <span className="text-sm text-gray-700">{lvl}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               {/* Video */}
@@ -549,10 +709,10 @@ export default function ProgramManagement() {
               <div className="divide-y divide-gray-100">
                 {[
                   ['Name', viewItem.name],
-                  ['Program', viewItem.programTitle || '—'],
+                  ['Program', (() => { const t = Array.isArray(viewItem.programTitles) && viewItem.programTitles.length ? viewItem.programTitles : (viewItem.programTitle ? [viewItem.programTitle] : []); return t.length ? t.join(', ') : '—'; })()],
                   ['Section', SECTION_LABELS[viewItem.section]],
                   ['Equipment', EQUIPMENT_LABELS[viewItem.equipment]],
-                  ['Level', viewItem.level || '—'],
+                  ['Level', (() => { const lvls = Array.isArray(viewItem.level) ? viewItem.level : (viewItem.level ? [viewItem.level] : []); return lvls.length ? lvls.join(', ') : '—'; })()],
                   ['Video', viewItem.videoUrl ? '✅ Uploaded' : '❌ Not uploaded'],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between py-2">
