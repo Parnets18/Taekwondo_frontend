@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaArrowUp, FaArrowDown, FaEye } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaArrowUp, FaArrowDown, FaEye, FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
@@ -34,6 +34,9 @@ export default function DoJangManagement() {
   const [headingPointGroups, setHeadingPointGroups] = useState([{ heading: '', points: [''] }]);
   const [imgFiles, setImgFiles] = useState([]);
   const [imgPreviews, setImgPreviews] = useState([]);
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -94,7 +97,7 @@ export default function DoJangManagement() {
   };
 
   return (
-    <div>
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-lg font-bold text-gray-800">Do Jang</h3>
@@ -295,7 +298,7 @@ export default function DoJangManagement() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

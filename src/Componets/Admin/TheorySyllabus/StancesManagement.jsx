@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye, FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
@@ -39,7 +39,12 @@ export default function StancesManagement() {
   const [diagramPreview, setDiagramPreview] = useState(null);
   const [personFiles, setPersonFiles] = useState([]);
   const [personPreviews, setPersonPreviews] = useState([]); // { url, isExisting }[]
-  const [filterCategory, setFilterCategory] = useState('all');  useEffect(() => { fetchStances(); }, []);
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  useEffect(() => { fetchStances(); }, []);
 
   const fetchStances = async () => {
     setLoading(true);
@@ -49,6 +54,18 @@ export default function StancesManagement() {
       setStances(data.data || []);
     } finally { setLoading(false); }
   };
+
+  const filteredItems = useMemo(() => {
+    if (!search.trim()) return stances;
+    const q = search.trim().toLowerCase();
+    return stances.filter(s => (s.name || '').toLowerCase().includes(q) || (s.korean || '').toLowerCase().includes(q));
+  }, [stances, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pagedItems = filteredItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  useEffect(() => { setCurrentPage(1); }, [search]);
 
   const openAdd = () => {
     setEditing(null);
@@ -113,6 +130,25 @@ export default function StancesManagement() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="flex flex-wrap gap-3 mb-4">
+        <div className="relative flex-1 min-w-[200px]">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
+          <input
+            type="text"
+            placeholder="Search by name or Korean..."
+            className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <FaTimes size={12} />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Table */}
       {loading ? (
         <p className="text-gray-400 text-center py-10 text-sm">Loading...</p>
@@ -130,9 +166,9 @@ export default function StancesManagement() {
               </tr>
             </thead>
             <tbody>
-              {stances.map((s, idx) => (
+              {pagedItems.map((s, idx) => (
                 <tr key={s._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{idx + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(safePage - 1) * PAGE_SIZE + idx + 1}</td>
                   <td className="px-4 py-3">
                     {s.diagramImage
                       ? <img src={`${BASE_URL}${s.diagramImage}`} alt="diagram" className="w-10 h-10 object-cover rounded border border-gray-200" />
@@ -152,7 +188,53 @@ export default function StancesManagement() {
               ))}
             </tbody>
           </table>
-          {stances.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No stances yet.</p>}
+          {filteredItems.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No stances yet.</p>}
+          {filteredItems.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+              <p className="text-xs text-gray-500">
+                Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredItems.length)} of {filteredItems.length}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FaChevronLeft size={11} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                  .reduce((acc, p, i, arr) => {
+                    if (i > 0 && p - arr[i - 1] > 1) acc.push('...');
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, i) =>
+                    p === '...' ? (
+                      <span key={`ellipsis-${i}`} className="px-1 text-gray-400 text-xs">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setCurrentPage(p)}
+                        className={`w-7 h-7 rounded-lg text-xs font-semibold border ${
+                          safePage === p ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                        }`}
+                        style={safePage === p ? { backgroundColor: '#006CB5' } : {}}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FaChevronRight size={11} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

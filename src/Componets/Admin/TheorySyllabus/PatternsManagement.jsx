@@ -862,27 +862,7 @@ function SlideSection({ slideKey }) {
     setEditing(item);
     setForm({ title: item.title || '', subtitle: item.subtitle || '', description: item.description || '', name: item.name || '', moves: item.moves || '', number: item.number || '' });
     setHeadings([...(item.headings || [])]);
-    
-    // Convert old kickEntries structure to new patternEntries structure for non-standard-list
-    let processedPoints = JSON.parse(JSON.stringify(item.points || []));
-    if (slideKey === 'non-standard-list') {
-      processedPoints = processedPoints.map(point => {
-        if (point.kickEntries && !point.patternEntries) {
-          // Convert old kickEntries to new patternEntries structure
-          return {
-            ...point,
-            patternEntries: point.kickEntries.map(entry => ({
-              number: entry.number || '',
-              koreanTerm: entry.rows?.[0]?.koreanTerm || '',
-              description: entry.rows?.[0]?.description || ''
-            }))
-          };
-        }
-        return point;
-      });
-    }
-    
-    setPoints(processedPoints);
+    setPoints(JSON.parse(JSON.stringify(item.points || [])));
     setImgFiles([]);
     setImgPreviews((item.images || []).map(url => ({ url: `${BASE_URL}${url}`, isExisting: true, path: url })));
     setShowModal(true);
@@ -952,9 +932,9 @@ function SlideSection({ slideKey }) {
         rows: entry.rows || []
       }));
     } else if (point.patternEntries && point.patternEntries.length > 0) {
-      // Convert old patternEntries to new format
+      // patternEntries already have patternName stored — use it directly
       entries = point.patternEntries.map(entry => ({
-        patternName: '', // Will need to be filled manually
+        patternName: entry.patternName || '',
         number: entry.number || '',
         rows: [{
           koreanTerm: entry.koreanTerm || '',
@@ -963,19 +943,58 @@ function SlideSection({ slideKey }) {
       }));
     }
     setPatternGroups(entries);
+    // Reset the add-entry form
+    setPatternEntryForm({ patternName: '', entries: [{ number: '', koreanTerm: '', description: '' }] });
+    setEditingEntryIndex(null);
     setShowPatternGroupManager(true);
   };
 
-  const savePatternGroups = () => {
+  const [savingPatternGroups, setSavingPatternGroups] = useState(false);
+
+  const savePatternGroups = async () => {
     // Convert the pattern groups to kickEntries format for backend compatibility
     const kickEntries = patternGroups.map(group => ({
       patternName: group.patternName || '',
       number: group.number || '',
       rows: group.rows || []
     }));
-    
-    setPoints(p => p.map((pt, idx) => idx === managingPointIndex ? { ...pt, kickEntries: kickEntries } : pt));
+
+    // Build the updated points array synchronously so we can send it immediately
+    // Strip patternEntries from the point so the backend uses kickEntries as the source of truth
+    const updatedPoints = points.map((pt, idx) => {
+      if (idx === managingPointIndex) {
+        const { patternEntries, ...rest } = pt;
+        return { ...rest, kickEntries };
+      }
+      return pt;
+    });
+
+    // Update local state
+    setPoints(updatedPoints);
     setShowPatternGroupManager(false);
+
+    // Persist to backend immediately — don't require the user to click "Update" again
+    if (editing) {
+      setSavingPatternGroups(true);
+      try {
+        const fd = new FormData();
+        fd.append('slide', slideKey);
+        Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+        fd.append('headings', JSON.stringify(headings.filter(Boolean)));
+        fd.append('points', JSON.stringify(updatedPoints));
+        const existingPaths = imgPreviews.filter(p => p.isExisting).map(p => p.path);
+        fd.append('existingImages', JSON.stringify(existingPaths));
+        imgFiles.forEach(f => fd.append('images', f));
+        await fetch(`${API_BASE}/pattern-slides/${editing._id}`, {
+          method: 'PUT',
+          headers: authH(),
+          body: fd,
+        });
+        fetchItems();
+      } finally {
+        setSavingPatternGroups(false);
+      }
+    }
   };
 
   const addPatternGroup = () => {
@@ -1659,9 +1678,9 @@ function SlideSection({ slideKey }) {
             <div className="flex gap-3 p-4 border-t">
               <button onClick={() => setShowPatternGroupManager(false)} 
                 className="flex-1 py-2 rounded border border-gray-300 text-gray-600 text-sm">Cancel</button>
-              <button onClick={savePatternGroups} 
-                className="flex-1 py-2 rounded text-white text-sm font-semibold" style={{ backgroundColor: '#006CB5' }}>
-                Save All Entries ({patternGroups.length})
+              <button onClick={savePatternGroups} disabled={savingPatternGroups}
+                className="flex-1 py-2 rounded text-white text-sm font-semibold disabled:opacity-60" style={{ backgroundColor: '#006CB5' }}>
+                {savingPatternGroups ? 'Saving...' : `Save All Entries (${patternGroups.length})`}
               </button>
             </div>
           </div>

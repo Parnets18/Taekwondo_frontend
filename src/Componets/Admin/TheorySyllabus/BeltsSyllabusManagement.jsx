@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaChevronDown, FaChevronUp, FaCog, FaEye } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaChevronDown, FaChevronUp, FaCog, FaEye, FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
@@ -132,7 +132,32 @@ export default function BeltsSyllabusManagement() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // Search, filter, pagination
+  const [search, setSearch] = useState('');
+  const [filterPatterns, setFilterPatterns] = useState('all'); // 'all' | 'has' | 'none'
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+
   useEffect(() => { fetchItems(); fetchBeltNames(); }, []);
+
+  // Derived: filtered + paginated items
+  const filteredItems = useMemo(() => {
+    let result = items;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter(i => (i.beltName || '').toLowerCase().includes(q));
+    }
+    if (filterPatterns === 'has') result = result.filter(i => (i.patterns?.length || 0) > 0);
+    if (filterPatterns === 'none') result = result.filter(i => (i.patterns?.length || 0) === 0);
+    return result;
+  }, [items, search, filterPatterns]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pagedItems = filteredItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  // Reset to page 1 when search/filter changes
+  useEffect(() => { setCurrentPage(1); }, [search, filterPatterns]);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -273,6 +298,34 @@ export default function BeltsSyllabusManagement() {
         </div>
       </div>
 
+      {/* Search & Filter Bar */}
+      <div className="flex flex-wrap gap-3 mb-4">
+        <div className="relative flex-1 min-w-[200px]">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
+          <input
+            type="text"
+            placeholder="Search by belt name..."
+            className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <FaTimes size={12} />
+            </button>
+          )}
+        </div>
+        <select
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          value={filterPatterns}
+          onChange={e => setFilterPatterns(e.target.value)}
+        >
+          <option value="all">All Belts</option>
+          <option value="has">Has Patterns</option>
+          <option value="none">No Patterns</option>
+        </select>
+      </div>
+
       {/* Table */}
       {loading ? (
         <p className="text-gray-400 text-center py-10 text-sm">Loading...</p>
@@ -290,9 +343,9 @@ export default function BeltsSyllabusManagement() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item, idx) => (
+              {pagedItems.map((item, idx) => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{idx + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(safePage - 1) * PAGE_SIZE + idx + 1}</td>
                   <td className="px-4 py-3 font-semibold text-gray-800">{item.beltName || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs max-w-[220px] truncate">{item.colourMeaning || '—'}</td>
                   <td className="px-4 py-3 text-center">
@@ -312,7 +365,61 @@ export default function BeltsSyllabusManagement() {
               ))}
             </tbody>
           </table>
-          {items.length === 0 && <p className="text-gray-400 text-center py-10 text-sm">No belt levels added yet.</p>}
+          {filteredItems.length === 0 && (
+            <p className="text-gray-400 text-center py-10 text-sm">
+              {items.length === 0 ? 'No belt levels added yet.' : 'No results match your search or filter.'}
+            </p>
+          )}
+
+          {/* Pagination */}
+          {filteredItems.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+              <p className="text-xs text-gray-500">
+                Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredItems.length)} of {filteredItems.length}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FaChevronLeft size={11} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                  .reduce((acc, p, i, arr) => {
+                    if (i > 0 && p - arr[i - 1] > 1) acc.push('...');
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, i) =>
+                    p === '...' ? (
+                      <span key={`ellipsis-${i}`} className="px-1 text-gray-400 text-xs">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setCurrentPage(p)}
+                        className={`w-7 h-7 rounded-lg text-xs font-semibold border ${
+                          safePage === p
+                            ? 'text-white border-transparent'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                        }`}
+                        style={safePage === p ? { backgroundColor: '#006CB5' } : {}}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <FaChevronRight size={11} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

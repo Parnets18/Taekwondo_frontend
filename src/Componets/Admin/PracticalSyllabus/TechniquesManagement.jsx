@@ -57,17 +57,19 @@ const EMPTY_TECHNIQUE = {
   name: '',
   category: '',
   difficulty: 'Easy',
+  beltName: '',
   videoUrl: '',
   steps: [''],
   tips: [''],
   image: null,
 };
 
-const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+const DIFFICULTIES = ['Easy', 'Advance', 'Master'];
 
 export default function TechniquesManagement() {
   const [categories, setCategories] = useState([]);
   const [techniques, setTechniques] = useState([]);
+  const [belts, setBelts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -103,12 +105,14 @@ export default function TechniquesManagement() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [catRes, techRes] = await Promise.all([
+      const [catRes, techRes, beltRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/techniques/categories`, { headers: getAuthHeaders() }),
         axios.get(`${API_BASE_URL}/techniques`, { headers: getAuthHeaders() }),
+        axios.get(`${API_BASE_URL}/belt-content`),
       ]);
       setCategories(catRes.data || []);
       setTechniques(techRes.data || []);
+      setBelts(beltRes.data?.data?.belts || []);
     } catch {
       setError('Failed to load data.');
     } finally {
@@ -430,7 +434,7 @@ export default function TechniquesManagement() {
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           tech.difficulty === 'Easy' ? 'bg-green-50 text-green-700' :
-                          tech.difficulty === 'Medium' ? 'bg-yellow-50 text-yellow-700' :
+                          tech.difficulty === 'Advance' ? 'bg-yellow-50 text-yellow-700' :
                           'bg-red-50 text-red-700'}`}>
                           {tech.difficulty}
                         </span>
