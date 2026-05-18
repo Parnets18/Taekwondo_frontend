@@ -1,4 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-slate-200 bg-slate-50">
+      <p className="text-xs text-slate-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-slate-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function AdmissionManagement() {
   const [admissions, setAdmissions] = useState([]);
@@ -9,6 +42,7 @@ function AdmissionManagement() {
     status: "",
     search: "",
   });
+  const [page, setPage] = useState(1);
   const [stats, setStats] = useState({
     totalApplications: 0,
     pendingApplications: 0,
@@ -82,7 +116,7 @@ function AdmissionManagement() {
   }, []);
 
   // Filter admissions based on current filters
-  const filteredAdmissions = admissions.filter((admission) => {
+  const filteredAdmissions = useMemo(() => admissions.filter((admission) => {
     const matchesStatus =
       !filters.status || admission.status === filters.status;
     const matchesSearch =
@@ -90,20 +124,24 @@ function AdmissionManagement() {
       (admission.name &&
         admission.name.toLowerCase().includes(filters.search.toLowerCase())) ||
       (admission.fullName &&
-        admission.fullName
-          .toLowerCase()
-          .includes(filters.search.toLowerCase())) ||
+        admission.fullName.toLowerCase().includes(filters.search.toLowerCase())) ||
       (admission.email &&
         admission.email.toLowerCase().includes(filters.search.toLowerCase())) ||
       (admission.phone &&
         admission.phone.toLowerCase().includes(filters.search.toLowerCase())) ||
       (admission.mobileNumber &&
-        admission.mobileNumber
-          .toLowerCase()
-          .includes(filters.search.toLowerCase()));
-
+        admission.mobileNumber.toLowerCase().includes(filters.search.toLowerCase()));
     return matchesStatus && matchesSearch;
-  });
+  }), [admissions, filters.status, filters.search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAdmissions.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedAdmissions = useMemo(
+    () => filteredAdmissions.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filteredAdmissions, safePage]
+  );
+
+  useEffect(() => { setPage(1); }, [filters.status, filters.search]);
 
   const handleStatusUpdate = async (
     admissionId,
@@ -500,7 +538,7 @@ function AdmissionManagement() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
-                    {filteredAdmissions.length === 0 ? (
+                    {pagedAdmissions.length === 0 ? (
                       <tr>
                         <td
                           colSpan="7"
@@ -510,7 +548,7 @@ function AdmissionManagement() {
                         </td>
                       </tr>
                     ) : (
-                      filteredAdmissions.map((admission) => (
+                      pagedAdmissions.map((admission) => (
                         <tr
                           key={admission._id}
                           className="hover:bg-slate-50 transition-colors"
@@ -632,6 +670,7 @@ function AdmissionManagement() {
               </div>
             </>
           )}
+          <Pagination page={safePage} totalPages={totalPages} onPage={setPage} />
         </div>
 
         {/* Admission Details Modal */}

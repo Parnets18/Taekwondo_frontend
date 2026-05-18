@@ -1,5 +1,37 @@
-﻿import { useState, useEffect } from "react";
-import { FaEye, FaTrash } from "react-icons/fa";
+﻿import { useState, useEffect, useMemo } from "react";
+import { FaEye, FaTrash, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
+      <p className="text-xs text-gray-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-gray-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const ContactManagement = () => {
   const [contacts, setContacts] = useState([]);
@@ -20,18 +52,26 @@ const ContactManagement = () => {
   }, []);
 
   // Filter contacts based on current filters
-  const filteredContacts = contacts.filter((contact) => {
-    const matchesInquiryType =
-      filters.inquiryType === "all" ||
-      contact.inquiryType === filters.inquiryType;
-    const matchesSearch =
-      !filters.search ||
-      contact.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-      contact.email.toLowerCase().includes(filters.search.toLowerCase()) ||
-      contact.message.toLowerCase().includes(filters.search.toLowerCase());
+  const filteredContacts = useMemo(() => {
+    return contacts.filter((contact) => {
+      const matchesInquiryType =
+        filters.inquiryType === "all" ||
+        contact.inquiryType === filters.inquiryType;
+      const matchesSearch =
+        !filters.search ||
+        contact.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+        contact.email.toLowerCase().includes(filters.search.toLowerCase()) ||
+        contact.message.toLowerCase().includes(filters.search.toLowerCase());
+      return matchesInquiryType && matchesSearch;
+    });
+  }, [contacts, filters.inquiryType, filters.search]);
 
-    return matchesInquiryType && matchesSearch;
-  });
+  const totalPages = Math.max(1, Math.ceil(filteredContacts.length / PAGE_SIZE));
+  const safePage = Math.min(filters.page, totalPages);
+  const pagedContacts = useMemo(
+    () => filteredContacts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filteredContacts, safePage]
+  );
 
   // Handle contact delete
   const handleDeleteContact = async (id) => {
@@ -258,6 +298,7 @@ const ContactManagement = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Name
                 </th>
@@ -279,18 +320,18 @@ const ContactManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredContacts.length === 0 ? (
+              {pagedContacts.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="6"
-                    className="px-6 py-12 text-center text-gray-500"
-                  >
+                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                     No contacts found
                   </td>
                 </tr>
               ) : (
-                filteredContacts.map((contact) => (
+                pagedContacts.map((contact, i) => (
                   <tr key={contact._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-400">
+                      {(safePage - 1) * PAGE_SIZE + i + 1}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {contact.name}
@@ -326,20 +367,14 @@ const ContactManagement = () => {
                           className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="View"
                         >
-                          <FaEye
-                            className="w-4 h-4"
-                            style={{ color: "#006CB5" }}
-                          />
+                          <FaEye className="w-4 h-4" style={{ color: "#006CB5" }} />
                         </button>
                         <button
                           onClick={() => handleDeleteContact(contact._id)}
                           className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
                           title="Delete"
                         >
-                          <FaTrash
-                            className="w-4 h-4"
-                            style={{ color: "#dc2626" }}
-                          />
+                          <FaTrash className="w-4 h-4" style={{ color: "#dc2626" }} />
                         </button>
                       </div>
                     </td>
@@ -349,6 +384,11 @@ const ContactManagement = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          onPage={(p) => setFilters(f => ({ ...f, page: p }))}
+        />
       </div>
 
       {/* Contact Detail Modal - Read Only */}

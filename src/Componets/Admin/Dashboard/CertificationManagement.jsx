@@ -1,11 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { FaEye, FaEdit, FaTrash, FaDownload } from 'react-icons/fa';
+import { FaEye, FaEdit, FaTrash, FaDownload, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { API_BASE_URL } from '../../../utils/api';
 import { logApiCall, logApiError, logEnvironment } from '../../../utils/debug';
 import { testApiConnection, testCertificateEndpoint } from '../../../utils/apiTest';
 
 // Certificate Management Component - Updated 2026-01-13
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-slate-200 bg-slate-50">
+      <p className="text-xs text-slate-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-slate-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CertificationManagement() {
   
   const [certificates, setCertificates] = useState([]);
@@ -153,6 +185,12 @@ function CertificationManagement() {
       cert.verificationCode.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesType && matchesSearch;
   });
+
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [filterType, searchTerm]);
+  const totalPages = Math.max(1, Math.ceil(filteredCertificates.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedCertificates = useMemo(() => filteredCertificates.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE), [filteredCertificates, safePage]);
 
   const handleExportCSV = async () => {
     try {
@@ -631,7 +669,7 @@ function CertificationManagement() {
                   </td>
                 </tr>
               ) : (
-                filteredCertificates.map((certificate, index) => (
+                pagedCertificates.map((certificate, index) => (
                   <tr key={certificate._id || certificate.id || `cert-${index}`} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-semibold text-slate-800">{certificate.studentName}</div>
@@ -703,6 +741,7 @@ function CertificationManagement() {
               )}
             </tbody>
           </table>
+          <Pagination page={safePage} totalPages={totalPages} onPage={setPage} />
         </div>
       </div>
 

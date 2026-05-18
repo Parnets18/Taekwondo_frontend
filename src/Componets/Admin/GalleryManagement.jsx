@@ -1,5 +1,37 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaTrash, FaEye, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaTrash, FaEye, FaEdit, FaCheck, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
+      <p className="text-xs text-gray-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-gray-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const CATEGORIES = ['Seminars', 'Stunts', 'Our Memories', 'Video', 'Competitions', 'Belt Ceremonies'];
 
@@ -141,6 +173,12 @@ function GalleryManagement() {
     ? photos
     : photos.filter(p => getPhotoCategory(p) === filterCategory);
 
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [filterCategory]);
+  const totalPages = Math.max(1, Math.ceil(displayedPhotos.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedPhotos = useMemo(() => displayedPhotos.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE), [displayedPhotos, safePage]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -230,7 +268,7 @@ function GalleryManagement() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {displayedPhotos.map((photo) => (
+                {pagedPhotos.map((photo) => (
                   <tr key={photo._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <img
@@ -297,6 +335,7 @@ function GalleryManagement() {
                 ))}
               </tbody>
             </table>
+            <Pagination page={safePage} totalPages={totalPages} onPage={setPage} />
           </div>
         )}
       </div>

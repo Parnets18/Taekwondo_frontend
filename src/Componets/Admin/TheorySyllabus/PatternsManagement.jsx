@@ -35,6 +35,7 @@ function ConfirmModal({ message, onConfirm, onCancel }) {
 
 export default function PatternsManagement() {
   const [patterns, setPatterns] = useState([]);
+  const [entries, setEntries] = useState({}); // { patternId: [entries] }
   const [loading, setLoading] = useState(true);
   const [showPatternModal, setShowPatternModal] = useState(false);
   const [editingPattern, setEditingPattern] = useState(null);
@@ -78,9 +79,7 @@ export default function PatternsManagement() {
   const [descDiagramPreview, setDescDiagramPreview] = useState(null);
   const [descText, setDescText] = useState('');
 
-  // new-techniques / modified-techniques fields
-  const [ntTitle, setNtTitle] = useState('');
-  const [ntPoints, setNtPoints] = useState([]);
+  const [patternError, setPatternError] = useState('');
 
   useEffect(() => { fetchPatterns(); }, []);
 
@@ -89,7 +88,29 @@ export default function PatternsManagement() {
     try {
       const res = await fetch(`${API_BASE}/patterns`);
       const d = await res.json();
-      setPatterns(d.data || []);
+      const patternsData = d.data || [];
+      setPatterns(patternsData);
+      
+      console.log('📋 All patterns:', patternsData.map(p => ({ id: p._id.slice(-6), name: p.name })));
+      
+      // Fetch entries for each pattern
+      const entriesMap = {};
+      for (const pattern of patternsData) {
+        try {
+          const entriesRes = await fetch(`${API_BASE}/patterns/${pattern._id}/entries`);
+          const entriesData = await entriesRes.json();
+          entriesMap[pattern._id] = entriesData.data || [];
+          console.log(`✅ Pattern "${pattern.name}" (${pattern._id.slice(-6)}): ${entriesMap[pattern._id].length} entries`);
+          if (entriesMap[pattern._id].length > 0) {
+            console.log(`   Entries:`, entriesMap[pattern._id].map(e => ({ id: e._id.slice(-6), tab: e.tab, title: e.title || e.name })));
+          }
+        } catch (err) {
+          console.error(`❌ Failed to fetch entries for pattern ${pattern._id}:`, err);
+          entriesMap[pattern._id] = [];
+        }
+      }
+      console.log('📊 Final entries map:', entriesMap);
+      setEntries(entriesMap);
     } finally { setLoading(false); }
   };
 
@@ -98,6 +119,8 @@ export default function PatternsManagement() {
     setEditingPattern(null);
     setPatternForm({ name: '', moves: '', order: patterns.length });
     setPatternImgFile(null); setPatternImgPreview(null);
+    setPatternError('');
+    setItemPatternId(null); // ← Clear itemPatternId when opening pattern modal
     setShowPatternModal(true);
   };
 
@@ -106,10 +129,19 @@ export default function PatternsManagement() {
     setPatternForm({ name: p.name, moves: p.moves, order: p.order });
     setPatternImgFile(null);
     setPatternImgPreview(p.image ? `${BASE_URL}${p.image}` : null);
+    setPatternError('');
     setShowPatternModal(true);
   };
 
   const savePattern = async () => {
+    setPatternError('');
+    
+    // Validation: Check if name is empty
+    if (!patternForm.name.trim()) {
+      setPatternError('Pattern name is required');
+      return;
+    }
+
     const fd = new FormData();
     Object.entries(patternForm).forEach(([k, v]) => fd.append(k, v));
     if (patternImgFile) fd.append('image', patternImgFile);
@@ -118,9 +150,32 @@ export default function PatternsManagement() {
       fd.append('existingImage', editingPattern.image);
     }
     const url = editingPattern ? `${API_BASE}/patterns/${editingPattern._id}` : `${API_BASE}/patterns`;
-    await fetch(url, { method: editingPattern ? 'PUT' : 'POST', headers: authH(), body: fd });
-    setShowPatternModal(false);
-    fetchPatterns();
+    
+    try {
+      const res = await fetch(url, { method: editingPattern ? 'PUT' : 'POST', headers: authH(), body: fd });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setPatternError(data.message || 'Failed to save pattern');
+        return;
+      }
+      
+      // If creating new pattern, add it to state immediately with empty entries
+      if (!editingPattern && data.data) {
+        const newPattern = data.data;
+        setPatterns(prev => [...prev, newPattern]);
+        setEntries(prev => ({ ...prev, [newPattern._id]: [] })); // Empty entries for new pattern
+        console.log(`✅ New pattern created: ${newPattern.name} (${newPattern._id}) with 0 entries`);
+      }
+      
+      setShowPatternModal(false);
+      // Only fetch if editing, not if creating (we already updated state)
+      if (editingPattern) {
+        fetchPatterns();
+      }
+    } catch (err) {
+      setPatternError('Error saving pattern: ' + err.message);
+    }
   };
 
   const deletePattern = async () => {
@@ -155,6 +210,10 @@ export default function PatternsManagement() {
   };
 
   const openAddItem = (patternId) => {
+    console.log(`🔵 Opening Add Item modal for pattern: ${patternId}`);
+    const pattern = patterns.find(p => p._id === patternId);
+    console.log(`   Pattern name: ${pattern?.name}, ID: ${patternId.slice(-6)}`);
+    
     const tab = patternTabs[patternId] || 'list-of-techniques';
     setItemPatternId(patternId);
     setEditingItem(null);
@@ -208,17 +267,74 @@ export default function PatternsManagement() {
       fd.append('ntTitle', ntTitle);
       fd.append('ntPoints', JSON.stringify(ntPoints));
     }
+    
     const url = editingItem
-      ? `${API_BASE}/patterns/${itemPatternId}/items/${editingItem._id}`
-      : `${API_BASE}/patterns/${itemPatternId}/items`;
-    await fetch(url, { method: editingItem ? 'PUT' : 'POST', headers: authH(), body: fd });
-    setShowItemModal(false);
-    fetchPatterns();
+      ? `${API_BASE}/patterns/entries/${editingItem._id}`
+      : `${API_BASE}/patterns/${itemPatternId}/entries`;
+    
+    const patternName = patterns.find(p => p._id === itemPatternId)?.name || 'Unknown';
+    console.log(`\n📤 SAVING ENTRY:`);
+    console.log(`   Pattern: ${patternName} (${itemPatternId.slice(-6)})`);
+    console.log(`   URL: ${url}`);
+    console.log(`   Tab: ${itemTab}`);
+    
+    try {
+      const res = await fetch(url, { method: editingItem ? 'PUT' : 'POST', headers: authH(), body: fd });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('❌ Failed to save entry:', data.message);
+        return;
+      }
+      
+      console.log(`✅ Entry saved successfully`);
+      console.log(`   Response patternId: ${data.data.patternId.slice(-6)}`);
+      console.log(`   Response patternName: ${data.data.patternName}`);
+      
+      // Update entries state immediately
+      if (editingItem) {
+        // Update existing entry
+        setEntries(prev => ({
+          ...prev,
+          [itemPatternId]: prev[itemPatternId].map(e => e._id === editingItem._id ? data.data : e)
+        }));
+        console.log(`✅ Entry updated in pattern ${itemPatternId}`);
+      } else {
+        // Add new entry
+        setEntries(prev => ({
+          ...prev,
+          [itemPatternId]: [...(prev[itemPatternId] || []), data.data]
+        }));
+        console.log(`✅ Entry added to pattern ${itemPatternId}. Total: ${(entries[itemPatternId] || []).length + 1}`);
+      }
+      
+      setShowItemModal(false);
+    } catch (err) {
+      console.error('❌ Error saving entry:', err);
+    }
   };
 
   const delItem = async () => {
-    await fetch(`${API_BASE}/patterns/${deleteItem.patternId}/items/${deleteItem.itemId}`, { method: 'DELETE', headers: authH() });
-    setDeleteItem(null); fetchPatterns();
+    try {
+      const res = await fetch(`${API_BASE}/patterns/entries/${deleteItem.itemId}`, { method: 'DELETE', headers: authH() });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('❌ Failed to delete entry:', data.message);
+        return;
+      }
+      
+      // Update entries state immediately
+      setEntries(prev => ({
+        ...prev,
+        [deleteItem.patternId]: prev[deleteItem.patternId].filter(e => e._id !== deleteItem.itemId)
+      }));
+      console.log(`✅ Entry deleted from pattern ${deleteItem.patternId}`);
+      
+      setDeleteItem(null);
+    } catch (err) {
+      console.error('❌ Error deleting entry:', err);
+    }
   };
 
   // ── Simple points helpers (information / new / modified tabs) ────────────
@@ -228,6 +344,19 @@ export default function PatternsManagement() {
 
   const sorted = [...patterns].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const [activeView, setActiveView] = useState('patterns');
+
+  // ── Patterns tab search + pagination ──────────────────────
+  const PAGE_SIZE = 10;
+  const [patternSearch, setPatternSearch] = useState('');
+  const [patternPage, setPatternPage] = useState(1);
+
+  const filteredPatterns = sorted.filter(p =>
+    patternSearch.trim() === '' ||
+    p.name?.toLowerCase().includes(patternSearch.trim().toLowerCase())
+  );
+  const patternTotalPages = Math.max(1, Math.ceil(filteredPatterns.length / PAGE_SIZE));
+  const patternPageSafe = Math.min(patternPage, patternTotalPages);
+  const pagedPatterns = filteredPatterns.slice((patternPageSafe - 1) * PAGE_SIZE, patternPageSafe * PAGE_SIZE);
 
   const SLIDE_VIEWS = [
     { key: 'patterns',             label: 'Patterns' },
@@ -273,6 +402,23 @@ export default function PatternsManagement() {
       {/* Patterns table */}
       {loading ? <p className="text-gray-400 text-center py-10 text-sm">Loading...</p> : (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          {/* Search bar */}
+          <div className="px-4 pt-4 pb-2 border-b border-gray-100">
+            <div className="relative max-w-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={patternSearch}
+                onChange={e => { setPatternSearch(e.target.value); setPatternPage(1); }}
+                placeholder="Search patterns..."
+                className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100 bg-gray-50">
@@ -285,10 +431,10 @@ export default function PatternsManagement() {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((p, i) => (
+              {pagedPatterns.map((p, i) => (
                 <React.Fragment key={p._id}>
                   <tr key={p._id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">{(patternPageSafe - 1) * PAGE_SIZE + i + 1}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-0.5">
                         <button onClick={() => movePattern(p, -1)} className="p-0.5 text-gray-400 hover:text-[#006CB5]"><FaArrowUp size={9} /></button>
@@ -298,12 +444,14 @@ export default function PatternsManagement() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {p.image && <img src={`${BASE_URL}${p.image}`} className="w-8 h-8 rounded object-cover border border-gray-200 flex-shrink-0" alt="" />}
-                        <span className="font-semibold text-gray-800">{p.name}</span>
+                        <div>
+                          <span className="font-semibold text-gray-800">{p.name}</span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{p.moves} mov.</td>
                     <td className="px-4 py-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600">{(p.items || []).length}</span>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600">{(entries[p._id] || []).length}</span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex gap-1.5 justify-end items-center">
@@ -324,7 +472,7 @@ export default function PatternsManagement() {
                   {expandedId === p._id && (
                     <tr key={`${p._id}-items`}>
                       <td colSpan={6} className="px-0 py-0 bg-gray-50">
-                        {(p.items || []).length > 0 ? (
+                        {(entries[p._id] || []).length > 0 ? (
                           <table className="w-full text-xs border-t border-gray-100">
                             <thead>
                               <tr className="text-gray-400 uppercase bg-gray-100">
@@ -335,7 +483,7 @@ export default function PatternsManagement() {
                               </tr>
                             </thead>
                             <tbody>
-                              {(p.items || []).map((item, idx) => (
+                              {(entries[p._id] || []).map((item, idx) => (
                                 <tr key={item._id} className="border-t border-gray-100 hover:bg-white">
                                   <td className="px-6 py-2 text-gray-400">{idx + 1}</td>
                                   <td className="px-4 py-2">
@@ -365,7 +513,37 @@ export default function PatternsManagement() {
               ))}
             </tbody>
           </table>
-          {sorted.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No patterns yet.</p>}
+          {filteredPatterns.length === 0 && (
+            <p className="text-gray-400 text-center py-8 text-sm">
+              {patternSearch ? 'No patterns match your search.' : 'No patterns yet.'}
+            </p>
+          )}
+          {filteredPatterns.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs text-gray-500">
+                Showing {filteredPatterns.length === 0 ? 0 : (patternPageSafe - 1) * PAGE_SIZE + 1}–{Math.min(patternPageSafe * PAGE_SIZE, filteredPatterns.length)} of {filteredPatterns.length}
+              </span>
+              {patternTotalPages > 1 && (
+                <div className="flex gap-1 items-center">
+                  <button onClick={() => setPatternPage(p => Math.max(1, p - 1))} disabled={patternPageSafe === 1}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40"
+                    style={{ borderColor: '#006CB5', color: '#006CB5' }}>Previous</button>
+                  {Array.from({ length: patternTotalPages }, (_, i) => i + 1).map(pg => (
+                    <button key={pg} onClick={() => setPatternPage(pg)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition"
+                      style={pg === patternPageSafe
+                        ? { backgroundColor: '#006CB5', color: '#fff', borderColor: '#006CB5' }
+                        : { borderColor: '#006CB5', color: '#006CB5' }}>
+                      {pg}
+                    </button>
+                  ))}
+                  <button onClick={() => setPatternPage(p => Math.min(patternTotalPages, p + 1))} disabled={patternPageSafe === patternTotalPages}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40"
+                    style={{ borderColor: '#006CB5', color: '#006CB5' }}>Next</button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
       </>)}
@@ -384,6 +562,11 @@ export default function PatternsManagement() {
               <button onClick={() => setShowPatternModal(false)}><FaTimes className="text-gray-500" /></button>
             </div>
             <div className="p-5 space-y-4">
+              {patternError && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                  <p className="text-sm text-red-600 font-semibold">{patternError}</p>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1">Name <span className="text-red-500">*</span></label>
@@ -426,7 +609,10 @@ export default function PatternsManagement() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-xl w-full max-w-xl shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-5 border-b sticky top-0 bg-white z-10">
-              <h4 className="font-bold text-gray-800">{editingItem ? 'Edit Tab Item' : 'Add Tab Item'}</h4>
+              <div>
+                <h4 className="font-bold text-gray-800">{editingItem ? 'Edit Tab Item' : 'Add Tab Item'}</h4>
+                <p className="text-xs text-gray-500 mt-1">Pattern: {patterns.find(p => p._id === itemPatternId)?.name}</p>
+              </div>
               <button onClick={() => setShowItemModal(false)}><FaTimes className="text-gray-500" /></button>
             </div>
             <div className="p-5 space-y-4">
@@ -769,6 +955,11 @@ function SlideSection({ slideKey }) {
     entries: [{ number: '', koreanTerm: '', description: '' }]
   });
 
+  // Staging area — entries being built before "Save as Box"
+  const [stagingEntries, setStagingEntries] = useState([]);
+  // When set, "Save as Box" appends to this existing groupId instead of creating a new box
+  const [stagingTargetGroupId, setStagingTargetGroupId] = useState(null);
+
   // Single entry editing state
   const [editingEntryIndex, setEditingEntryIndex] = useState(null);
   const [editingEntryData, setEditingEntryData] = useState({
@@ -923,28 +1114,49 @@ function SlideSection({ slideKey }) {
   const openPatternGroupManager = (pointIndex, point) => {
     setManagingPointIndex(pointIndex);
     setManagingPoint(point);
-    // Convert kickEntries or patternEntries to the admin format
     let entries = [];
     if (point.kickEntries && point.kickEntries.length > 0) {
-      entries = point.kickEntries.map(entry => ({
-        patternName: entry.patternName || '',
-        number: entry.number || '',
-        rows: entry.rows || []
-      }));
+      // Preserve groupId. Legacy entries (no groupId) get grouped by consecutive patternName.
+      let currentGroupId = null;
+      let currentPatternName = null;
+      entries = point.kickEntries.map(entry => {
+        if (entry.groupId) {
+          currentGroupId = entry.groupId;
+          currentPatternName = entry.patternName;
+        } else if (entry.patternName !== currentPatternName) {
+          currentGroupId = `grp_legacy_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          currentPatternName = entry.patternName;
+        }
+        return {
+          groupId: currentGroupId,
+          patternName: entry.patternName || '',
+          number: entry.number || '',
+          rows: entry.rows || []
+        };
+      });
     } else if (point.patternEntries && point.patternEntries.length > 0) {
-      // patternEntries already have patternName stored — use it directly
-      entries = point.patternEntries.map(entry => ({
-        patternName: entry.patternName || '',
-        number: entry.number || '',
-        rows: [{
-          koreanTerm: entry.koreanTerm || '',
-          description: entry.description || ''
-        }]
-      }));
+      let currentGroupId = null;
+      let currentPatternName = null;
+      entries = point.patternEntries.map(entry => {
+        if (entry.groupId) {
+          currentGroupId = entry.groupId;
+          currentPatternName = entry.patternName;
+        } else if (entry.patternName !== currentPatternName) {
+          currentGroupId = `grp_legacy_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          currentPatternName = entry.patternName;
+        }
+        return {
+          groupId: currentGroupId,
+          patternName: entry.patternName || '',
+          number: entry.number || '',
+          rows: [{ koreanTerm: entry.koreanTerm || '', description: entry.description || '' }]
+        };
+      });
     }
     setPatternGroups(entries);
-    // Reset the add-entry form
     setPatternEntryForm({ patternName: '', entries: [{ number: '', koreanTerm: '', description: '' }] });
+    setStagingEntries([]);
+    setStagingTargetGroupId(null);
     setEditingEntryIndex(null);
     setShowPatternGroupManager(true);
   };
@@ -952,8 +1164,9 @@ function SlideSection({ slideKey }) {
   const [savingPatternGroups, setSavingPatternGroups] = useState(false);
 
   const savePatternGroups = async () => {
-    // Convert the pattern groups to kickEntries format for backend compatibility
+    // Convert the pattern groups to kickEntries format, preserving groupId
     const kickEntries = patternGroups.map(group => ({
+      groupId: group.groupId || '',
       patternName: group.patternName || '',
       number: group.number || '',
       rows: group.rows || []
@@ -973,27 +1186,41 @@ function SlideSection({ slideKey }) {
     setPoints(updatedPoints);
     setShowPatternGroupManager(false);
 
-    // Persist to backend immediately — don't require the user to click "Update" again
-    if (editing) {
-      setSavingPatternGroups(true);
-      try {
-        const fd = new FormData();
-        fd.append('slide', slideKey);
-        Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-        fd.append('headings', JSON.stringify(headings.filter(Boolean)));
-        fd.append('points', JSON.stringify(updatedPoints));
-        const existingPaths = imgPreviews.filter(p => p.isExisting).map(p => p.path);
-        fd.append('existingImages', JSON.stringify(existingPaths));
-        imgFiles.forEach(f => fd.append('images', f));
+    // Persist to backend immediately — works for both new and existing items
+    setSavingPatternGroups(true);
+    try {
+      const fd = new FormData();
+      fd.append('slide', slideKey);
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      fd.append('headings', JSON.stringify(headings.filter(Boolean)));
+      fd.append('points', JSON.stringify(updatedPoints));
+      const existingPaths = imgPreviews.filter(p => p.isExisting).map(p => p.path);
+      fd.append('existingImages', JSON.stringify(existingPaths));
+      imgFiles.forEach(f => fd.append('images', f));
+
+      if (editing) {
+        // Update existing item
         await fetch(`${API_BASE}/pattern-slides/${editing._id}`, {
           method: 'PUT',
           headers: authH(),
           body: fd,
         });
-        fetchItems();
-      } finally {
-        setSavingPatternGroups(false);
+      } else {
+        // Create new item with the entries already included
+        const res = await fetch(`${API_BASE}/pattern-slides`, {
+          method: 'POST',
+          headers: authH(),
+          body: fd,
+        });
+        const data = await res.json();
+        if (data.data) {
+          // Switch to editing mode so subsequent saves update the same record
+          setEditing(data.data);
+        }
       }
+      fetchItems();
+    } finally {
+      setSavingPatternGroups(false);
     }
   };
 
@@ -1041,10 +1268,14 @@ function SlideSection({ slideKey }) {
       return; // Don't save if pattern name is empty
     }
 
-    // Convert all entries to kickEntries format
+    // Each click of "Add All Entries" = one new independent box (unique groupId per click)
+    const groupId = `grp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+    // All entries in this click share the same groupId → stored in one box
     const newEntries = patternEntryForm.entries
-      .filter(entry => entry.number.trim() || entry.koreanTerm.trim()) // Only include entries with at least number or korean term
+      .filter(entry => entry.number.trim() || entry.koreanTerm.trim())
       .map(entry => ({
+        groupId,
         patternName: patternEntryForm.patternName,
         number: entry.number,
         rows: [{ koreanTerm: entry.koreanTerm, description: entry.description }]
@@ -1053,8 +1284,8 @@ function SlideSection({ slideKey }) {
     if (newEntries.length > 0) {
       setPatternGroups(prev => [...prev, ...newEntries]);
     }
-    
-    // Reset form
+
+    // Reset everything so next click creates a fresh box
     setPatternEntryForm({
       patternName: '',
       entries: [{ number: '', koreanTerm: '', description: '' }]
@@ -1062,6 +1293,21 @@ function SlideSection({ slideKey }) {
   };
 
   const sorted = [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  // ── Search + pagination ────────────────────────────────────
+  const SLIDE_PAGE_SIZE = 10;
+  const [slideSearch, setSlideSearch] = useState('');
+  const [slidePage, setSlidePage] = useState(1);
+
+  const filteredItems = sorted.filter(item =>
+    slideSearch.trim() === '' ||
+    item.title?.toLowerCase().includes(slideSearch.trim().toLowerCase()) ||
+    item.description?.toLowerCase().includes(slideSearch.trim().toLowerCase()) ||
+    item.name?.toLowerCase().includes(slideSearch.trim().toLowerCase())
+  );
+  const slideTotalPages = Math.max(1, Math.ceil(filteredItems.length / SLIDE_PAGE_SIZE));
+  const slidePageSafe = Math.min(slidePage, slideTotalPages);
+  const pagedItems = filteredItems.slice((slidePageSafe - 1) * SLIDE_PAGE_SIZE, slidePageSafe * SLIDE_PAGE_SIZE);
 
   return (
     <div>
@@ -1077,6 +1323,23 @@ function SlideSection({ slideKey }) {
 
       {loading ? <p className="text-gray-400 text-center py-8 text-sm">Loading...</p> : (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          {/* Search bar */}
+          <div className="px-4 pt-4 pb-2 border-b border-gray-100">
+            <div className="relative max-w-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={slideSearch}
+                onChange={e => { setSlideSearch(e.target.value); setSlidePage(1); }}
+                placeholder="Search..."
+                className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100 bg-gray-50">
@@ -1094,9 +1357,9 @@ function SlideSection({ slideKey }) {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((item, i) => (
+              {pagedItems.map((item, i) => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(slidePageSafe - 1) * SLIDE_PAGE_SIZE + i + 1}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-0.5">
                       <button onClick={() => moveItem(item, -1)} className="p-0.5 text-gray-400 hover:text-[#006CB5]"><FaArrowUp size={9} /></button>
@@ -1152,7 +1415,37 @@ function SlideSection({ slideKey }) {
               ))}
             </tbody>
           </table>
-          {sorted.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No sections yet.</p>}
+          {filteredItems.length === 0 && (
+            <p className="text-gray-400 text-center py-8 text-sm">
+              {slideSearch ? 'No sections match your search.' : 'No sections yet.'}
+            </p>
+          )}
+          {filteredItems.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs text-gray-500">
+                Showing {filteredItems.length === 0 ? 0 : (slidePageSafe - 1) * SLIDE_PAGE_SIZE + 1}–{Math.min(slidePageSafe * SLIDE_PAGE_SIZE, filteredItems.length)} of {filteredItems.length}
+              </span>
+              {slideTotalPages > 1 && (
+                <div className="flex gap-1 items-center">
+                  <button onClick={() => setSlidePage(p => Math.max(1, p - 1))} disabled={slidePageSafe === 1}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40"
+                    style={{ borderColor: '#006CB5', color: '#006CB5' }}>Previous</button>
+                  {Array.from({ length: slideTotalPages }, (_, i) => i + 1).map(pg => (
+                    <button key={pg} onClick={() => setSlidePage(pg)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition"
+                      style={pg === slidePageSafe
+                        ? { backgroundColor: '#006CB5', color: '#fff', borderColor: '#006CB5' }
+                        : { borderColor: '#006CB5', color: '#006CB5' }}>
+                      {pg}
+                    </button>
+                  ))}
+                  <button onClick={() => setSlidePage(p => Math.min(slideTotalPages, p + 1))} disabled={slidePageSafe === slideTotalPages}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40"
+                    style={{ borderColor: '#006CB5', color: '#006CB5' }}>Next</button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -1431,252 +1724,298 @@ function SlideSection({ slideKey }) {
       {showPatternGroupManager && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b">
+            <div className="flex justify-between items-center p-5 border-b">
               <div>
-                <h4 className="font-bold text-gray-800 text-xl">Manage Pattern Entries</h4>
-                <p className="text-sm text-gray-500 mt-1">Point: "{managingPoint?.text}"</p>
+                <h4 className="font-bold text-gray-800 text-lg">Manage Pattern Entries</h4>
+                <p className="text-xs text-gray-500 mt-0.5">Point: "{managingPoint?.text}"</p>
               </div>
-              <button onClick={() => setShowPatternGroupManager(false)}><FaTimes className="text-gray-500 text-lg" /></button>
+              <button onClick={() => setShowPatternGroupManager(false)}><FaTimes className="text-gray-500" /></button>
             </div>
-            
-            <div className="p-6 space-y-6">
-              {/* Add New Entry Form - At Top */}
-              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-                <h5 className="font-semibold text-gray-700 text-lg mb-4">Add New Entry</h5>
-                
-                <div className="mb-4">
-                  <label className="text-sm font-semibold text-gray-700 block mb-2">Pattern Name</label>
-                  <input 
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base" 
+
+            <div className="p-5 space-y-5">
+
+              {/* ── STEP 1: Single entry form ── */}
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-3">
+                  Add entry — fill and click "+ Add to Box"
+                </p>
+
+                {/* Pattern name — locked once staging has entries */}
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-gray-600">Pattern Name</label>
+                    {stagingEntries.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setStagingEntries([]);
+                          setStagingTargetGroupId(null);
+                          setPatternEntryForm({ patternName: '', entries: [{ number: '', koreanTerm: '', description: '' }] });
+                        }}
+                        className="text-xs text-orange-500 hover:text-orange-700 font-semibold"
+                      >
+                        ✕ Clear &amp; Start New Box
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    className={`w-full border rounded-lg px-3 py-2 text-sm ${stagingEntries.length > 0 ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
                     placeholder="e.g. Dan-Gun"
                     value={patternEntryForm.patternName}
-                    onChange={e => setPatternEntryForm(prev => ({ ...prev, patternName: e.target.value }))}
+                    readOnly={stagingEntries.length > 0}
+                    onChange={e => {
+                      if (stagingEntries.length > 0) return;
+                      setPatternEntryForm(prev => ({ ...prev, patternName: e.target.value }));
+                    }}
                   />
+                  {stagingEntries.length > 0 && (
+                    <p className="text-xs text-orange-500 mt-1">
+                      🔒 Locked — all entries go into the same box. Click "Save as Box" when done, or "Clear &amp; Start New Box" to start fresh.
+                    </p>
+                  )}
                 </div>
 
-                <div className="space-y-3 mb-4">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-semibold text-gray-700">Entries for this pattern</label>
-                    <button 
-                      type="button"
-                      onClick={addPatternEntryRow}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold" 
-                      style={{ backgroundColor: '#006CB5' }}
-                    >
-                      <FaPlus size={12} /> Add More
-                    </button>
+                {/* Single entry row */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Number</label>
+                    <input
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      placeholder="e.g. 13"
+                      value={patternEntryForm.entries[0]?.number || ''}
+                      onChange={e => setPatternEntryForm(prev => ({
+                        ...prev,
+                        entries: [{ ...prev.entries[0], number: e.target.value }]
+                      }))}
+                    />
                   </div>
-                  
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {patternEntryForm.entries.map((entry, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-sm font-bold text-[#006CB5]">Entry {index + 1}</span>
-                          {patternEntryForm.entries.length > 1 && (
-                            <button 
-                              type="button"
-                              onClick={() => removePatternEntryRow(index)}
-                              className="text-sm text-red-400 hover:text-red-600"
-                            >
-                              <FaTimes size={14} />
-                            </button>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-sm text-gray-500 block mb-2">Number</label>
-                            <input 
-                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
-                              placeholder="e.g. 13."
-                              value={entry.number}
-                              onChange={e => updatePatternEntryRow(index, 'number', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm text-gray-500 block mb-2">Korean Term</label>
-                            <input 
-                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
-                              placeholder="e.g. Ap Chagi"
-                              value={entry.koreanTerm}
-                              onChange={e => updatePatternEntryRow(index, 'koreanTerm', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm text-gray-500 block mb-2">English Description</label>
-                            <input 
-                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
-                              placeholder="e.g. Front snap kick"
-                              value={entry.description}
-                              onChange={e => updatePatternEntryRow(index, 'description', e.target.value)}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Korean Term</label>
+                    <input
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      placeholder="e.g. Ap Chagi"
+                      value={patternEntryForm.entries[0]?.koreanTerm || ''}
+                      onChange={e => setPatternEntryForm(prev => ({
+                        ...prev,
+                        entries: [{ ...prev.entries[0], koreanTerm: e.target.value }]
+                      }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 block mb-1">Description</label>
+                    <input
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      placeholder="e.g. Front snap kick"
+                      value={patternEntryForm.entries[0]?.description || ''}
+                      onChange={e => setPatternEntryForm(prev => ({
+                        ...prev,
+                        entries: [{ ...prev.entries[0], description: e.target.value }]
+                      }))}
+                    />
                   </div>
                 </div>
 
-                <button 
-                  onClick={savePatternEntry} 
-                  className="w-full py-3 rounded-lg text-white text-base font-semibold" 
+                {/* Add to staging */}
+                <button
+                  onClick={() => {
+                    const e = patternEntryForm.entries[0];
+                    if (!patternEntryForm.patternName.trim()) return;
+                    if (!e.number.trim() && !e.koreanTerm.trim()) return;
+                    // Find existing staging group for this patternName (current open box being built)
+                    // We use a special staging key stored in state
+                    setStagingEntries(prev => [...prev, {
+                      patternName: patternEntryForm.patternName,
+                      number: e.number,
+                      koreanTerm: e.koreanTerm,
+                      description: e.description,
+                    }]);
+                    // Clear only the entry fields, keep pattern name
+                    setPatternEntryForm(prev => ({
+                      ...prev,
+                      entries: [{ number: '', koreanTerm: '', description: '' }]
+                    }));
+                  }}
+                  className="w-full py-2 rounded-lg text-white text-sm font-semibold flex items-center justify-center gap-2"
                   style={{ backgroundColor: '#006CB5' }}
                 >
-                  Add All Entries ({patternEntryForm.entries.length})
+                  <FaPlus size={11} /> Add to Box
                 </button>
+
+                {/* Staging preview */}
+                {stagingEntries.length > 0 && (
+                  <div className="mt-3 border border-blue-200 rounded-lg overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-2 bg-blue-100">
+                      <span className="text-xs font-bold text-blue-700">
+                        {stagingTargetGroupId ? `Adding to: ${stagingEntries[0]?.patternName}` : `Staging: ${stagingEntries[0]?.patternName}`} — {stagingEntries.length} {stagingEntries.length === 1 ? 'entry' : 'entries'}
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (stagingEntries.length === 0) return;
+                          if (stagingTargetGroupId) {
+                            // Append to existing box — reuse the same groupId
+                            const newEntries = stagingEntries.map(e => ({
+                              groupId: stagingTargetGroupId,
+                              patternName: e.patternName,
+                              number: e.number,
+                              rows: [{ koreanTerm: e.koreanTerm, description: e.description }]
+                            }));
+                            setPatternGroups(prev => [...prev, ...newEntries]);
+                          } else {
+                            // Create a brand new box
+                            const groupId = `grp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                            const newEntries = stagingEntries.map(e => ({
+                              groupId,
+                              patternName: e.patternName,
+                              number: e.number,
+                              rows: [{ koreanTerm: e.koreanTerm, description: e.description }]
+                            }));
+                            setPatternGroups(prev => [...prev, ...newEntries]);
+                          }
+                          setStagingEntries([]);
+                          setStagingTargetGroupId(null);
+                          setPatternEntryForm({ patternName: '', entries: [{ number: '', koreanTerm: '', description: '' }] });
+                        }}
+                        className="px-3 py-1 rounded-lg text-white text-xs font-bold"
+                        style={{ backgroundColor: '#16a34a' }}
+                      >
+                        {stagingTargetGroupId ? `✓ Add to Box (${stagingEntries.length})` : `✓ Save as Box (${stagingEntries.length})`}
+                      </button>
+                    </div>
+                    <div className="divide-y divide-blue-100 max-h-40 overflow-y-auto">
+                      {stagingEntries.map((e, i) => (
+                        <div key={i} className="flex items-center justify-between px-3 py-1.5 bg-white text-xs">
+                          <span className="text-gray-700">
+                            <span className="font-bold text-blue-600 mr-2">{e.number}.</span>
+                            {e.koreanTerm}
+                            {e.description && <span className="text-gray-400 ml-1">— {e.description}</span>}
+                          </span>
+                          <button onClick={() => setStagingEntries(prev => prev.filter((_, idx) => idx !== i))}
+                            className="text-red-400 hover:text-red-600 ml-2"><FaTimes size={10} /></button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Current Entries - Below Form with Separate Scroll */}
+              {/* ── Saved boxes ── */}
               {patternGroups.length > 0 && (
                 <div>
-                  <h5 className="font-semibold text-gray-700 text-lg mb-4">Current Entries ({patternGroups.length})</h5>
-                  <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg bg-gray-50 p-2"
-                       style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 #f1f5f9' }}>
-                    <div className="space-y-3">
-                      {(() => {
-                        // Group entries by pattern name
-                        const groupedEntries = {};
-                        patternGroups.forEach((group, index) => {
-                          // Handle different possible data structures
-                          const patternName = group.patternName || 'Unnamed Pattern';
-                          if (!groupedEntries[patternName]) {
-                            groupedEntries[patternName] = [];
-                          }
-                          groupedEntries[patternName].push({ ...group, originalIndex: index });
-                        });
+                  <h5 className="font-semibold text-gray-700 text-base mb-3">
+                    Saved Entries ({patternGroups.length})
+                    {' • '}
+                    Boxes ({new Set(patternGroups.map(g => g.groupId || g.patternName)).size})
+                  </h5>
+                  <div className="space-y-3 max-h-80 overflow-y-auto"
+                       style={{ scrollbarWidth: 'thin' }}>
+                    {(() => {
+                      // Group by groupId — each unique groupId = one box
+                      const boxes = [];
+                      const seen = {};
+                      patternGroups.forEach((group, index) => {
+                        const key = group.groupId || `__ungrouped_${index}`;
+                        if (seen[key] === undefined) {
+                          seen[key] = boxes.length;
+                          boxes.push({ groupId: key, patternName: group.patternName, entries: [] });
+                        }
+                        boxes[seen[key]].entries.push({ ...group, _idx: index });
+                      });
 
-                        return Object.keys(groupedEntries).map((patternName, groupIndex) => (
-                          <div key={groupIndex} className="border border-gray-200 rounded-lg overflow-hidden mb-3 bg-white shadow-sm">
-                            {/* Pattern Name Header */}
-                            <div className="bg-blue-50 px-4 py-3 border-b">
-                              <div className="flex justify-between items-center">
-                                <h6 className="font-bold text-gray-800 text-base">{patternName}</h6>
-                                <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
-                                  {groupedEntries[patternName].length} entries
-                                </span>
-                              </div>
-                            </div>
-                            
-                            {/* Individual Entries with Edit/Delete */}
-                            <div className="bg-white">
-                              {groupedEntries[patternName].map((entry, entryIndex) => {
-                                // Handle different data structures
-                                const number = entry.number || (entryIndex + 1);
-                                const koreanTerm = entry.rows?.[0]?.koreanTerm || entry.koreanTerm || '';
-                                const description = entry.rows?.[0]?.description || entry.description || '';
-                                
-                                return (
-                                  <div key={entryIndex} className="border-b border-gray-100 last:border-b-0 p-3 hover:bg-gray-50">
-                                    {editingEntryIndex === entry.originalIndex ? (
-                                      // Inline Edit Form
-                                      <div className="space-y-4">
-                                        <div className="flex justify-between items-center">
-                                          <span className="text-sm font-semibold text-blue-600">Editing Entry</span>
-                                          <div className="flex gap-2">
-                                            <button 
-                                              onClick={saveEditingEntry}
-                                              className="px-3 py-1 rounded bg-green-50 text-green-600 hover:bg-green-100 text-xs font-semibold"
-                                            >
-                                              Save
-                                            </button>
-                                            <button 
-                                              onClick={cancelEditingEntry}
-                                              className="px-3 py-1 rounded bg-gray-50 text-gray-600 hover:bg-gray-100 text-xs font-semibold"
-                                            >
-                                              Cancel
-                                            </button>
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="space-y-4">
-                                          <div>
-                                            <label className="text-sm font-semibold text-gray-700 block mb-2">Pattern Name</label>
-                                            <input 
-                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
-                                              value={editingEntryData.patternName}
-                                              onChange={e => setEditingEntryData(prev => ({ ...prev, patternName: e.target.value }))}
-                                            />
-                                          </div>
-                                          <div>
-                                            <label className="text-sm font-semibold text-gray-700 block mb-2">Number</label>
-                                            <input 
-                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
-                                              value={editingEntryData.number}
-                                              onChange={e => setEditingEntryData(prev => ({ ...prev, number: e.target.value }))}
-                                            />
-                                          </div>
-                                          <div>
-                                            <label className="text-sm font-semibold text-gray-700 block mb-2">Korean Term</label>
-                                            <input 
-                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
-                                              value={editingEntryData.koreanTerm}
-                                              onChange={e => setEditingEntryData(prev => ({ ...prev, koreanTerm: e.target.value }))}
-                                            />
-                                          </div>
-                                          <div>
-                                            <label className="text-sm font-semibold text-gray-700 block mb-2">English Description</label>
-                                            <textarea 
-                                              rows={2}
-                                              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" 
-                                              value={editingEntryData.description}
-                                              onChange={e => setEditingEntryData(prev => ({ ...prev, description: e.target.value }))}
-                                            />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      // Normal Display
-                                      <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                          <div className="flex items-center gap-3 mb-1">
-                                            <span className="font-bold text-blue-600 text-lg min-w-[40px]">{number}.</span>
-                                            <span className="font-semibold text-gray-800 text-sm">{koreanTerm}</span>
-                                          </div>
-                                          {description && (
-                                            <div className="ml-12">
-                                              <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
-                                            </div>
-                                          )}
-                                        </div>
-                                        
-                                        {/* Individual Entry Actions */}
-                                        <div className="flex items-center gap-2 ml-4">
-                                          <button 
-                                            onClick={() => startEditingEntry(entry, entry.originalIndex)}
-                                            className="p-1.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100"
-                                            title="Edit this entry"
-                                          >
-                                            <FaEdit size={12} />
-                                          </button>
-                                          <button 
-                                            onClick={() => {
-                                              if (confirm(`Delete entry "${number} ${koreanTerm}"?`)) {
-                                                removePatternGroup(entry.originalIndex);
-                                              }
-                                            }}
-                                            className="p-1.5 rounded bg-red-50 text-red-600 hover:bg-red-100"
-                                            title="Delete this entry"
-                                          >
-                                            <FaTrash size={12} />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
+                      return boxes.map((box, bi) => (
+                        <div key={bi} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                          <div className="flex items-center justify-between px-4 py-2.5 bg-blue-50 border-b border-blue-100">
+                            <span className="font-bold text-blue-700 text-sm">{box.patternName || 'Unnamed'}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  // Pre-fill pattern name and target this box's groupId
+                                  setStagingTargetGroupId(box.groupId);
+                                  setStagingEntries([]);
+                                  setPatternEntryForm(prev => ({
+                                    ...prev,
+                                    patternName: box.patternName,
+                                    entries: [{ number: '', koreanTerm: '', description: '' }]
+                                  }));
+                                  // Scroll to top of modal
+                                  document.querySelector('.max-h-\\[90vh\\]')?.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold text-blue-600 bg-white border border-blue-200 hover:bg-blue-100"
+                              >
+                                <FaPlus size={9} /> Add More
+                              </button>
+                              <span className="text-xs text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-200">
+                                {box.entries.length} {box.entries.length === 1 ? 'entry' : 'entries'}
+                              </span>
                             </div>
                           </div>
-                        ));
-                      })()}
-                    </div>
+                          <div className="divide-y divide-gray-100">
+                            {box.entries.map((entry, ei) => {
+                              const idx = entry._idx;
+                              const number = entry.number || (ei + 1);
+                              const koreanTerm = entry.rows?.[0]?.koreanTerm || '';
+                              const description = entry.rows?.[0]?.description || '';
+                              return (
+                                <div key={ei}>
+                                  {editingEntryIndex === idx ? (
+                                    <div className="p-3 space-y-2 bg-blue-50/40">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-xs font-semibold text-blue-600">Editing</span>
+                                        <div className="flex gap-2">
+                                          <button onClick={saveEditingEntry} className="px-2 py-1 rounded bg-green-50 text-green-600 text-xs font-semibold">Save</button>
+                                          <button onClick={cancelEditingEntry} className="px-2 py-1 rounded bg-gray-50 text-gray-600 text-xs">Cancel</button>
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <label className="text-xs text-gray-500 block mb-1">Number</label>
+                                          <input className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs"
+                                            value={editingEntryData.number}
+                                            onChange={e => setEditingEntryData(prev => ({ ...prev, number: e.target.value }))} />
+                                        </div>
+                                        <div>
+                                          <label className="text-xs text-gray-500 block mb-1">Korean Term</label>
+                                          <input className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs"
+                                            value={editingEntryData.koreanTerm}
+                                            onChange={e => setEditingEntryData(prev => ({ ...prev, koreanTerm: e.target.value }))} />
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <label className="text-xs text-gray-500 block mb-1">Description</label>
+                                        <input className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs"
+                                          value={editingEntryData.description}
+                                          onChange={e => setEditingEntryData(prev => ({ ...prev, description: e.target.value }))} />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-start justify-between px-4 py-2 hover:bg-gray-50">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-bold text-blue-600 text-sm">{number}.</span>
+                                          <span className="font-semibold text-gray-800 text-sm">{koreanTerm}</span>
+                                        </div>
+                                        {description && <p className="text-gray-400 text-xs ml-6">{description}</p>}
+                                      </div>
+                                      <div className="flex gap-1.5 ml-2 flex-shrink-0">
+                                        <button onClick={() => startEditingEntry(entry, idx)}
+                                          className="p-1.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100"><FaEdit size={10} /></button>
+                                        <button onClick={() => { if (confirm(`Delete?`)) removePatternGroup(idx); }}
+                                          className="p-1.5 rounded bg-red-50 text-red-600 hover:bg-red-100"><FaTrash size={10} /></button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               )}
             </div>
-            
+
             <div className="flex gap-3 p-4 border-t">
-              <button onClick={() => setShowPatternGroupManager(false)} 
+              <button onClick={() => { setShowPatternGroupManager(false); setStagingEntries([]); setStagingTargetGroupId(null); }}
                 className="flex-1 py-2 rounded border border-gray-300 text-gray-600 text-sm">Cancel</button>
               <button onClick={savePatternGroups} disabled={savingPatternGroups}
                 className="flex-1 py-2 rounded text-white text-sm font-semibold disabled:opacity-60" style={{ backgroundColor: '#006CB5' }}>

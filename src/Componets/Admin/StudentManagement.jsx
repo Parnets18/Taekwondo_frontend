@@ -437,23 +437,9 @@ function StudentManagement() {
     }
   }, [searchTerm, selectedBelt, authToken]);
 
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch =
-      student.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesBelt =
-      selectedBelt === "" || student.currentBelt === selectedBelt;
-
-    // Debug logging
-    console.log("Student filter debug:", {
-      student: student.fullName,
-      matchesSearch,
-      matchesBelt,
-      age: student.age,
-    });
-
-    return matchesSearch && matchesBelt;
-  });
+  // Note: Filtering is now done server-side via API parameters
+  // The students array already contains only filtered results from the current page
+  const filteredStudents = students;
 
   const beltLevels = [
     { value: "white", label: "White Belt" },
@@ -1041,8 +1027,9 @@ function StudentManagement() {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-6 rounded-lg shadow">
-          <div className="flex-1 flex justify-between sm:hidden">
+        <div className="bg-white px-4 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 mt-6 rounded-lg shadow gap-4">
+          {/* Mobile View - Simple Previous/Next */}
+          <div className="flex-1 flex justify-between sm:hidden w-full gap-2">
             <button
               onClick={() =>
                 fetchStudents(
@@ -1052,10 +1039,13 @@ function StudentManagement() {
                 )
               }
               disabled={pagination.currentPage === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Previous
+              ← Previous
             </button>
+            <div className="text-sm text-gray-700 font-medium">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </div>
             <button
               onClick={() =>
                 fetchStudents(
@@ -1065,31 +1055,34 @@ function StudentManagement() {
                 )
               }
               disabled={pagination.currentPage === pagination.totalPages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next
+              Next →
             </button>
           </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+
+          {/* Desktop View - Full Pagination */}
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between w-full">
             <div>
               <p className="text-sm text-gray-700">
                 Showing{" "}
-                <span className="font-medium">
+                <span className="font-semibold">
                   {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}
                 </span>{" "}
                 to{" "}
-                <span className="font-medium">
+                <span className="font-semibold">
                   {Math.min(
                     pagination.currentPage * pagination.itemsPerPage,
                     pagination.totalItems,
                   )}
                 </span>{" "}
-                of <span className="font-medium">{pagination.totalItems}</span>{" "}
-                results
+                of <span className="font-semibold">{pagination.totalItems}</span>{" "}
+                students
               </p>
             </div>
             <div>
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                {/* Previous Button */}
                 <button
                   onClick={() =>
                     fetchStudents(
@@ -1099,25 +1092,86 @@ function StudentManagement() {
                     )
                   }
                   disabled={pagination.currentPage === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Previous page"
                 >
-                  Previous
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 </button>
-                {[...Array(pagination.totalPages)].map((_, index) => (
-                  <button
-                    key={index + 1}
-                    onClick={() =>
-                      fetchStudents(index + 1, searchTerm, selectedBelt)
+
+                {/* Page Numbers - Show smart range */}
+                {(() => {
+                  const pages = [];
+                  const maxPagesToShow = 5;
+                  let startPage = Math.max(1, pagination.currentPage - Math.floor(maxPagesToShow / 2));
+                  let endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
+                  
+                  if (endPage - startPage + 1 < maxPagesToShow) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                  }
+
+                  // Add first page if not visible
+                  if (startPage > 1) {
+                    pages.push(
+                      <button
+                        key={1}
+                        onClick={() => fetchStudents(1, searchTerm, selectedBelt)}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+                      >
+                        1
+                      </button>
+                    );
+                    if (startPage > 2) {
+                      pages.push(
+                        <span key="ellipsis-start" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                          ...
+                        </span>
+                      );
                     }
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                      pagination.currentPage === index + 1
-                        ? "z-10 bg-red-50 border-red-500 text-red-600"
-                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
+                  }
+
+                  // Add page range
+                  for (let i = startPage; i <= endPage; i++) {
+                    pages.push(
+                      <button
+                        key={i}
+                        onClick={() => fetchStudents(i, searchTerm, selectedBelt)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors ${
+                          pagination.currentPage === i
+                            ? "z-10 bg-red-50 border-red-500 text-red-600"
+                            : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                        }`}
+                      >
+                        {i}
+                      </button>
+                    );
+                  }
+
+                  // Add last page if not visible
+                  if (endPage < pagination.totalPages) {
+                    if (endPage < pagination.totalPages - 1) {
+                      pages.push(
+                        <span key="ellipsis-end" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                          ...
+                        </span>
+                      );
+                    }
+                    pages.push(
+                      <button
+                        key={pagination.totalPages}
+                        onClick={() => fetchStudents(pagination.totalPages, searchTerm, selectedBelt)}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+                      >
+                        {pagination.totalPages}
+                      </button>
+                    );
+                  }
+
+                  return pages;
+                })()}
+
+                {/* Next Button */}
                 <button
                   onClick={() =>
                     fetchStudents(
@@ -1127,9 +1181,12 @@ function StudentManagement() {
                     )
                   }
                   disabled={pagination.currentPage === pagination.totalPages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Next page"
                 >
-                  Next
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
                 </button>
               </nav>
             </div>

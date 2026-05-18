@@ -6,7 +6,6 @@ import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaImage, FaEye } from 'react-
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
 const SECTIONS = ['warmUp', 'training', 'stretching'];
 const SECTION_LABELS = { warmUp: 'Warm-Up', training: 'Training', stretching: 'Stretching' };
-const EQUIPMENT = ['chair', 'noChair'];
 const EQUIPMENT_LABELS = { chair: 'With Chair', noChair: 'No Chair' };
 const LEVELS = ['Easy', 'Advance', 'Master'];
 const getImageUrl = (img) => {
@@ -16,9 +15,7 @@ const getImageUrl = (img) => {
 };
 
 const PAGE_SIZE = 10;
-
 const EMPTY_PROG = { title: '', category: '' };
-const EMPTY_EX = { name: '', section: 'warmUp', equipment: 'chair', level: [], programIds: [], programTitles: [], videoFile: null, videoName: '', steps: [''], tips: [''] };
 
 function Pagination({ page, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
@@ -67,7 +64,6 @@ export default function ProgramManagement() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -79,17 +75,10 @@ export default function ProgramManagement() {
   const [progImagePreview, setProgImagePreview] = useState(null);
 
   // Exercise form
-  const [showExForm, setShowExForm] = useState(false);
-  const [editingEx, setEditingEx] = useState(null);
-  const [exForm, setExForm] = useState(EMPTY_EX);
-  const [exImageFile, setExImageFile] = useState(null);
-  const [exImagePreview, setExImagePreview] = useState(null);
   const [filterProgram, setFilterProgram] = useState('All');
   const [filterSection, setFilterSection] = useState('All');
   const [filterLevel, setFilterLevel] = useState('All');
   const [viewItem, setViewItem] = useState(null);
-  const [showLevelDropdown, setShowLevelDropdown] = useState(false);
-  const [showProgramDropdown, setShowProgramDropdown] = useState(false);
 
   // Search & pagination
   const [progSearch, setProgSearch] = useState('');
@@ -98,52 +87,6 @@ export default function ProgramManagement() {
   const [exPage, setExPage] = useState(1);
 
   useEffect(() => { fetchAll(); }, []);
-
-  // Close level dropdown when clicking outside
-  useEffect(() => {
-    if (!showLevelDropdown) return;
-    const handler = (e) => {
-      if (!e.target.closest('[data-level-dropdown]')) setShowLevelDropdown(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showLevelDropdown]);
-
-  // Close program dropdown when clicking outside
-  useEffect(() => {
-    if (!showProgramDropdown) return;
-    const handler = (e) => {
-      if (!e.target.closest('[data-program-dropdown]')) setShowProgramDropdown(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showProgramDropdown]);
-
-  const toggleLevel = (lvl) => {
-    setExForm(f => {
-      const current = Array.isArray(f.level) ? f.level : [];
-      return { ...f, level: current.includes(lvl) ? current.filter(l => l !== lvl) : [...current, lvl] };
-    });
-  };
-
-  const toggleProgram = (prog) => {
-    setExForm(f => {
-      const currentIds = f.programIds || [];
-      const currentTitles = f.programTitles || [];
-      if (currentIds.includes(prog._id)) {
-        return {
-          ...f,
-          programIds: currentIds.filter(id => id !== prog._id),
-          programTitles: currentTitles.filter(t => t !== prog.title),
-        };
-      }
-      return {
-        ...f,
-        programIds: [...currentIds, prog._id],
-        programTitles: [...currentTitles, prog.title],
-      };
-    });
-  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -198,68 +141,7 @@ export default function ProgramManagement() {
     catch { setError('Failed to delete.'); }
   };
 
-  // ── Exercise CRUD ─────────────────────────────────────────────────────────────
-  const openAddEx = (programId = '', programTitle = '') => {
-    setEditingEx(null);
-    setExForm({ ...EMPTY_EX, programIds: programId ? [programId] : [], programTitles: programTitle ? [programTitle] : [] });
-    setExImageFile(null); setExImagePreview(null); setError(''); setShowExForm(true);
-  };
-  const openEditEx = (ex) => {
-    const levelVal = ex.level ? (Array.isArray(ex.level) ? ex.level : [ex.level]) : [];
-    // Normalize programIds — migrate legacy programId
-    const programIds = (Array.isArray(ex.programIds) && ex.programIds.length > 0)
-      ? ex.programIds
-      : (ex.programId ? [ex.programId] : []);
-    const programTitles = (Array.isArray(ex.programTitles) && ex.programTitles.length > 0)
-      ? ex.programTitles
-      : (ex.programTitle ? [ex.programTitle] : []);
-    setEditingEx(ex);
-    setExForm({ name: ex.name, section: ex.section, equipment: ex.equipment, level: levelVal, programIds, programTitles, videoFile: null, videoName: ex.videoUrl ? 'Existing video' : '', steps: ex.steps?.length ? ex.steps : [''], tips: ex.tips?.length ? ex.tips : [''] });
-    setExImagePreview(ex.image ? getImageUrl(ex.image) : null); setExImageFile(null); setError(''); setShowExForm(true);
-  };
-  const closeExForm = () => { setShowExForm(false); setEditingEx(null); setExForm(EMPTY_EX); setExImageFile(null); setExImagePreview(null); setError(''); };
-
-  const handleExImageChange = (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    setExImageFile(file);
-    const r = new FileReader(); r.onloadend = () => setExImagePreview(r.result); r.readAsDataURL(file);
-  };
-
-  const saveEx = async (e) => {
-    e.preventDefault();
-    if (!exForm.name.trim()) return setError('Name is required.');
-    setSaving(true);
-    try {
-      const fd = new FormData();
-      fd.append('name', exForm.name);
-      fd.append('section', exForm.section);
-      fd.append('equipment', exForm.equipment);
-      fd.append('levelJson', JSON.stringify(exForm.level || []));
-      fd.append('programIdsJson', JSON.stringify(exForm.programIds || []));
-      fd.append('programTitlesJson', JSON.stringify(exForm.programTitles || []));
-      fd.append('stepsJson', JSON.stringify(exForm.steps.filter(s => s?.trim())));
-      fd.append('tipsJson', JSON.stringify(exForm.tips.filter(t => t?.trim())));
-      if (exImageFile) fd.append('image', exImageFile);
-      if (exForm.videoFile) fd.append('video', exForm.videoFile);
-
-      const opts = { headers: getAuthHeadersMultipart(), timeout: 5 * 60 * 1000, onUploadProgress: (e) => setUploadProgress(Math.round((e.loaded * 100) / e.total)) };
-      if (editingEx) {
-        await axios.put(`${API_BASE_URL}/programs/exercises/${editingEx._id}`, fd, opts);
-        setSuccess('Exercise updated.');
-      } else {
-        await axios.post(`${API_BASE_URL}/programs/exercises`, fd, opts);
-        setSuccess('Exercise created.');
-      }
-      setUploadProgress(0); await fetchAll(); closeExForm();
-    } catch (err) { setError(err.response?.data?.message || 'Failed to save exercise.'); }
-    finally { setSaving(false); }
-  };
-
-  const deleteEx = async (ex) => {
-    if (!window.confirm(`Delete "${ex.name}"?`)) return;
-    try { await axios.delete(`${API_BASE_URL}/programs/exercises/${ex._id}`, { headers: getAuthHeaders() }); setSuccess('Exercise deleted.'); fetchAll(); }
-    catch { setError('Failed to delete.'); }
-  };
+  // ── Exercise filter ───────────────────────────────────────────────────────────
 
   const filteredExercises = exercises.filter(ex => {
     // Program filter — support both legacy and new arrays
@@ -301,25 +183,14 @@ export default function ProgramManagement() {
           <p className="text-gray-500 text-sm mt-1">Manage training programs and their exercises shown in the mobile app</p>
         </div>
         <div className="flex gap-2">
-          {activeTab === 'programs' ? (
-            <>
-              <button onClick={() => openAddEx()} className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 font-semibold text-sm transition hover:opacity-80" style={{ borderColor: '#006CB5', color: '#006CB5' }}>
-                <FaPlus className="w-3 h-3" /> Add Exercise
-              </button>
-              <button onClick={openAddProg} className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm shadow transition hover:opacity-90" style={{ backgroundColor: '#006CB5' }}>
-                <FaPlus className="w-3 h-3" /> Add Program
-              </button>
-            </>
-          ) : (
-            <button onClick={() => openAddEx()} className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm shadow transition hover:opacity-90" style={{ backgroundColor: '#006CB5' }}>
-              <FaPlus className="w-3 h-3" /> Add Exercise
-            </button>
-          )}
+          <button onClick={openAddProg} className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm shadow transition hover:opacity-90" style={{ backgroundColor: '#006CB5' }}>
+            <FaPlus className="w-3 h-3" /> Add Program
+          </button>
         </div>
       </div>
 
       {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{success}</div>}
-      {error && !showProgForm && !showExForm && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+      {error && !showProgForm && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
@@ -426,7 +297,7 @@ export default function ProgramManagement() {
             <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">
               {exSearch || filterProgram !== 'All' || filterSection !== 'All' || filterLevel !== 'All'
                 ? 'No exercises match your search/filters.'
-                : 'No exercises yet. Click "Add Exercise" to start.'}
+                : 'No exercises yet. Add them from Techniques & Kicks → assign a Program in the form.'}
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -440,7 +311,7 @@ export default function ProgramManagement() {
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Section</th>
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Equipment</th>
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Level</th>
-                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-32">Actions</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-20">View</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -480,10 +351,8 @@ export default function ProgramManagement() {
                         })()}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center">
                           <button onClick={() => setViewItem(ex)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-green-200 text-green-600 hover:bg-green-50 transition"><FaEye className="w-3 h-3" /> View</button>
-                          <button onClick={() => openEditEx(ex)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition"><FaEdit className="w-3 h-3" /> Edit</button>
-                          <button onClick={() => deleteEx(ex)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition"><FaTrash className="w-3 h-3" /> Delete</button>
                         </div>
                       </td>
                     </tr>
@@ -540,152 +409,6 @@ export default function ProgramManagement() {
                   <FaSave className="w-4 h-4" /> {saving ? 'Saving...' : editingProg ? 'Update' : 'Save'}
                 </button>
                 <button type="button" onClick={closeProgForm} className="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition">Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ── EXERCISE FORM MODAL ── */}
-      {showExForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-4 py-3 border-b">
-              <h2 className="text-base font-bold text-gray-900">{editingEx ? 'Edit Exercise' : 'Add Exercise'}</h2>
-              <button onClick={closeExForm} className="text-gray-400 hover:text-gray-600"><FaTimes /></button>
-            </div>
-            <form onSubmit={saveEx} className="px-4 py-3 space-y-3">
-              {error && <div className="p-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs">{error}</div>}
-              {uploadProgress > 0 && uploadProgress < 100 && <div className="w-full bg-gray-200 rounded-full h-2"><div className="h-2 rounded-full transition-all" style={{ width: `${uploadProgress}%`, backgroundColor: '#006CB5' }} /></div>}
-              {/* Image + Name */}
-              <div className="flex items-center gap-3">
-                <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 cursor-pointer hover:border-blue-400 transition flex-shrink-0" onClick={() => document.getElementById('ex-img-input').click()}>
-                  {exImagePreview ? <img src={exImagePreview} alt="preview" className="w-full h-full object-cover rounded-lg" /> : <div className="text-center text-gray-400"><FaImage className="w-5 h-5 mx-auto mb-0.5" /><span className="text-xs">Image</span></div>}
-                </div>
-                <div className="flex-1">
-                  <input id="ex-img-input" type="file" accept="image/*" className="hidden" onChange={handleExImageChange} />
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Exercise Name <span className="text-red-500">*</span></label>
-                  <input type="text" value={exForm.name} onChange={e => setExForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Front Kick" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                  <button type="button" onClick={() => document.getElementById('ex-img-input').click()} className="mt-1 text-xs text-blue-500 hover:underline">Change image</button>
-                </div>
-              </div>
-              {/* Program + Section + Equipment + Level */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Program</label>
-                  <div className="relative" data-program-dropdown>
-                    <button
-                      type="button"
-                      onClick={() => setShowProgramDropdown(v => !v)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <span className={exForm.programTitles?.length ? 'text-gray-800 truncate pr-2' : 'text-gray-400'}>
-                        {exForm.programTitles?.length ? exForm.programTitles.join(', ') : 'Select programs'}
-                      </span>
-                      <svg className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${showProgramDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </button>
-                    {showProgramDropdown && (
-                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto">
-                        {programs.map(p => (
-                          <label key={p._id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={(exForm.programIds || []).includes(p._id)}
-                              onChange={() => toggleProgram(p)}
-                              className="w-4 h-4 rounded accent-blue-600"
-                            />
-                            <span className="text-sm text-gray-700">{p.title}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Section</label>
-                  <select value={exForm.section} onChange={e => setExForm(f => ({ ...f, section: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    {SECTIONS.map(s => <option key={s} value={s}>{SECTION_LABELS[s]}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Equipment</label>
-                  <select value={exForm.equipment} onChange={e => setExForm(f => ({ ...f, equipment: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    {EQUIPMENT.map(eq => <option key={eq} value={eq}>{EQUIPMENT_LABELS[eq]}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Level</label>
-                  <div className="relative" data-level-dropdown>
-                    <button
-                      type="button"
-                      onClick={() => setShowLevelDropdown(v => !v)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <span className={Array.isArray(exForm.level) && exForm.level.length ? 'text-gray-800' : 'text-gray-400'}>
-                        {Array.isArray(exForm.level) && exForm.level.length ? exForm.level.join(', ') : 'Select levels'}
-                      </span>
-                      <svg className={`w-4 h-4 text-gray-400 transition-transform ${showLevelDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </button>
-                    {showLevelDropdown && (
-                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-                        {LEVELS.map(lvl => (
-                          <label key={lvl} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={(Array.isArray(exForm.level) ? exForm.level : []).includes(lvl)}
-                              onChange={() => toggleLevel(lvl)}
-                              className="w-4 h-4 rounded accent-blue-600"
-                            />
-                            <span className="text-sm text-gray-700">{lvl}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {/* Video */}
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50 transition cursor-pointer">
-                  <span>🎬</span>{exForm.videoName ? 'Change Video' : 'Upload Video'}
-                  <input type="file" accept="video/*" className="hidden" onChange={e => { const file = e.target.files[0]; if (!file) return; setExForm(f => ({ ...f, videoFile: file, videoName: file.name })); }} />
-                </label>
-                {exForm.videoName && <span className="text-xs text-gray-500 truncate max-w-[160px]">{exForm.videoName}</span>}
-                {exForm.videoName && <button type="button" onClick={() => setExForm(f => ({ ...f, videoFile: null, videoName: '' }))} className="text-red-400 hover:text-red-600 text-xs">Remove</button>}
-              </div>
-              {/* Steps */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Steps</label>
-                <div className="space-y-1.5">
-                  {exForm.steps.map((step, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400 w-4 flex-shrink-0">{i + 1}.</span>
-                      <input type="text" value={step} onChange={e => { const s = [...exForm.steps]; s[i] = e.target.value; setExForm(f => ({ ...f, steps: s })); }} placeholder={`Step ${i + 1}`} className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                      <button type="button" onClick={() => { const s = exForm.steps.filter((_, idx) => idx !== i); setExForm(f => ({ ...f, steps: s.length ? s : [''] })); }} className="text-red-400 hover:text-red-600"><FaTimes className="w-3 h-3" /></button>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={() => setExForm(f => ({ ...f, steps: [...f.steps, ''] }))} className="mt-1 text-xs font-medium flex items-center gap-1 hover:opacity-80" style={{ color: '#006CB5' }}><FaPlus className="w-2.5 h-2.5" /> Add Step</button>
-              </div>
-              {/* Tips */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Tips</label>
-                <div className="space-y-1.5">
-                  {exForm.tips.map((tip, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400 w-4 flex-shrink-0">{i + 1}.</span>
-                      <input type="text" value={tip} onChange={e => { const t = [...exForm.tips]; t[i] = e.target.value; setExForm(f => ({ ...f, tips: t })); }} placeholder={`Tip ${i + 1}`} className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                      <button type="button" onClick={() => { const t = exForm.tips.filter((_, idx) => idx !== i); setExForm(f => ({ ...f, tips: t.length ? t : [''] })); }} className="text-red-400 hover:text-red-600"><FaTimes className="w-3 h-3" /></button>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={() => setExForm(f => ({ ...f, tips: [...f.tips, ''] }))} className="mt-1 text-xs font-medium flex items-center gap-1 hover:opacity-80" style={{ color: '#006CB5' }}><FaPlus className="w-2.5 h-2.5" /> Add Tip</button>
-              </div>
-              <div className="flex gap-3 pt-1">
-                <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-semibold shadow transition hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: '#006CB5' }}>
-                  <FaSave className="w-4 h-4" /> {saving ? 'Saving...' : editingEx ? 'Update' : 'Save'}
-                </button>
-                <button type="button" onClick={closeExForm} className="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition">Cancel</button>
               </div>
             </form>
           </div>

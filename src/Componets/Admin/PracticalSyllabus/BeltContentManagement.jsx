@@ -6,7 +6,6 @@ import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaImage, FaEye } from 'react-
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
 const SECTIONS = ['warmUp', 'training', 'stretching'];
 const SECTION_LABELS = { warmUp: 'Warm-Up', training: 'Training', stretching: 'Stretching' };
-const EQUIPMENT = ['chair', 'noChair'];
 const EQUIPMENT_LABELS = { chair: 'With Chair', noChair: 'No Chair' };
 const LEVELS = ['Easy', 'Advance', 'Master'];
 
@@ -17,8 +16,6 @@ const getImageUrl = (img) => {
 };
 
 const EMPTY_BELT = { beltName: '' };
-const EMPTY_EX = { name: '', section: 'warmUp', equipment: 'chair', level: [], beltNames: [], duration: '25 sec', videoFile: null, videoName: '', steps: [''], tips: [''] };
-
 const PAGE_SIZE = 10;
 
 function Pagination({ page, total, onPage }) {
@@ -75,7 +72,6 @@ export default function BeltContentManagement() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -86,18 +82,11 @@ export default function BeltContentManagement() {
   const [beltImageFile, setBeltImageFile] = useState(null);
   const [beltImagePreview, setBeltImagePreview] = useState(null);
 
-  // Exercise form
-  const [showExForm, setShowExForm] = useState(false);
-  const [editingEx, setEditingEx] = useState(null);
-  const [exForm, setExForm] = useState(EMPTY_EX);
-  const [exImageFile, setExImageFile] = useState(null);
-  const [exImagePreview, setExImagePreview] = useState(null);
+  // Filters + view
   const [filterBelt, setFilterBelt] = useState('All');
   const [filterSection, setFilterSection] = useState('All');
   const [filterLevel, setFilterLevel] = useState('All');
   const [viewItem, setViewItem] = useState(null);
-  const [showLevelDropdown, setShowLevelDropdown] = useState(false);
-  const [showBeltDropdown, setShowBeltDropdown] = useState(false);
 
   // Search + pagination
   const [beltSearch, setBeltSearch] = useState('');
@@ -106,26 +95,6 @@ export default function BeltContentManagement() {
   const [exPage, setExPage] = useState(1);
 
   useEffect(() => { fetchAll(); }, []);
-
-  // Close level dropdown when clicking outside
-  useEffect(() => {
-    if (!showLevelDropdown) return;
-    const handler = (e) => {
-      if (!e.target.closest('[data-level-dropdown]')) setShowLevelDropdown(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showLevelDropdown]);
-
-  // Close belt dropdown when clicking outside
-  useEffect(() => {
-    if (!showBeltDropdown) return;
-    const handler = (e) => {
-      if (!e.target.closest('[data-belt-dropdown]')) setShowBeltDropdown(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showBeltDropdown]);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -180,111 +149,7 @@ export default function BeltContentManagement() {
     catch { setError('Failed to delete.'); }
   };
 
-  // ── Exercise CRUD ──────────────────────────────────────────
-  const openAddEx = (beltName = '') => { setEditingEx(null); setExForm({ ...EMPTY_EX, beltNames: beltName ? [beltName] : [] }); setExImageFile(null); setExImagePreview(null); setError(''); setShowExForm(true); };
-  const openEditEx = (ex) => {
-    // Normalize level to always be an array
-    const levelVal = ex.level
-      ? (Array.isArray(ex.level) ? ex.level : [ex.level])
-      : [];
-    // Normalize beltNames to always be an array — migrate legacy beltName string
-    const beltNamesVal = (Array.isArray(ex.beltNames) && ex.beltNames.length > 0)
-      ? ex.beltNames
-      : (ex.beltName ? [ex.beltName] : []);
-    setEditingEx(ex);
-    setExForm({
-      name: ex.name,
-      section: ex.section,
-      equipment: ex.equipment,
-      level: levelVal,
-      beltNames: beltNamesVal,
-      duration: ex.duration || '25 sec',
-      videoFile: null,
-      videoName: ex.videoUrl ? 'Existing video uploaded' : '',
-      steps: ex.steps?.length ? ex.steps : [''],
-      tips: ex.tips?.length ? ex.tips : [''],
-    });
-    setExImagePreview(ex.image ? getImageUrl(ex.image) : null);
-    setExImageFile(null);
-    setError('');
-    setShowExForm(true);
-  };
-  const closeExForm = () => { setShowExForm(false); setEditingEx(null); setExForm(EMPTY_EX); setExImageFile(null); setExImagePreview(null); setError(''); };
-
-  const handleExImageChange = (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    setExImageFile(file);
-    const r = new FileReader(); r.onloadend = () => setExImagePreview(r.result); r.readAsDataURL(file);
-  };
-
-  const saveEx = async (e) => {
-    e.preventDefault();
-    if (!exForm.name.trim()) return setError('Name is required.');
-    setSaving(true);
-    try {
-      const fd = new FormData();
-      // Text fields FIRST — files must come last to ensure multer parses all text fields
-      fd.append('name', exForm.name);
-      fd.append('section', exForm.section);
-      fd.append('equipment', exForm.equipment);
-      fd.append('levelJson', JSON.stringify(exForm.level || [])); // Send as JSON array
-      fd.append('beltNamesJson', JSON.stringify(exForm.beltNames || [])); // Send as JSON array
-      // Send steps and tips as JSON strings — avoids multipart array parsing issues
-      const cleanSteps = exForm.steps.filter(s => s && s.trim());
-      const cleanTips = exForm.tips.filter(t => t && t.trim());
-      fd.append('stepsJson', JSON.stringify(cleanSteps));
-      fd.append('tipsJson', JSON.stringify(cleanTips));
-      // Files LAST
-      if (exImageFile) fd.append('image', exImageFile);
-      if (exForm.videoFile) fd.append('video', exForm.videoFile);
-
-      if (editingEx) {
-        await axios.put(`${API_BASE_URL}/exercises/${editingEx._id}`, fd, {
-          headers: getAuthHeadersMultipart(),
-          timeout: 5 * 60 * 1000, // 5 min for large videos
-          onUploadProgress: (e) => setUploadProgress(Math.round((e.loaded * 100) / e.total)),
-        });
-        setSuccess('Exercise updated.');
-      } else {
-        await axios.post(`${API_BASE_URL}/exercises`, fd, {
-          headers: getAuthHeadersMultipart(),
-          timeout: 5 * 60 * 1000,
-          onUploadProgress: (e) => setUploadProgress(Math.round((e.loaded * 100) / e.total)),
-        });
-        setSuccess('Exercise created.');
-      }
-      setUploadProgress(0);
-      await fetchAll();
-      closeExForm();
-    } catch (err) { setError(err.response?.data?.message || 'Failed to save exercise.'); }
-    finally { setSaving(false); }
-  };
-
-  const deleteEx = async (ex) => {
-    if (!window.confirm(`Delete "${ex.name}"?`)) return;
-    try { await axios.delete(`${API_BASE_URL}/exercises/${ex._id}`, { headers: getAuthHeaders() }); setSuccess('Exercise deleted.'); fetchAll(); }
-    catch { setError('Failed to delete.'); }
-  };
-
-  const toggleLevel = (lvl) => {
-    setExForm(f => {
-      const current = f.level || [];
-      return {
-        ...f,
-        level: current.includes(lvl) ? current.filter(l => l !== lvl) : [...current, lvl],
-      };
-    });
-  };
-
-  const toggleBelt = (beltName) => {
-    setExForm(f => {
-      const current = f.beltNames || [];
-      return {
-        ...f,
-        beltNames: current.includes(beltName) ? current.filter(b => b !== beltName) : [...current, beltName],
-      };
-    });
-  };
+  // ── Exercise filter ────────────────────────────────────────
 
   const filteredExercises = exercises.filter(ex => {
     // Support both old beltName string and new beltNames array
@@ -320,31 +185,16 @@ export default function BeltContentManagement() {
           <p className="text-gray-500 text-sm mt-1">Manage belt images and training exercises shown in the mobile app</p>
         </div>
         <div className="flex gap-2">
-          {activeTab === 'belts' ? (
-            <>
-              <button onClick={() => openAddEx()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 font-semibold text-sm transition hover:opacity-80"
-                style={{ borderColor: '#006CB5', color: '#006CB5' }}>
-                <FaPlus className="w-3 h-3" /> Add Training
-              </button>
-              <button onClick={openAddBelt}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm shadow transition hover:opacity-90"
-                style={{ backgroundColor: '#006CB5' }}>
-                <FaPlus className="w-3 h-3" /> Add Belt
-              </button>
-            </>
-          ) : (
-            <button onClick={() => openAddEx()}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm shadow transition hover:opacity-90"
-              style={{ backgroundColor: '#006CB5' }}>
-              <FaPlus className="w-3 h-3" /> Add Exercise
-            </button>
-          )}
+          <button onClick={openAddBelt}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-sm shadow transition hover:opacity-90"
+            style={{ backgroundColor: '#006CB5' }}>
+            <FaPlus className="w-3 h-3" /> Add Belt
+          </button>
         </div>
       </div>
 
       {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{success}</div>}
-      {error && !showBeltForm && !showExForm && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+      {error && !showBeltForm && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
@@ -469,7 +319,7 @@ export default function BeltContentManagement() {
             <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">
               {exSearch || filterBelt !== 'All' || filterSection !== 'All' || filterLevel !== 'All'
                 ? 'No exercises match your search/filters.'
-                : 'No exercises yet. Click "Add Exercise" to start.'}
+                : 'No exercises yet. Add them from Techniques & Kicks → Warm-Up, Training or Stretching tabs.'}
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -483,7 +333,7 @@ export default function BeltContentManagement() {
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Section</th>
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Level</th>
                     <th className="text-left px-4 py-3 font-semibold text-gray-600">Equipment</th>
-                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-28">Actions</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 w-20">View</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -520,15 +370,9 @@ export default function BeltContentManagement() {
                       </td>
                       <td className="px-4 py-3 text-gray-500">{EQUIPMENT_LABELS[ex.equipment]}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center">
                           <button onClick={() => setViewItem(ex)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-green-200 text-green-600 hover:bg-green-50 transition">
                             <FaEye className="w-3 h-3" /> View
-                          </button>
-                          <button onClick={() => openEditEx(ex)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition">
-                            <FaEdit className="w-3 h-3" /> Edit
-                          </button>
-                          <button onClick={() => deleteEx(ex)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 transition">
-                            <FaTrash className="w-3 h-3" /> Delete
                           </button>
                         </div>
                       </td>
@@ -587,196 +431,6 @@ export default function BeltContentManagement() {
                   <FaSave className="w-4 h-4" /> {saving ? 'Saving...' : editingBelt ? 'Update' : 'Save'}
                 </button>
                 <button type="button" onClick={closeBeltForm} className="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition">Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ── EXERCISE FORM MODAL ── */}
-      {showExForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-4 py-3 border-b">
-              <h2 className="text-base font-bold text-gray-900">{editingEx ? 'Edit Exercise' : 'Add Exercise'}</h2>
-              <button onClick={closeExForm} className="text-gray-400 hover:text-gray-600"><FaTimes /></button>
-            </div>
-            <form onSubmit={saveEx} className="px-4 py-3 space-y-3">
-              {error && <div className="p-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs">{error}</div>}
-
-              {/* Image + Name row */}
-              <div className="flex items-center gap-3">
-                <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 cursor-pointer hover:border-blue-400 transition flex-shrink-0"
-                  onClick={() => document.getElementById('ex-img-input').click()}>
-                  {exImagePreview
-                    ? <img src={exImagePreview} alt="preview" className="w-full h-full object-cover rounded-lg" />
-                    : <div className="text-center text-gray-400"><FaImage className="w-5 h-5 mx-auto mb-0.5" /><span className="text-xs">Image</span></div>}
-                </div>
-                <div className="flex-1">
-                  <input id="ex-img-input" type="file" accept="image/*" className="hidden" onChange={handleExImageChange} />
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Exercise Name <span className="text-red-500">*</span></label>
-                  <input type="text" value={exForm.name} onChange={e => setExForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="e.g. Front Kick"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                  <button type="button" onClick={() => document.getElementById('ex-img-input').click()}
-                    className="mt-1 text-xs text-blue-500 hover:underline">Change image</button>
-                </div>
-              </div>
-
-              {/* Belt + Section + Equipment + Level in grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Belt</label>
-                  <div className="relative" data-belt-dropdown>
-                    <button
-                      type="button"
-                      onClick={() => setShowBeltDropdown(v => !v)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <span className={exForm.beltNames?.length ? 'text-gray-800 truncate pr-2' : 'text-gray-400'}>
-                        {exForm.beltNames?.length ? exForm.beltNames.join(', ') : 'Select belts'}
-                      </span>
-                      <svg className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${showBeltDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </button>
-                    {showBeltDropdown && (
-                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto">
-                        {belts.map(b => (
-                          <label key={b._id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={(exForm.beltNames || []).includes(b.beltName)}
-                              onChange={() => toggleBelt(b.beltName)}
-                              className="w-4 h-4 rounded accent-blue-600"
-                            />
-                            <span className="text-sm text-gray-700">{b.beltName}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Section</label>
-                  <select value={exForm.section} onChange={e => setExForm(f => ({ ...f, section: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    {SECTIONS.map(s => <option key={s} value={s}>{SECTION_LABELS[s]}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Equipment</label>
-                  <select value={exForm.equipment} onChange={e => setExForm(f => ({ ...f, equipment: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                    {EQUIPMENT.map(eq => <option key={eq} value={eq}>{EQUIPMENT_LABELS[eq]}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Level</label>
-                  <div className="relative" data-level-dropdown>
-                    <button
-                      type="button"
-                      onClick={() => setShowLevelDropdown(v => !v)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <span className={exForm.level?.length ? 'text-gray-800' : 'text-gray-400'}>
-                        {exForm.level?.length ? exForm.level.join(', ') : 'Select levels'}
-                      </span>
-                      <svg className={`w-4 h-4 text-gray-400 transition-transform ${showLevelDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </button>
-                    {showLevelDropdown && (
-                      <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-                        {LEVELS.map(lvl => (
-                          <label key={lvl} className="flex items-center gap-2.5 px-3 py-2 hover:bg-blue-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={(exForm.level || []).includes(lvl)}
-                              onChange={() => toggleLevel(lvl)}
-                              className="w-4 h-4 rounded accent-blue-600"
-                            />
-                            <span className="text-sm text-gray-700">{lvl}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Video */}
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50 transition cursor-pointer">
-                  <span>🎬</span>{exForm.videoName ? 'Change Video' : 'Upload Video'}
-                  <input type="file" accept="video/*" className="hidden"
-                    onChange={e => { const file = e.target.files[0]; if (!file) return; setExForm(f => ({ ...f, videoFile: file, videoName: file.name })); }} />
-                </label>
-                {exForm.videoName && <span className="text-xs text-gray-500 truncate max-w-[160px]">{exForm.videoName}</span>}
-                {exForm.videoName && <button type="button" onClick={() => setExForm(f => ({ ...f, videoFile: null, videoName: '' }))} className="text-red-400 hover:text-red-600 text-xs">Remove</button>}
-              </div>
-
-              {/* Steps */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Steps</label>
-                <div className="space-y-1.5">
-                  {exForm.steps.map((step, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400 w-4 flex-shrink-0">{i + 1}.</span>
-                      <input type="text" value={step}
-                        onChange={e => { const s = [...exForm.steps]; s[i] = e.target.value; setExForm(f => ({ ...f, steps: s })); }}
-                        placeholder={`Step ${i + 1}`}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                      <button type="button" onClick={() => { const s = exForm.steps.filter((_, idx) => idx !== i); setExForm(f => ({ ...f, steps: s.length ? s : [''] })); }}
-                        className="text-red-400 hover:text-red-600"><FaTimes className="w-3 h-3" /></button>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={() => setExForm(f => ({ ...f, steps: [...f.steps, ''] }))}
-                  className="mt-1 text-xs font-medium flex items-center gap-1 hover:opacity-80" style={{ color: '#006CB5' }}>
-                  <FaPlus className="w-2.5 h-2.5" /> Add Step
-                </button>
-              </div>
-
-              {/* Tips */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Tips</label>
-                <div className="space-y-1.5">
-                  {exForm.tips.map((tip, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400 w-4 flex-shrink-0">{i + 1}.</span>
-                      <input type="text" value={tip}
-                        onChange={e => { const t = [...exForm.tips]; t[i] = e.target.value; setExForm(f => ({ ...f, tips: t })); }}
-                        placeholder={`Tip ${i + 1}`}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                      <button type="button" onClick={() => { const t = exForm.tips.filter((_, idx) => idx !== i); setExForm(f => ({ ...f, tips: t.length ? t : [''] })); }}
-                        className="text-red-400 hover:text-red-600"><FaTimes className="w-3 h-3" /></button>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={() => setExForm(f => ({ ...f, tips: [...f.tips, ''] }))}
-                  className="mt-1 text-xs font-medium flex items-center gap-1 hover:opacity-80" style={{ color: '#006CB5' }}>
-                  <FaPlus className="w-2.5 h-2.5" /> Add Tip
-                </button>
-              </div>
-
-              <div className="flex gap-2 pt-1 flex-col">
-                {saving && uploadProgress > 0 && (
-                  <div className="w-full">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>{uploadProgress < 100 ? 'Uploading...' : 'Processing...'}</span>
-                      <span>{uploadProgress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div className="h-1.5 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%`, backgroundColor: '#006CB5' }} />
-                    </div>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <button type="submit" disabled={saving}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-lg text-white text-sm font-semibold shadow transition hover:opacity-90 disabled:opacity-60"
-                    style={{ backgroundColor: '#006CB5' }}>
-                    {saving ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" /> : <FaSave className="w-3.5 h-3.5" />}
-                    {saving ? (uploadProgress > 0 ? `${uploadProgress}%` : 'Saving...') : editingEx ? 'Update' : 'Save'}
-                  </button>
-                  <button type="button" onClick={closeExForm} disabled={saving} className="px-5 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-40">Cancel</button>
-                </div>
               </div>
             </form>
           </div>

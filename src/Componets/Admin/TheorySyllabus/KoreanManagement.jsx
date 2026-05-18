@@ -1,5 +1,37 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye, FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+      <p className="text-xs text-gray-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-gray-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 const getToken = () => localStorage.getItem('token');
@@ -26,12 +58,24 @@ function SectionsTab({ sections, setSections }) {
   const [form, setForm] = useState({ section: '', sectionKorean: '' });
   const [deleteIdx, setDeleteIdx] = useState(null);
   const [viewItem, setViewItem] = useState(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   // Sections are stored in localStorage for now (no separate backend model needed)
   useEffect(() => {
     const saved = localStorage.getItem('korean_sections');
     if (saved) setSections(JSON.parse(saved));
   }, []);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q ? sections.filter(s => s.section?.toLowerCase().includes(q) || s.sectionKorean?.toLowerCase().includes(q)) : sections;
+  }, [sections, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  useEffect(() => { setPage(1); }, [search]);
 
   const save = () => {
     let updated;
@@ -58,11 +102,18 @@ function SectionsTab({ sections, setSections }) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <p className="text-sm text-gray-500">Add sections that appear as headers in the Korean screen.</p>
         <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold" style={{ backgroundColor: '#006CB5' }}>
           <FaPlus /> Add Section
         </button>
+      </div>
+      {/* Search */}
+      <div className="relative mb-4 max-w-xs">
+        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
+        <input type="text" placeholder="Search section or Korean..." value={search} onChange={e => setSearch(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+        {search && <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><FaTimes size={12} /></button>}
       </div>
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
@@ -73,21 +124,25 @@ function SectionsTab({ sections, setSections }) {
             <th className="px-4 py-3 text-right">Actions</th>
           </tr></thead>
           <tbody>
-            {sections.map((s, i) => (
-              <tr key={i} className="border-b border-gray-50 hover:bg-gray-50">
-                <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
-                <td className="px-4 py-3 font-semibold text-gray-800">{s.section}</td>
-                <td className="px-4 py-3 text-gray-500">{s.sectionKorean || '—'}</td>
-                <td className="px-4 py-3 text-right"><div className="flex gap-1.5 justify-end">
-                  <button onClick={() => setViewItem(s)} className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100"><FaEye size={13} /></button>
-                  <button onClick={() => openEdit(i)} className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"><FaEdit size={13} /></button>
-                  <button onClick={() => setDeleteIdx(i)} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><FaTrash size={13} /></button>
-                </div></td>
-              </tr>
-            ))}
+            {paged.map((s, i) => {
+              const realIdx = sections.indexOf(s);
+              return (
+                <tr key={i} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(safePage - 1) * PAGE_SIZE + i + 1}</td>
+                  <td className="px-4 py-3 font-semibold text-gray-800">{s.section}</td>
+                  <td className="px-4 py-3 text-gray-500">{s.sectionKorean || '—'}</td>
+                  <td className="px-4 py-3 text-right"><div className="flex gap-1.5 justify-end">
+                    <button onClick={() => setViewItem(s)} className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100"><FaEye size={13} /></button>
+                    <button onClick={() => openEdit(realIdx)} className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"><FaEdit size={13} /></button>
+                    <button onClick={() => setDeleteIdx(realIdx)} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><FaTrash size={13} /></button>
+                  </div></td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-        {sections.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No sections yet. Add one first.</p>}
+        {filtered.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">{sections.length === 0 ? 'No sections yet. Add one first.' : 'No results match your search.'}</p>}
+        <Pagination page={safePage} totalPages={totalPages} onPage={setPage} />
       </div>
 
       {showModal && (
@@ -155,6 +210,8 @@ function TermsTab({ sections }) {
   const [viewItem, setViewItem] = useState(null);
   const [form, setForm] = useState({ section: '', sectionKorean: '', korean: '', english: '', order: 0 });
   const [filterSection, setFilterSection] = useState('all');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -163,17 +220,26 @@ function TermsTab({ sections }) {
     const res = await fetch(`${API_BASE}/korean`);
     const d = await res.json();
     const data = d.data || [];
-    
-    // Sort by creation date (oldest first - creation order)
     const sortedData = data.sort((a, b) => {
       const dateA = new Date(a.createdAt || a.created_at || 0);
       const dateB = new Date(b.createdAt || b.created_at || 0);
-      return dateA - dateB; // Oldest first (creation order)
+      return dateA - dateB;
     });
-    
     setItems(sortedData);
     setLoading(false);
   };
+
+  const filtered = useMemo(() => {
+    let rows = filterSection === 'all' ? items : items.filter(i => i.section === filterSection);
+    const q = search.trim().toLowerCase();
+    if (q) rows = rows.filter(i => i.korean?.toLowerCase().includes(q) || i.english?.toLowerCase().includes(q) || i.section?.toLowerCase().includes(q));
+    return rows;
+  }, [items, filterSection, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  useEffect(() => { setPage(1); }, [search, filterSection]);
 
   const openAdd = () => {
     setEditing(null);
@@ -205,13 +271,19 @@ function TermsTab({ sections }) {
     fetchItems();
   };
 
-  const filtered = filterSection === 'all' ? items : items.filter(i => i.section === filterSection);
-
   return (
     <div>
       <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
         <p className="text-sm text-gray-500">Manage Korean terms grouped by section.</p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Search */}
+          <div className="relative">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
+            <input type="text" placeholder="Search Korean or English..." value={search} onChange={e => setSearch(e.target.value)}
+              className="border border-gray-300 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 w-52" />
+            {search && <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><FaTimes size={12} /></button>}
+          </div>
+          {/* Section filter */}
           <select value={filterSection} onChange={e => setFilterSection(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700">
             <option value="all">All ({items.length})</option>
             {sections.map(s => <option key={s.section} value={s.section}>{s.section} ({items.filter(i => i.section === s.section).length})</option>)}
@@ -233,9 +305,9 @@ function TermsTab({ sections }) {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr></thead>
             <tbody>
-              {filtered.map((item, i) => (
+              {paged.map((item, i) => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(safePage - 1) * PAGE_SIZE + i + 1}</td>
                   <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600">{item.section}</span></td>
                   <td className="px-4 py-3 font-semibold text-gray-800">{item.korean}</td>
                   <td className="px-4 py-3 text-gray-500">{item.english}</td>
@@ -248,7 +320,8 @@ function TermsTab({ sections }) {
               ))}
             </tbody>
           </table>
-          {filtered.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No terms yet.</p>}
+          {filtered.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">{items.length === 0 ? 'No terms yet.' : 'No results match your search.'}</p>}
+          <Pagination page={safePage} totalPages={totalPages} onPage={setPage} />
         </div>
       )}
 

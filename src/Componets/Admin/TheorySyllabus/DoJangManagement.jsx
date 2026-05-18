@@ -96,6 +96,15 @@ export default function DoJangManagement() {
     fetchItems();
   };
 
+  const filteredItems = items.filter(item =>
+    search.trim() === '' ||
+    item.title?.toLowerCase().includes(search.trim().toLowerCase()) ||
+    item.subtitle?.toLowerCase().includes(search.trim().toLowerCase())
+  );
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const pageSafe = Math.min(currentPage, totalPages);
+  const pagedItems = filteredItems.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -110,6 +119,19 @@ export default function DoJangManagement() {
 
       {loading ? <p className="text-gray-400 text-center py-10 text-sm">Loading...</p> : (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          {/* Search */}
+          <div className="px-4 pt-4 pb-3 border-b border-gray-100">
+            <div className="relative max-w-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              </span>
+              <input type="text" value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+                placeholder="Search by title or subtitle..."
+                className="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+          </div>
           <table className="w-full text-sm">
             <thead><tr className="text-left text-gray-500 text-xs uppercase bg-gray-50 border-b">
               <th className="px-4 py-3">#</th>
@@ -120,9 +142,9 @@ export default function DoJangManagement() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr></thead>
             <tbody>
-              {items.map((item, i) => (
+              {pagedItems.map((item, i) => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(pageSafe - 1) * PAGE_SIZE + i + 1}</td>
                   <td className="px-4 py-3 font-semibold text-gray-800">{item.title || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{item.subtitle || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{(item.headingPointGroups || []).length}</td>
@@ -140,7 +162,23 @@ export default function DoJangManagement() {
               ))}
             </tbody>
           </table>
-          {items.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No sections yet.</p>}
+          {filteredItems.length === 0 && (
+            <p className="text-gray-400 text-center py-8 text-sm">{search ? 'No sections match your search.' : 'No sections yet.'}</p>
+          )}
+          {filteredItems.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs text-gray-500">Showing {(pageSafe - 1) * PAGE_SIZE + 1}–{Math.min(pageSafe * PAGE_SIZE, filteredItems.length)} of {filteredItems.length}</span>
+              {totalPages > 1 && (
+                <div className="flex gap-1 items-center">
+                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={pageSafe === 1} className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40" style={{ borderColor: '#006CB5', color: '#006CB5' }}>Previous</button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(pg => (
+                    <button key={pg} onClick={() => setCurrentPage(pg)} className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition" style={pg === pageSafe ? { backgroundColor: '#006CB5', color: '#fff', borderColor: '#006CB5' } : { borderColor: '#006CB5', color: '#006CB5' }}>{pg}</button>
+                  ))}
+                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages} className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40" style={{ borderColor: '#006CB5', color: '#006CB5' }}>Next</button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

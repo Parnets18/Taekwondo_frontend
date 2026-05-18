@@ -1,5 +1,37 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaArrowUp, FaArrowDown, FaEye } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaArrowUp, FaArrowDown, FaEye, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+      <p className="text-xs text-gray-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-gray-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://cwtakarnataka.com';
@@ -34,6 +66,11 @@ export default function PracticeSuitManagement() {
   const [headingPointGroups, setHeadingPointGroups] = useState([{ heading: '', points: [''] }]);
   const [imgFiles, setImgFiles] = useState([]);
   const [imgPreviews, setImgPreviews] = useState([]);
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paged = useMemo(() => items.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE), [items, safePage]);
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -117,9 +154,9 @@ export default function PracticeSuitManagement() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr></thead>
             <tbody>
-              {items.map((item, i) => (
+              {paged.map((item, i) => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(safePage - 1) * PAGE_SIZE + i + 1}</td>
                   <td className="px-4 py-3 font-semibold text-gray-800">{item.title || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{item.subtitle || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{(item.headingPointGroups || []).length}</td>
@@ -138,6 +175,7 @@ export default function PracticeSuitManagement() {
             </tbody>
           </table>
           {items.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No sections yet.</p>}
+          <Pagination page={safePage} totalPages={totalPages} onPage={setPage} />
         </div>
       )}
 

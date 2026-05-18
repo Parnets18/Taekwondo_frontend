@@ -360,6 +360,23 @@ export default function TechniqueDivisionManagement() {
     upd('sections', arr);
   };
 
+  // ── Search + filter + pagination ──────────────────────────
+  const PAGE_SIZE = 10;
+  const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState('All');
+  const [page, setPage] = useState(1);
+
+  const filteredItems = items.filter(item => {
+    const matchCat = filterCategory === 'All' || item.category === filterCategory;
+    const matchSearch = search.trim() === '' ||
+      item.title?.toLowerCase().includes(search.trim().toLowerCase()) ||
+      item.category?.toLowerCase().includes(search.trim().toLowerCase());
+    return matchCat && matchSearch;
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages);
+  const pagedItems = filteredItems.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+
   return (
     <div>
       {/* Header */}
@@ -424,6 +441,31 @@ export default function TechniqueDivisionManagement() {
         <p className="text-gray-400 text-center py-10 text-sm">Loading...</p>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          {/* Search + Category filter */}
+          <div className="px-4 pt-4 pb-3 border-b border-gray-100 flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                placeholder="Search by title or category..."
+                className="border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-64"
+              />
+            </div>
+            <select
+              value={filterCategory}
+              onChange={e => { setFilterCategory(e.target.value); setPage(1); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <option value="All">All Categories</option>
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100 bg-gray-50">
@@ -435,9 +477,9 @@ export default function TechniqueDivisionManagement() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item, idx) => (
+              {pagedItems.map((item, idx) => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400 text-xs">{idx + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs">{(pageSafe - 1) * PAGE_SIZE + idx + 1}</td>
                   <td className="px-4 py-3">
                     <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">{item.category}</span>
                   </td>
@@ -458,7 +500,37 @@ export default function TechniqueDivisionManagement() {
               ))}
             </tbody>
           </table>
-          {items.length === 0 && <p className="text-gray-400 text-center py-8 text-sm">No items yet.</p>}
+          {filteredItems.length === 0 && (
+            <p className="text-gray-400 text-center py-8 text-sm">
+              {search || filterCategory !== 'All' ? 'No items match your search/filter.' : 'No items yet.'}
+            </p>
+          )}
+          {filteredItems.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs text-gray-500">
+                Showing {filteredItems.length === 0 ? 0 : (pageSafe - 1) * PAGE_SIZE + 1}–{Math.min(pageSafe * PAGE_SIZE, filteredItems.length)} of {filteredItems.length}
+              </span>
+              {totalPages > 1 && (
+                <div className="flex gap-1 items-center">
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={pageSafe === 1}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40"
+                    style={{ borderColor: '#006CB5', color: '#006CB5' }}>Previous</button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(pg => (
+                    <button key={pg} onClick={() => setPage(pg)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition"
+                      style={pg === pageSafe
+                        ? { backgroundColor: '#006CB5', color: '#fff', borderColor: '#006CB5' }
+                        : { borderColor: '#006CB5', color: '#006CB5' }}>
+                      {pg}
+                    </button>
+                  ))}
+                  <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-40"
+                    style={{ borderColor: '#006CB5', color: '#006CB5' }}>Next</button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

@@ -66,6 +66,10 @@ function AttendanceTracking() {
   const [studentSuggestions, setStudentSuggestions] = useState([]);
   const [showStudentSuggestions, setShowStudentSuggestions] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "https://cwtakarnataka.com/api/api";
 
@@ -200,6 +204,8 @@ function AttendanceTracking() {
     if (authToken) {
       Promise.all([fetchAttendance(), fetchStudents(), fetchStatistics()]);
     }
+    // Reset to first page when filters change
+    setCurrentPage(1);
   }, [
     authToken,
     viewMode,
@@ -587,6 +593,25 @@ function AttendanceTracking() {
     return matchesSearch;
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredAttendance.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAttendance = filteredAttendance.slice(startIndex, endIndex);
+
+  // Handle page changes
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Handle items per page change
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(parseInt(e.target.value));
+    setCurrentPage(1); // Reset to first page
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -845,7 +870,7 @@ function AttendanceTracking() {
                 : `Month: ${new Date(selectedMonth + "-01").toLocaleDateString("en-US", { year: "numeric", month: "long" })}`}
           </h3>
           <p className="text-sm text-slate-600 mt-1">
-            Showing {filteredAttendance.length} record
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredAttendance.length)} of {filteredAttendance.length} record
             {filteredAttendance.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -878,7 +903,7 @@ function AttendanceTracking() {
               </tr>
             </thead>
             <tbody>
-              {filteredAttendance.length === 0 ? (
+              {paginatedAttendance.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="py-12 text-center">
                     <FaCalendarCheck className="w-12 h-12 mx-auto mb-3 text-slate-300" />
@@ -891,7 +916,7 @@ function AttendanceTracking() {
                   </td>
                 </tr>
               ) : (
-                filteredAttendance.map((record) => (
+                paginatedAttendance.map((record) => (
                   <tr
                     key={record._id}
                     className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
@@ -977,6 +1002,81 @@ function AttendanceTracking() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {filteredAttendance.length > 0 && (
+          <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                Items per page:
+              </label>
+              <select
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                className="px-3 py-1 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={30}>30</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                First
+              </button>
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === page
+                          ? "bg-blue-500 text-white"
+                          : "border border-slate-300 hover:bg-slate-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+              <button
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Last
+              </button>
+            </div>
+
+            <div className="text-sm text-slate-600 font-medium">
+              Page {currentPage} of {totalPages}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mark Attendance Modal */}

@@ -132,9 +132,8 @@ export default function BeltsSyllabusManagement() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Search, filter, pagination
+  // Search & pagination
   const [search, setSearch] = useState('');
-  const [filterPatterns, setFilterPatterns] = useState('all'); // 'all' | 'has' | 'none'
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
 
@@ -147,17 +146,15 @@ export default function BeltsSyllabusManagement() {
       const q = search.trim().toLowerCase();
       result = result.filter(i => (i.beltName || '').toLowerCase().includes(q));
     }
-    if (filterPatterns === 'has') result = result.filter(i => (i.patterns?.length || 0) > 0);
-    if (filterPatterns === 'none') result = result.filter(i => (i.patterns?.length || 0) === 0);
     return result;
-  }, [items, search, filterPatterns]);
+  }, [items, search]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
   const pagedItems = filteredItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  // Reset to page 1 when search/filter changes
-  useEffect(() => { setCurrentPage(1); }, [search, filterPatterns]);
+  // Reset to page 1 when search changes
+  useEffect(() => { setCurrentPage(1); }, [search]);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -270,8 +267,8 @@ export default function BeltsSyllabusManagement() {
   const removeSectionPoint = (si, pi) => setForm(f => { const arr = [...f.extraSections]; arr[si].points = arr[si].points.filter((_, idx) => idx !== pi); return { ...f, extraSections: arr }; });
   const updateSectionPoint = (si, pi, val) => setForm(f => { const arr = [...f.extraSections]; arr[si].points[pi] = val; return { ...f, extraSections: arr }; });
 
-  const usedNames = items.map(i => i.beltName);
-  const availableNames = editing ? beltNames : beltNames.filter(n => !usedNames.includes(n.label));
+  const usedNames = items.filter(i => !editing || i._id !== editing._id).map(i => i.beltName);
+  const availableNames = beltNames.filter(n => !usedNames.includes(n.label));
 
   return (
     <div>
@@ -298,7 +295,7 @@ export default function BeltsSyllabusManagement() {
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
+      {/* Search Bar */}
       <div className="flex flex-wrap gap-3 mb-4">
         <div className="relative flex-1 min-w-[200px]">
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
@@ -315,15 +312,6 @@ export default function BeltsSyllabusManagement() {
             </button>
           )}
         </div>
-        <select
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          value={filterPatterns}
-          onChange={e => setFilterPatterns(e.target.value)}
-        >
-          <option value="all">All Belts</option>
-          <option value="has">Has Patterns</option>
-          <option value="none">No Patterns</option>
-        </select>
       </div>
 
       {/* Table */}
@@ -450,7 +438,7 @@ export default function BeltsSyllabusManagement() {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   value={form.beltName}
                   onChange={e => setForm(f => ({ ...f, beltName: e.target.value }))}
-                  disabled={!!editing}
+
                 >
                   <option value="">Select belt level...</option>
                   {availableNames.map(n => (

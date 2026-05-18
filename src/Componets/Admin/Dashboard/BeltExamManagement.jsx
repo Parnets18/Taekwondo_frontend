@@ -1,4 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-slate-200 bg-slate-50">
+      <p className="text-xs text-slate-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-slate-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function BeltExamManagement() {
   const [beltExams, setBeltExams] = useState([]);
@@ -9,6 +42,7 @@ function BeltExamManagement() {
     examStatus: "",
     search: "",
   });
+  const [page, setPage] = useState(1);
   const [stats, setStats] = useState({
     totalApplications: 0,
     pendingApplications: 0,
@@ -78,22 +112,29 @@ function BeltExamManagement() {
   }, []);
 
   // Filter belt exams
-  const filteredExams = beltExams.filter((exam) => {
+  const filteredExams = useMemo(() => beltExams.filter((exam) => {
     const matchesStatus =
       !filters.examStatus || exam.examStatus === filters.examStatus;
     const matchesSearch =
       !filters.search ||
       (exam.candidateName &&
-        exam.candidateName
-          .toLowerCase()
-          .includes(filters.search.toLowerCase())) ||
+        exam.candidateName.toLowerCase().includes(filters.search.toLowerCase())) ||
       (exam.gmail &&
         exam.gmail.toLowerCase().includes(filters.search.toLowerCase())) ||
       (exam.phoneNumber &&
         exam.phoneNumber.toLowerCase().includes(filters.search.toLowerCase()));
-
     return matchesStatus && matchesSearch;
-  });
+  }), [beltExams, filters.examStatus, filters.search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredExams.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedExams = useMemo(
+    () => filteredExams.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filteredExams, safePage]
+  );
+
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [filters.examStatus, filters.search]);
 
   const viewExamDetails = (examId) => {
     const exam = beltExams.find((exam) => exam._id === examId);
@@ -380,7 +421,7 @@ function BeltExamManagement() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
-                    {filteredExams.length === 0 ? (
+                    {pagedExams.length === 0 ? (
                       <tr>
                         <td
                           colSpan="8"
@@ -390,7 +431,7 @@ function BeltExamManagement() {
                         </td>
                       </tr>
                     ) : (
-                      filteredExams.map((exam) => (
+                      pagedExams.map((exam) => (
                         <tr
                           key={exam._id}
                           className="hover:bg-slate-50 transition-colors"
@@ -502,6 +543,7 @@ function BeltExamManagement() {
               </div>
             </>
           )}
+          <Pagination page={safePage} totalPages={totalPages} onPage={setPage} />
         </div>
 
         {/* Belt Exam Details Modal */}

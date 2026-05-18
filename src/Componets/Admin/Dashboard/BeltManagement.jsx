@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   FaMedal,
   FaPlus,
@@ -11,7 +11,41 @@ import {
   FaCheckCircle,
   FaEye,
   FaDownload,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-slate-200 bg-slate-50">
+      <p className="text-xs text-slate-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-slate-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function BeltManagement() {
   const [activeTab, setActiveTab] = useState("levels");
@@ -110,6 +144,20 @@ function BeltManagement() {
   const [showEditPromotionModal, setShowEditPromotionModal] = useState(false);
   const [showViewTestModal, setShowViewTestModal] = useState(false);
   const [showEditTestModal, setShowEditTestModal] = useState(false);
+
+  // Pagination state per tab
+  const [levelsPage, setLevelsPage] = useState(1);
+  const [promotionsPage, setPromotionsPage] = useState(1);
+  const [testsPage, setTestsPage] = useState(1);
+
+  const levelsTotalPages = Math.max(1, Math.ceil(beltLevels.length / PAGE_SIZE));
+  const levelsPagedData = useMemo(() => beltLevels.slice((Math.min(levelsPage, levelsTotalPages) - 1) * PAGE_SIZE, Math.min(levelsPage, levelsTotalPages) * PAGE_SIZE), [beltLevels, levelsPage, levelsTotalPages]);
+
+  const promotionsTotalPages = Math.max(1, Math.ceil(recentPromotions.length / PAGE_SIZE));
+  const promotionsPagedData = useMemo(() => recentPromotions.slice((Math.min(promotionsPage, promotionsTotalPages) - 1) * PAGE_SIZE, Math.min(promotionsPage, promotionsTotalPages) * PAGE_SIZE), [recentPromotions, promotionsPage, promotionsTotalPages]);
+
+  const testsTotalPages = Math.max(1, Math.ceil(upcomingTests.length / PAGE_SIZE));
+  const testsPagedData = useMemo(() => upcomingTests.slice((Math.min(testsPage, testsTotalPages) - 1) * PAGE_SIZE, Math.min(testsPage, testsTotalPages) * PAGE_SIZE), [upcomingTests, testsPage, testsTotalPages]);
 
   // API base URL - using direct backend URL to bypass proxy issues
   const API_BASE_URL =
@@ -1422,7 +1470,7 @@ function BeltManagement() {
                 </td>
               </tr>
             ) : (
-              beltLevels.map((belt) => (
+              levelsPagedData.map((belt) => (
                 <tr
                   key={belt._id || belt.id}
                   className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
@@ -1502,6 +1550,7 @@ function BeltManagement() {
             )}
           </tbody>
         </table>
+        <Pagination page={Math.min(levelsPage, levelsTotalPages)} totalPages={levelsTotalPages} onPage={setLevelsPage} />
       </div>
     </div>
   );
@@ -1548,7 +1597,7 @@ function BeltManagement() {
               </tr>
             </thead>
             <tbody>
-              {recentPromotions.slice(0, 5).map((promotion) => (
+              {promotionsPagedData.map((promotion) => (
                 <tr
                   key={promotion._id || promotion.id}
                   className="border-b border-slate-100 hover:bg-slate-50"
@@ -1626,6 +1675,7 @@ function BeltManagement() {
               ))}
             </tbody>
           </table>
+          <Pagination page={Math.min(promotionsPage, promotionsTotalPages)} totalPages={promotionsTotalPages} onPage={setPromotionsPage} />
         </div>
       </div>
     </div>
@@ -1685,7 +1735,7 @@ function BeltManagement() {
                   </td>
                 </tr>
               ) : (
-                upcomingTests.map((test) => (
+                testsPagedData.map((test) => (
                   <tr
                     key={test._id || test.id}
                     className="border-b border-slate-100 hover:bg-slate-50"
@@ -1778,6 +1828,7 @@ function BeltManagement() {
               )}
             </tbody>
           </table>
+          <Pagination page={Math.min(testsPage, testsTotalPages)} totalPages={testsTotalPages} onPage={setTestsPage} />
         </div>
       </div>
     </div>

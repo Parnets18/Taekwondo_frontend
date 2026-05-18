@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye, FaTags } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaEye, FaTags, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cwtakarnataka.com/api';
 const getToken = () => localStorage.getItem('token');
@@ -7,6 +7,7 @@ const jsonH = () => ({ 'Content-Type': 'application/json', Authorization: `Beare
 
 const DEFAULT_BELTS = ['10th Kup','9th Kup','8th Kup','7th Kup','6th Kup','5th Kup','4th Kup','3rd Kup','2nd Kup','1st Kup','1st Dan'];
 const STORAGE_KEY = 'theory_belt_levels';
+const PAGE_SIZE = 10;
 
 const loadBelts = () => {
   try {
@@ -15,7 +16,7 @@ const loadBelts = () => {
   } catch { return DEFAULT_BELTS; }
 };
 
-const EMPTY_FORM = { beltLevel: '', question: '', options: ['','','',''], answer: '', order: 0, isActive: true };
+const EMPTY_FORM = { beltLevel: [], question: '', options: ['','','',''], answer: '', order: 0, isActive: true };
 
 function ConfirmModal({ onConfirm, onCancel }) {
   return (
@@ -31,6 +32,41 @@ function ConfirmModal({ onConfirm, onCancel }) {
   );
 }
 
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) pages.push(i);
+  return (
+    <div className="flex items-center justify-end gap-1 px-4 py-3 border-t border-gray-100">
+      <button
+        onClick={() => onPage(page - 1)}
+        disabled={page === 1}
+        className="p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        <FaChevronLeft size={12} />
+      </button>
+      {pages.map(p => (
+        <button
+          key={p}
+          onClick={() => onPage(p)}
+          className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
+            p === page ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          {p}
+        </button>
+      ))}
+      <button
+        onClick={() => onPage(page + 1)}
+        disabled={page === totalPages}
+        className="p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        <FaChevronRight size={12} />
+      </button>
+    </div>
+  );
+}
+
 export default function TheoryQuestionsManagement() {
   const [beltLevels, setBeltLevels] = useState(loadBelts);
   const [items, setItems] = useState([]);
@@ -39,10 +75,17 @@ export default function TheoryQuestionsManagement() {
   const [editing, setEditing] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [viewItem, setViewItem] = useState(null);
-  const [form, setForm] = useState({ ...EMPTY_FORM, beltLevel: loadBelts()[0] || '' });
+  const [form, setForm] = useState({ ...EMPTY_FORM, beltLevel: [] });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [searchBelt, setSearchBelt] = useState('');
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState('All');
+
+  // Per-tab search, belt filter, and page
+  const [tabSearch, setTabSearch] = useState({});
+  const [tabBelt, setTabBelt] = useState({});
+  const [tabPage, setTabPage] = useState({});
 
   // Belt manager state
   const [showBeltModal, setShowBeltModal] = useState(false);
@@ -50,6 +93,25 @@ export default function TheoryQuestionsManagement() {
   const [beltError, setBeltError] = useState('');
 
   useEffect(() => { fetchItems(); }, []);
+
+  // Reset page when search/belt changes for a tab
+  const getTabSearch = (tab) => tabSearch[tab] || '';
+  const getTabBelt = (tab) => tabBelt[tab] || 'All';
+  const getTabPage = (tab) => tabPage[tab] || 1;
+
+  const setTabSearchVal = (tab, val) => {
+    setTabSearch(prev => ({ ...prev, [tab]: val }));
+    setTabPage(prev => ({ ...prev, [tab]: 1 }));
+  };
+  const setTabBeltVal = (tab, val) => {
+    setTabBelt(prev => ({ ...prev, [tab]: val }));
+    setTabPage(prev => ({ ...prev, [tab]: 1 }));
+  };
+  const setTabPageVal = (tab, val) => {
+    setTabPage(prev => ({ ...prev, [tab]: val }));
+  };
+
+  const tabs = useMemo(() => ['All', ...beltLevels], [beltLevels]);
 
   const saveBelts = (updated) => {
     setBeltLevels(updated);
@@ -67,6 +129,7 @@ export default function TheoryQuestionsManagement() {
 
   const removeBelt = (belt) => {
     saveBelts(beltLevels.filter(b => b !== belt));
+    if (activeTab === belt) setActiveTab('All');
   };
 
   const fetchItems = async () => {
@@ -83,7 +146,8 @@ export default function TheoryQuestionsManagement() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ ...EMPTY_FORM, beltLevel: beltLevels[0] || '', order: items.length });
+    const defaultBelt = activeTab !== 'All' ? [activeTab] : [];
+    setForm({ ...EMPTY_FORM, beltLevel: defaultBelt, order: items.length });
     setError('');
     setShowModal(true);
   };
@@ -91,7 +155,7 @@ export default function TheoryQuestionsManagement() {
   const openEdit = (item) => {
     setEditing(item);
     setForm({
-      beltLevel: item.beltLevel,
+      beltLevel: Array.isArray(item.beltLevel) ? item.beltLevel : [item.beltLevel],
       question: item.question,
       options: [...item.options],
       answer: item.answer,
@@ -109,6 +173,7 @@ export default function TheoryQuestionsManagement() {
   };
 
   const validate = () => {
+    if (!form.beltLevel || form.beltLevel.length === 0) return 'Select at least one belt level';
     if (!form.question.trim()) return 'Question is required';
     if (form.options.some(o => !o.trim())) return 'All 4 options are required';
     if (!form.answer.trim()) return 'Correct answer is required';
@@ -133,9 +198,41 @@ export default function TheoryQuestionsManagement() {
     fetchItems();
   };
 
-  const filtered = searchBelt.trim()
-    ? items.filter(i => i.beltLevel.toLowerCase().includes(searchBelt.toLowerCase()))
-    : items;
+  // Compute filtered + paginated rows for the active tab
+  const { pageRows, totalPages, totalFiltered } = useMemo(() => {
+    const search = getTabSearch(activeTab).toLowerCase();
+    const belt = getTabBelt(activeTab);
+    const page = getTabPage(activeTab);
+
+    let rows = activeTab === 'All'
+      ? items
+      : items.filter(i => (Array.isArray(i.beltLevel) ? i.beltLevel : [i.beltLevel]).includes(activeTab));
+    if (search) rows = rows.filter(i =>
+      i.question.toLowerCase().includes(search) ||
+      i.answer.toLowerCase().includes(search) ||
+      (Array.isArray(i.beltLevel) ? i.beltLevel.join(' ') : i.beltLevel).toLowerCase().includes(search)
+    );
+    if (belt !== 'All') rows = rows.filter(i =>
+      (Array.isArray(i.beltLevel) ? i.beltLevel : [i.beltLevel]).includes(belt)
+    );
+
+    const total = rows.length;
+    const totalPg = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const safePage = Math.min(page, totalPg);
+    const start = (safePage - 1) * PAGE_SIZE;
+    return { pageRows: rows.slice(start, start + PAGE_SIZE), totalPages: totalPg, totalFiltered: total };
+  }, [items, activeTab, tabSearch, tabBelt, tabPage]);
+
+  // Count per belt tab (unfiltered)
+  const beltCount = useMemo(() => {
+    const map = {};
+    items.forEach(i => {
+      const belts = Array.isArray(i.beltLevel) ? i.beltLevel : [i.beltLevel];
+      belts.forEach(b => { map[b] = (map[b] || 0) + 1; });
+    });
+    return map;
+  }, [items]);
+
 
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto">
@@ -146,45 +243,86 @@ export default function TheoryQuestionsManagement() {
           <p className="text-gray-500 text-sm mt-1">{items.length} total questions across all belt levels</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Search */}
-          <div className="relative">
-            <input
-              type="text"
-              value={searchBelt}
-              onChange={e => setSearchBelt(e.target.value)}
-              placeholder="Search belt level..."
-              className="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-44"
-            />
-            <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-            </svg>
-            {searchBelt && (
-              <button onClick={() => setSearchBelt('')} className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600">
-                <FaTimes size={12} />
-              </button>
-            )}
-          </div>
-          {/* Manage Belts */}
           <button
             onClick={() => { setShowBeltModal(true); setBeltError(''); setNewBeltName(''); }}
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
           >
             <FaTags /> Manage Belts
           </button>
-          {/* Add Question */}
           <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
             <FaPlus /> Add Question
           </button>
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 overflow-x-auto pb-1 mb-4 scrollbar-thin">
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              activeTab === tab
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {tab}
+            <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+              activeTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
+            }`}>
+              {tab === 'All' ? items.length : (beltCount[tab] || 0)}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Per-tab search + status filter */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        {/* Search */}
+        <div className="relative flex-1 max-w-xs">
+          <input
+            type="text"
+            value={getTabSearch(activeTab)}
+            onChange={e => setTabSearchVal(activeTab, e.target.value)}
+            placeholder="Search question or answer..."
+            className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          {getTabSearch(activeTab) && (
+            <button onClick={() => setTabSearchVal(activeTab, '')} className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600">
+              <FaTimes size={12} />
+            </button>
+          )}
+        </div>
+
+        {/* Belt dropdown */}
+        <select
+          value={getTabBelt(activeTab)}
+          onChange={e => setTabBeltVal(activeTab, e.target.value)}
+          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+        >
+          <option value="All">All Belts</option>
+          {beltLevels.map(b => (
+            <option key={b} value={b}>{b}</option>
+          ))}
+        </select>
+
+        {/* Result count */}
+        <span className="self-center text-sm text-gray-400 ml-auto">
+          {totalFiltered} result{totalFiltered !== 1 ? 's' : ''}
+        </span>
+      </div>
+
       {/* Table */}
       {loading ? (
         <div className="text-center py-16 text-gray-400">Loading...</div>
-      ) : filtered.length === 0 ? (
+      ) : pageRows.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-lg font-medium">No questions yet</p>
-          <p className="text-sm mt-1">Click "Add Question" to get started</p>
+          <p className="text-lg font-medium">No questions found</p>
+          <p className="text-sm mt-1">Try adjusting your search or filter</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -201,31 +339,43 @@ export default function TheoryQuestionsManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filtered.map((item, idx) => (
-                  <tr key={item._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold">{item.beltLevel}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-800 max-w-xs truncate">{item.question}</td>
-                    <td className="px-4 py-3 text-green-700 font-medium">{item.answer}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                        {item.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => setViewItem(item)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="View"><FaEye /></button>
-                        <button onClick={() => openEdit(item)} className="p-1.5 text-gray-400 hover:text-yellow-600 transition-colors" title="Edit"><FaEdit /></button>
-                        <button onClick={() => setDeleteId(item._id)} className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete"><FaTrash /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {pageRows.map((item, idx) => {
+                  const globalIdx = (getTabPage(activeTab) - 1) * PAGE_SIZE + idx + 1;
+                  return (
+                    <tr key={item._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-gray-400">{globalIdx}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {(Array.isArray(item.beltLevel) ? item.beltLevel : [item.beltLevel]).map(b => (
+                            <span key={b} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold">{b}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-gray-800 max-w-xs truncate">{item.question}</td>
+                      <td className="px-4 py-3 text-green-700 font-medium">{item.answer}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                          {item.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => setViewItem(item)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="View"><FaEye /></button>
+                          <button onClick={() => openEdit(item)} className="p-1.5 text-gray-400 hover:text-yellow-600 transition-colors" title="Edit"><FaEdit /></button>
+                          <button onClick={() => setDeleteId(item._id)} className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete"><FaTrash /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
+          <Pagination
+            page={getTabPage(activeTab)}
+            totalPages={totalPages}
+            onPage={(p) => setTabPageVal(activeTab, p)}
+          />
         </div>
       )}
 
@@ -238,7 +388,6 @@ export default function TheoryQuestionsManagement() {
               <button onClick={() => setShowBeltModal(false)} className="text-gray-400 hover:text-gray-600"><FaTimes /></button>
             </div>
             <div className="p-5 space-y-4">
-              {/* Add new belt */}
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -253,17 +402,11 @@ export default function TheoryQuestionsManagement() {
                 </button>
               </div>
               {beltError && <p className="text-red-500 text-xs">{beltError}</p>}
-
-              {/* Belt list */}
               <div className="space-y-2 max-h-72 overflow-y-auto">
                 {beltLevels.map(belt => (
                   <div key={belt} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
                     <span className="text-sm font-medium text-gray-700">{belt}</span>
-                    <button
-                      onClick={() => removeBelt(belt)}
-                      className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                      title="Remove belt"
-                    >
+                    <button onClick={() => removeBelt(belt)} className="text-gray-400 hover:text-red-500 transition-colors p-1" title="Remove belt">
                       <FaTrash size={12} />
                     </button>
                   </div>
@@ -292,11 +435,40 @@ export default function TheoryQuestionsManagement() {
               {error && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{error}</p>}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Belt Level</label>
-                <select value={form.beltLevel} onChange={e => setForm(f => ({ ...f, beltLevel: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  {beltLevels.map(b => <option key={b}>{b}</option>)}
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Belt Level <span className="text-gray-400 font-normal text-xs">(select one or more)</span>
+                </label>
+                <div className="border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-1.5">
+                  {beltLevels.map(b => (
+                    <label key={b} className="flex items-center gap-2.5 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded-lg">
+                      <input
+                        type="checkbox"
+                        checked={form.beltLevel.includes(b)}
+                        onChange={e => {
+                          setForm(f => ({
+                            ...f,
+                            beltLevel: e.target.checked
+                              ? [...f.beltLevel, b]
+                              : f.beltLevel.filter(x => x !== b)
+                          }));
+                        }}
+                        className="w-4 h-4 accent-blue-600 flex-shrink-0"
+                      />
+                      <span className="text-sm text-gray-700">{b}</span>
+                    </label>
+                  ))}
+                </div>
+                {form.beltLevel.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {form.beltLevel.map(b => (
+                      <span key={b} className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                        {b}
+                        <button type="button" onClick={() => setForm(f => ({ ...f, beltLevel: f.beltLevel.filter(x => x !== b) }))}
+                          className="hover:text-red-500 ml-0.5">×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -356,7 +528,11 @@ export default function TheoryQuestionsManagement() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">{viewItem.beltLevel}</span>
+              <span className="flex flex-wrap gap-1">
+                {(Array.isArray(viewItem.beltLevel) ? viewItem.beltLevel : [viewItem.beltLevel]).map(b => (
+                  <span key={b} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">{b}</span>
+                ))}
+              </span>
               <button onClick={() => setViewItem(null)} className="text-gray-400 hover:text-gray-600"><FaTimes /></button>
             </div>
             <div className="p-5 space-y-4">

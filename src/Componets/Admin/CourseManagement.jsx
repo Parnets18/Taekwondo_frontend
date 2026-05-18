@@ -1,5 +1,37 @@
 import { useState, useEffect } from "react";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+const PAGE_SIZE = 10;
+
+function Pagination({ page, totalPages, onPage }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
+      <p className="text-xs text-gray-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(page - 1)} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronLeft size={11} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i - 1] > 1) acc.push('...'); acc.push(p); return acc; }, [])
+          .map((p, i) => p === '...'
+            ? <span key={`e${i}`} className="px-1 text-gray-400 text-xs">…</span>
+            : <button key={p} onClick={() => onPage(p)}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold border ${page === p ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                style={page === p ? { backgroundColor: '#006CB5' } : {}}>
+                {p}
+              </button>
+          )}
+        <button onClick={() => onPage(page + 1)} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed">
+          <FaChevronRight size={11} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function CourseManagement() {
   const [courses, setCourses] = useState([]);
@@ -10,6 +42,8 @@ function CourseManagement() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [courseForm, setCourseForm] = useState({
     title: "",
     ageGroup: "",
@@ -60,6 +94,11 @@ function CourseManagement() {
 
       if (data.status === "success") {
         setCourses(data.data.courses);
+        // Capture pagination metadata if the API returns it
+        const pagination = data.data.pagination || data.pagination || {};
+        const total = pagination.total || pagination.totalCount || data.data.total || data.data.courses.length;
+        setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
+        setCurrentPage(page);
       }
     } catch (error) {
       console.error("Error fetching courses:", error);
@@ -230,8 +269,13 @@ function CourseManagement() {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
     fetchCourses(1, searchTerm, selectedCategory);
-  }, []);
+  }, [searchTerm, selectedCategory]);
+
+  const handlePageChange = (p) => {
+    fetchCourses(p, searchTerm, selectedCategory);
+  };
 
   if (loading) {
     return (
@@ -515,6 +559,7 @@ function CourseManagement() {
             </tbody>
           </table>
         </div>
+        <Pagination page={currentPage} totalPages={totalPages} onPage={handlePageChange} />
       </div>
 
       {/* Add Course Modal */}
