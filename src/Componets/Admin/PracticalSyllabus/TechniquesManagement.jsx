@@ -670,9 +670,6 @@ export default function TechniquesManagement() {
                 </tbody>
               </table>
               <div className="px-4 pb-4">
-                <div className="text-xs text-gray-500 mt-3">
-                  Showing {filteredCategories.length === 0 ? 0 : (catPage - 1) * PAGE_SIZE + 1}–{Math.min(catPage * PAGE_SIZE, filteredCategories.length)} of {filteredCategories.length}
-                </div>
                 <Pagination page={catPage} total={filteredCategories.length} onPageChange={setCatPage} />
               </div>
             </>
@@ -783,9 +780,6 @@ export default function TechniquesManagement() {
                 </tbody>
               </table>
               <div className="px-4 pb-4">
-                <div className="text-xs text-gray-500 mt-3">
-                  Showing {filteredWarmup.length === 0 ? 0 : (warmupPage - 1) * PAGE_SIZE + 1}–{Math.min(warmupPage * PAGE_SIZE, filteredWarmup.length)} of {filteredWarmup.length}
-                </div>
                 <Pagination page={warmupPage} total={filteredWarmup.length} onPageChange={setWarmupPage} />
               </div>
             </div>
@@ -896,9 +890,6 @@ export default function TechniquesManagement() {
                 </tbody>
               </table>
               <div className="px-4 pb-4">
-                <div className="text-xs text-gray-500 mt-3">
-                  Showing {filteredStretch.length === 0 ? 0 : (stretchPage - 1) * PAGE_SIZE + 1}–{Math.min(stretchPage * PAGE_SIZE, filteredStretch.length)} of {filteredStretch.length}
-                </div>
                 <Pagination page={stretchPage} total={filteredStretch.length} onPageChange={setStretchPage} />
               </div>
             </div>
@@ -1033,9 +1024,6 @@ export default function TechniquesManagement() {
                 </tbody>
               </table>
               <div className="px-4 pb-4">
-                <div className="text-xs text-gray-500 mt-3">
-                  Showing {filteredTechniques.length === 0 ? 0 : (techPage - 1) * PAGE_SIZE + 1}–{Math.min(techPage * PAGE_SIZE, filteredTechniques.length)} of {filteredTechniques.length}
-                </div>
                 <Pagination page={techPage} total={filteredTechniques.length} onPageChange={setTechPage} />
               </div>
             </div>

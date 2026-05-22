@@ -1116,42 +1116,20 @@ function SlideSection({ slideKey }) {
     setManagingPoint(point);
     let entries = [];
     if (point.kickEntries && point.kickEntries.length > 0) {
-      // Preserve groupId. Legacy entries (no groupId) get grouped by consecutive patternName.
-      let currentGroupId = null;
-      let currentPatternName = null;
-      entries = point.kickEntries.map(entry => {
-        if (entry.groupId) {
-          currentGroupId = entry.groupId;
-          currentPatternName = entry.patternName;
-        } else if (entry.patternName !== currentPatternName) {
-          currentGroupId = `grp_legacy_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-          currentPatternName = entry.patternName;
-        }
-        return {
-          groupId: currentGroupId,
-          patternName: entry.patternName || '',
-          number: entry.number || '',
-          rows: entry.rows || []
-        };
-      });
+      // Group by existing groupId. Entries without a groupId each get their own unique groupId.
+      entries = point.kickEntries.map(entry => ({
+        groupId: entry.groupId || `grp_legacy_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        patternName: entry.patternName || '',
+        number: entry.number || '',
+        rows: entry.rows || []
+      }));
     } else if (point.patternEntries && point.patternEntries.length > 0) {
-      let currentGroupId = null;
-      let currentPatternName = null;
-      entries = point.patternEntries.map(entry => {
-        if (entry.groupId) {
-          currentGroupId = entry.groupId;
-          currentPatternName = entry.patternName;
-        } else if (entry.patternName !== currentPatternName) {
-          currentGroupId = `grp_legacy_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-          currentPatternName = entry.patternName;
-        }
-        return {
-          groupId: currentGroupId,
-          patternName: entry.patternName || '',
-          number: entry.number || '',
-          rows: [{ koreanTerm: entry.koreanTerm || '', description: entry.description || '' }]
-        };
-      });
+      entries = point.patternEntries.map(entry => ({
+        groupId: entry.groupId || `grp_legacy_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        patternName: entry.patternName || '',
+        number: entry.number || '',
+        rows: [{ koreanTerm: entry.koreanTerm || '', description: entry.description || '' }]
+      }));
     }
     setPatternGroups(entries);
     setPatternEntryForm({ patternName: '', entries: [{ number: '', koreanTerm: '', description: '' }] });
@@ -1490,7 +1468,11 @@ function SlideSection({ slideKey }) {
                               <button type="button" title="Manage pattern groups for this point"
                                 onClick={() => openPatternGroupManager(i, pt)}
                                 className="px-3 py-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 text-xs font-semibold">
-                                Manage Groups ({(pt.kickEntries || pt.patternEntries || []).length})
+                                {(() => {
+                                  const allEntries = pt.kickEntries || pt.patternEntries || [];
+                                  const boxCount = new Set(allEntries.map((e, idx) => e.groupId || `__solo_${idx}`)).size;
+                                  return `Manage Groups (${allEntries.length} entries · ${boxCount} box${boxCount !== 1 ? 'es' : ''})`;
+                                })()}
                               </button>
                               <button type="button" onClick={() => setPoints(arr => arr.filter((_, idx) => idx !== i))}
                                 className="p-1.5 rounded-lg bg-red-50 text-red-500 flex-shrink-0"><FaTimes size={10} /></button>
